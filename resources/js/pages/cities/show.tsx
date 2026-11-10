@@ -26,7 +26,7 @@ export default function CityShow({ city, layers, places, itineraries }: Props) {
     return (
         <AppLayout
             breadcrumbs={[
-                { title: 'Города', href: route('cities.index') },
+                { title: 'Cities', href: route('cities.index') },
                 { title: city.name, href: route('cities.show', city.slug) },
             ]}
         >
@@ -39,7 +39,7 @@ export default function CityShow({ city, layers, places, itineraries }: Props) {
                     </div>
                     <Button asChild>
                         <Link href={route('itineraries.create', { city: city.slug })}>
-                            <Plus /> Составить маршрут
+                            <Plus /> Build a route
                         </Link>
                     </Button>
                 </div>
@@ -47,9 +47,9 @@ export default function CityShow({ city, layers, places, itineraries }: Props) {
                 <LayerToggles layers={layers} active={active} onToggle={toggle} counts={counts} />
                 <PlacesMap center={[city.lat, city.lng]} zoom={city.zoom} places={places} layers={layers} visibleLayerIds={active} />
 
-                <h2 className="mt-4 text-lg font-semibold">Авторские маршруты</h2>
+                <h2 className="mt-4 text-lg font-semibold">Author routes</h2>
                 {itineraries.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">Пока нет маршрутов — станьте первым автором.</p>
+                    <p className="text-muted-foreground text-sm">No routes yet. Be the first author.</p>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-3">
                         {itineraries.map((it) => (

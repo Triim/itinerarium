@@ -19,14 +19,14 @@ export function NavUser() {
                     <SidebarMenuButton asChild>
                         <Link href={route('login')}>
                             <LogIn />
-                            <span>Войти</span>
+                            <span>Log in</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                         <Link href={route('register')}>
-                            <span>Регистрация</span>
+                            <span>Sign up</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

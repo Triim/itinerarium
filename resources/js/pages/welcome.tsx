@@ -7,29 +7,29 @@ interface Props {
     selections: Pick<Selection, 'id' | 'title' | 'slug' | 'description'>[];
 }
 
-const LAYERS = ['Туристические места', 'Локации съёмок', 'Неформальные достопримечательности', 'Worth to try', 'Unique experience'];
+const LAYERS = ['Tourist sights', 'Filming locations', 'Informal sights', 'Worth to try', 'Unique experience'];
 
 export default function Welcome({ cities, selections }: Props) {
     const { auth } = usePage<SharedData>().props;
 
     return (
         <>
-            <Head title="Карта для идеального маршрута" />
+            <Head title="Build your perfect city route" />
             <div className="bg-background text-foreground min-h-screen">
                 <header className="mx-auto flex max-w-5xl items-center justify-between p-6">
                     <span className="text-lg font-semibold">Itinerarium</span>
                     <nav className="flex gap-2">
                         {auth.user ? (
                             <Button asChild variant="outline">
-                                <Link href={route('dashboard')}>Мои маршруты</Link>
+                                <Link href={route('dashboard')}>My routes</Link>
                             </Button>
                         ) : (
                             <>
                                 <Button asChild variant="ghost">
-                                    <Link href={route('login')}>Войти</Link>
+                                    <Link href={route('login')}>Log in</Link>
                                 </Button>
                                 <Button asChild variant="outline">
-                                    <Link href={route('register')}>Регистрация</Link>
+                                    <Link href={route('register')}>Sign up</Link>
                                 </Button>
                             </>
                         )}
@@ -38,9 +38,10 @@ export default function Welcome({ cities, selections }: Props) {
 
                 <main className="mx-auto flex max-w-5xl flex-col gap-12 px-6 pb-16">
                     <section className="space-y-4 pt-10">
-                        <h1 className="max-w-2xl text-4xl font-semibold tracking-tight">Карта города со слоями, которую вы настраиваете под себя</h1>
+                        <h1 className="max-w-2xl text-4xl font-semibold tracking-tight">A layered city map you tune to yourself</h1>
                         <p className="text-muted-foreground max-w-2xl">
-                            Включайте нужные слои, собирайте точки в маршрут и делитесь им. Или возьмите готовый маршрут из авторских подборок.
+                            Switch on the layers you care about, collect places into a route and share it. Or pick a ready-made route from author
+                            collections.
                         </p>
                         <div className="flex flex-wrap gap-2">
                             {LAYERS.map((l) => (
@@ -51,16 +52,16 @@ export default function Welcome({ cities, selections }: Props) {
                         </div>
                         <div className="flex gap-2 pt-2">
                             <Button asChild>
-                                <Link href={route('cities.index')}>Открыть карту</Link>
+                                <Link href={route('cities.index')}>Open the map</Link>
                             </Button>
                             <Button asChild variant="outline">
-                                <Link href={route('itineraries.index')}>Смотреть маршруты</Link>
+                                <Link href={route('itineraries.index')}>Browse routes</Link>
                             </Button>
                         </div>
                     </section>
 
                     <section className="space-y-3">
-                        <h2 className="text-xl font-semibold">Города</h2>
+                        <h2 className="text-xl font-semibold">Cities</h2>
                         <div className="grid gap-3 sm:grid-cols-3">
                             {cities.map((c) => (
                                 <Link
@@ -77,7 +78,7 @@ export default function Welcome({ cities, selections }: Props) {
 
                     {selections.length > 0 && (
                         <section className="space-y-3">
-                            <h2 className="text-xl font-semibold">Подборки</h2>
+                            <h2 className="text-xl font-semibold">Collections</h2>
                             <div className="grid gap-3 sm:grid-cols-3">
                                 {selections.map((s) => (
                                     <Link

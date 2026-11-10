@@ -32,20 +32,18 @@ class ItineraryRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'title' => 'название',
-            'description' => 'описание',
-            'city_id' => 'город',
-            'place_ids' => 'точки маршрута',
-            'place_ids.*' => 'точка маршрута',
+            'city_id' => 'city',
+            'place_ids' => 'stops',
+            'place_ids.*' => 'stop',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'place_ids.required' => 'Добавьте в маршрут хотя бы одну точку.',
-            'place_ids.min' => 'Добавьте в маршрут хотя бы одну точку.',
-            'place_ids.*.exists' => 'Точка не найдена в выбранном городе.',
+            'place_ids.required' => 'Add at least one stop to the route.',
+            'place_ids.min' => 'Add at least one stop to the route.',
+            'place_ids.*.exists' => 'This stop does not belong to the selected city.',
         ];
     }
 }

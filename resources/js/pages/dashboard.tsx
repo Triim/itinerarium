@@ -6,29 +6,29 @@ import { type BreadcrumbItem, type Itinerary } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Мои маршруты', href: '/dashboard' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'My routes', href: '/dashboard' }];
 
 export default function Dashboard({ itineraries }: { itineraries: Itinerary[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Мои маршруты" />
+            <Head title="My routes" />
             <div className="flex flex-col gap-4 p-4">
                 <FlashMessage />
                 <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-2xl font-semibold">Мои маршруты</h1>
+                    <h1 className="text-2xl font-semibold">My routes</h1>
                     <Button asChild>
                         <Link href={route('itineraries.create')}>
-                            <Plus /> Новый маршрут
+                            <Plus /> New route
                         </Link>
                     </Button>
                 </div>
                 {itineraries.length === 0 ? (
                     <p className="text-muted-foreground text-sm">
-                        У вас пока нет маршрутов. Откройте{' '}
+                        You have no routes yet. Open a{' '}
                         <Link href={route('cities.index')} className="underline underline-offset-4">
-                            карту города
+                            city map
                         </Link>{' '}
-                        и соберите первый.
+                        and build your first one.
                     </p>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-3">

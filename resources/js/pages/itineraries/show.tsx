@@ -19,7 +19,7 @@ export default function ItineraryShow({ itinerary, layers, can }: Props) {
     const layerOf = (id: number) => layers.find((l) => l.id === id);
 
     const destroy = () => {
-        if (confirm('Удалить маршрут? Это действие нельзя отменить.')) {
+        if (confirm('Delete this route? This cannot be undone.')) {
             router.delete(route('itineraries.destroy', itinerary.id));
         }
     };
@@ -27,7 +27,7 @@ export default function ItineraryShow({ itinerary, layers, can }: Props) {
     return (
         <AppLayout
             breadcrumbs={[
-                { title: 'Маршруты', href: route('itineraries.index') },
+                { title: 'Routes', href: route('itineraries.index') },
                 { title: itinerary.title, href: route('itineraries.show', itinerary.id) },
             ]}
         >
@@ -38,13 +38,13 @@ export default function ItineraryShow({ itinerary, layers, can }: Props) {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
                             <h1 className="text-2xl font-semibold">{itinerary.title}</h1>
-                            {!itinerary.is_published && <Badge variant="outline">Черновик</Badge>}
+                            {!itinerary.is_published && <Badge variant="outline">Draft</Badge>}
                         </div>
                         <p className="text-muted-foreground text-sm">
                             <Link href={route('cities.show', city.slug)} className="underline-offset-4 hover:underline">
                                 {city.name}
                             </Link>{' '}
-                            · автор: {author.name} · {places.length} точ.
+                            · by {author.name} · {places.length} {places.length === 1 ? 'stop' : 'stops'}
                         </p>
                         {itinerary.description && <p className="max-w-2xl text-sm">{itinerary.description}</p>}
                     </div>
@@ -52,11 +52,11 @@ export default function ItineraryShow({ itinerary, layers, can }: Props) {
                         <div className="flex gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={route('itineraries.edit', itinerary.id)}>
-                                    <Pencil /> Редактировать
+                                    <Pencil /> Edit
                                 </Link>
                             </Button>
                             <Button variant="destructive" onClick={destroy}>
-                                <Trash2 /> Удалить
+                                <Trash2 /> Delete
                             </Button>
                         </div>
                     )}
@@ -84,7 +84,7 @@ export default function ItineraryShow({ itinerary, layers, can }: Props) {
 
                 {itinerary.selections && itinerary.selections.length > 0 && (
                     <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-                        В подборках:
+                        In collections:
                         {itinerary.selections.map((s) => (
                             <Link key={s.id} href={route('selections.show', s.slug)}>
                                 <Badge variant="secondary">{s.title}</Badge>

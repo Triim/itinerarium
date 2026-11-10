@@ -63,7 +63,7 @@ class ItineraryController extends Controller
             return $itinerary;
         });
 
-        return to_route('itineraries.show', $itinerary)->with('success', 'Маршрут создан.');
+        return to_route('itineraries.show', $itinerary)->with('success', 'Route created.');
     }
 
     public function edit(Itinerary $itinerary): Response
@@ -86,7 +86,7 @@ class ItineraryController extends Controller
             $itinerary->syncStops($request->validated('place_ids'));
         });
 
-        return to_route('itineraries.show', $itinerary)->with('success', 'Маршрут сохранён.');
+        return to_route('itineraries.show', $itinerary)->with('success', 'Route saved.');
     }
 
     public function destroy(Itinerary $itinerary): RedirectResponse
@@ -95,7 +95,7 @@ class ItineraryController extends Controller
 
         $itinerary->delete();
 
-        return to_route('dashboard')->with('success', 'Маршрут удалён.');
+        return to_route('dashboard')->with('success', 'Route deleted.');
     }
 
     /** Cities with their editorial places, so the editor can switch city without a round trip. */

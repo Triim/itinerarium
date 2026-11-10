@@ -44,7 +44,7 @@ class ItineraryTest extends TestCase
         [$a, $b] = Place::factory()->count(2)->for($city)->create();
 
         $this->actingAs($user)->post('/routes', [
-            'title' => 'Мой маршрут',
+            'title' => 'My route',
             'city_id' => $city->id,
             'is_published' => true,
             'place_ids' => [$b->id, $a->id],
@@ -77,9 +77,9 @@ class ItineraryTest extends TestCase
         $this->actingAs($stranger)->delete("/routes/{$itinerary->id}")->assertForbidden();
 
         $this->actingAs($itinerary->author)->put("/routes/{$itinerary->id}", [
-            'title' => 'Обновлён', 'city_id' => $itinerary->city_id, 'place_ids' => [$place->id],
+            'title' => 'Updated', 'city_id' => $itinerary->city_id, 'place_ids' => [$place->id],
         ])->assertRedirect();
-        $this->assertSame('Обновлён', $itinerary->fresh()->title);
+        $this->assertSame('Updated', $itinerary->fresh()->title);
 
         $this->actingAs($itinerary->author)->delete("/routes/{$itinerary->id}")->assertRedirect('/dashboard');
         $this->assertModelMissing($itinerary);

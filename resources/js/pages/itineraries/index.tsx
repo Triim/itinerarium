@@ -29,23 +29,23 @@ export default function ItinerariesIndex({ itineraries, cities, layers, filters 
         apply({ layers: filters.layers.includes(layer.slug) ? filters.layers.filter((s) => s !== layer.slug) : [...filters.layers, layer.slug] });
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Маршруты', href: route('itineraries.index') }]}>
-            <Head title="Маршруты" />
+        <AppLayout breadcrumbs={[{ title: 'Routes', href: route('itineraries.index') }]}>
+            <Head title="Routes" />
             <div className="flex flex-col gap-4 p-4">
                 <div>
-                    <h1 className="text-2xl font-semibold">Авторские маршруты</h1>
+                    <h1 className="text-2xl font-semibold">Author routes</h1>
                     <p className="text-muted-foreground text-sm">
-                        Фильтруйте по городу и слоям — маршрут попадёт в выдачу, если в нём есть точки выбранных слоёв.
+                        Filter by city and layers: a route matches if it has stops on any of the selected layers.
                     </p>
                 </div>
 
                 <div className="flex flex-col gap-3">
                     <Select value={filters.city ?? ALL} onValueChange={(v) => apply({ city: v === ALL ? null : v })}>
                         <SelectTrigger className="w-64">
-                            <SelectValue placeholder="Город" />
+                            <SelectValue placeholder="City" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value={ALL}>Все города</SelectItem>
+                            <SelectItem value={ALL}>All cities</SelectItem>
                             {cities.map((c) => (
                                 <SelectItem key={c.id} value={c.slug}>
                                     {c.name}
@@ -57,7 +57,7 @@ export default function ItinerariesIndex({ itineraries, cities, layers, filters 
                 </div>
 
                 {itineraries.data.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">Ничего не найдено. Попробуйте изменить фильтры.</p>
+                    <p className="text-muted-foreground text-sm">Nothing found. Try changing the filters.</p>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-3">
                         {itineraries.data.map((it) => (

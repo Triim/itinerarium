@@ -9,7 +9,7 @@ export default function SelectionShow({ selection }: { selection: Selection }) {
     return (
         <AppLayout
             breadcrumbs={[
-                { title: 'Подборки', href: route('selections.index') },
+                { title: 'Collections', href: route('selections.index') },
                 { title: selection.title, href: route('selections.show', selection.slug) },
             ]}
         >
@@ -18,7 +18,7 @@ export default function SelectionShow({ selection }: { selection: Selection }) {
                 <div className="space-y-1">
                     <h1 className="text-2xl font-semibold">{selection.title}</h1>
                     <p className="text-muted-foreground text-sm">
-                        {selection.city ? selection.city.name : 'Разные города'} · составитель: {selection.author?.name}
+                        {selection.city ? selection.city.name : 'Various cities'} · curated by {selection.author?.name}
                     </p>
                     {selection.description && <p className="max-w-2xl text-sm">{selection.description}</p>}
                 </div>

@@ -7,14 +7,14 @@ import { Library, Map, PlusCircle, Route, User } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const exploreNavItems: NavItem[] = [
-    { title: 'Города', url: '/cities', icon: Map },
-    { title: 'Маршруты', url: '/routes', icon: Route },
-    { title: 'Подборки', url: '/collections', icon: Library },
+    { title: 'Cities', url: '/cities', icon: Map },
+    { title: 'Routes', url: '/routes', icon: Route },
+    { title: 'Collections', url: '/collections', icon: Library },
 ];
 
 const authorNavItems: NavItem[] = [
-    { title: 'Мои маршруты', url: '/dashboard', icon: User },
-    { title: 'Новый маршрут', url: '/routes/create', icon: PlusCircle },
+    { title: 'My routes', url: '/dashboard', icon: User },
+    { title: 'New route', url: '/routes/create', icon: PlusCircle },
 ];
 
 export function AppSidebar() {
@@ -35,8 +35,8 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain label="Исследовать" items={exploreNavItems} />
-                {auth.user && <NavMain label="Автор" items={authorNavItems} />}
+                <NavMain label="Explore" items={exploreNavItems} />
+                {auth.user && <NavMain label="Author" items={authorNavItems} />}
             </SidebarContent>
 
             <SidebarFooter>

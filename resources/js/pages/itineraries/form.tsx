@@ -38,7 +38,7 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
     const layerOf = (id: number) => layers.find((l) => l.id === id);
 
     const changeCity = (value: string) => {
-        if (data.place_ids.length > 0 && !confirm('При смене города точки маршрута будут сброшены. Продолжить?')) return;
+        if (data.place_ids.length > 0 && !confirm('Changing the city will clear the route stops. Continue?')) return;
         setData((d) => ({ ...d, city_id: Number(value), place_ids: [] }));
     };
 
@@ -63,12 +63,12 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
         .filter(([key]) => key.startsWith('place_ids'))
         .map(([, msg]) => msg);
 
-    const title = isEdit ? 'Редактирование маршрута' : 'Новый маршрут';
+    const title = isEdit ? 'Edit route' : 'New route';
 
     return (
         <AppLayout
             breadcrumbs={[
-                { title: 'Мои маршруты', href: route('dashboard') },
+                { title: 'My routes', href: route('dashboard') },
                 { title, href: '#' },
             ]}
         >
@@ -78,32 +78,32 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
                     <h1 className="text-2xl font-semibold">{title}</h1>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="title">Название</Label>
+                        <Label htmlFor="title">Title</Label>
                         <Input
                             id="title"
                             value={data.title}
                             onChange={(e) => setData('title', e.target.value)}
                             required
-                            placeholder="Например: Петербург за один день"
+                            placeholder="e.g. Petersburg in one day"
                         />
                         <InputError message={errors.title} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="description">Описание</Label>
+                        <Label htmlFor="description">Description</Label>
                         <textarea
                             id="description"
                             rows={4}
                             value={data.description}
                             onChange={(e) => setData('description', e.target.value)}
-                            placeholder="Для кого этот маршрут, сколько времени займёт…"
+                            placeholder="Who is this route for, how long does it take…"
                             className="border-input placeholder:text-muted-foreground focus-visible:ring-ring/50 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px]"
                         />
                         <InputError message={errors.description} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Город</Label>
+                        <Label>City</Label>
                         <Select value={String(data.city_id)} onValueChange={changeCity}>
                             <SelectTrigger>
                                 <SelectValue />
@@ -120,10 +120,8 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Точки маршрута ({stops.length})</Label>
-                        {stops.length === 0 && (
-                            <p className="text-muted-foreground text-sm">Нажмите на точку на карте и выберите «Добавить в маршрут».</p>
-                        )}
+                        <Label>Stops ({stops.length})</Label>
+                        {stops.length === 0 && <p className="text-muted-foreground text-sm">Click a point on the map and choose “Add to route”.</p>}
                         <ol className="flex flex-col gap-1">
                             {stops.map((place, i) => (
                                 <li
@@ -140,7 +138,7 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
                                         className="size-7"
                                         onClick={() => move(i, -1)}
                                         disabled={i === 0}
-                                        aria-label="Выше"
+                                        aria-label="Move up"
                                     >
                                         <ArrowUp />
                                     </Button>
@@ -151,7 +149,7 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
                                         className="size-7"
                                         onClick={() => move(i, 1)}
                                         disabled={i === stops.length - 1}
-                                        aria-label="Ниже"
+                                        aria-label="Move down"
                                     >
                                         <ArrowDown />
                                     </Button>
@@ -161,7 +159,7 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
                                         size="icon"
                                         className="size-7"
                                         onClick={() => toggleStop(place.id)}
-                                        aria-label="Убрать"
+                                        aria-label="Remove"
                                     >
                                         <X />
                                     </Button>
@@ -175,11 +173,11 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
 
                     <div className="flex items-center gap-2">
                         <Checkbox id="is_published" checked={data.is_published} onCheckedChange={(v) => setData('is_published', v === true)} />
-                        <Label htmlFor="is_published">Опубликовать (виден всем)</Label>
+                        <Label htmlFor="is_published">Publish (visible to everyone)</Label>
                     </div>
 
                     <Button type="submit" disabled={processing}>
-                        {isEdit ? 'Сохранить' : 'Создать маршрут'}
+                        {isEdit ? 'Save' : 'Create route'}
                     </Button>
                 </div>
 
@@ -207,7 +205,7 @@ export default function ItineraryForm({ itinerary, initialCityId, cities, layers
                                 variant={data.place_ids.includes(place.id) ? 'outline' : 'default'}
                                 onClick={() => toggleStop(place.id)}
                             >
-                                {data.place_ids.includes(place.id) ? 'Убрать из маршрута' : 'Добавить в маршрут'}
+                                {data.place_ids.includes(place.id) ? 'Remove from route' : 'Add to route'}
                             </Button>
                         )}
                     />

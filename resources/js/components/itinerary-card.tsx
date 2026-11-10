@@ -18,7 +18,7 @@ export function ItineraryCard({ itinerary, showStatus = false }: { itinerary: It
             <div className="flex items-start justify-between gap-2">
                 <h3 className="font-semibold">{itinerary.title}</h3>
                 {showStatus && (
-                    <Badge variant={itinerary.is_published ? 'secondary' : 'outline'}>{itinerary.is_published ? 'Опубликован' : 'Черновик'}</Badge>
+                    <Badge variant={itinerary.is_published ? 'secondary' : 'outline'}>{itinerary.is_published ? 'Published' : 'Draft'}</Badge>
                 )}
             </div>
             {itinerary.description && <p className="text-muted-foreground line-clamp-2 text-sm">{itinerary.description}</p>}
@@ -29,8 +29,10 @@ export function ItineraryCard({ itinerary, showStatus = false }: { itinerary: It
                         {itinerary.city.name}
                     </span>
                 )}
-                <span>{count} точ.</span>
-                {itinerary.author && <span>автор: {itinerary.author.name}</span>}
+                <span>
+                    {count} {count === 1 ? 'stop' : 'stops'}
+                </span>
+                {itinerary.author && <span>by {itinerary.author.name}</span>}
                 {layers.length > 0 && (
                     <span className="inline-flex gap-1">
                         {layers.map((l) => (

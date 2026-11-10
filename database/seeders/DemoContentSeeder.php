@@ -14,15 +14,15 @@ class DemoContentSeeder extends Seeder
     {
         $editor = User::firstOrCreate(
             ['email' => 'editor@itinerarium.test'],
-            ['name' => 'Редакция Itinerarium', 'password' => 'password', 'email_verified_at' => now()],
+            ['name' => 'Itinerarium Editors', 'password' => 'password', 'email_verified_at' => now()],
         );
 
         $routes = [
-            ['saint-petersburg', 'Классический Петербург за день', 'Главные музеи и соборы центра.', ['Эрмитаж', 'Дворцовая площадь', 'Спас на Крови', 'Исаакиевский собор', 'Развод Дворцового моста']],
-            ['saint-petersburg', 'Неформальный Петербург', 'Котельные, арт-центры и пышки.', ['Котельная «Камчатка»', 'Пышечная на Большой Конюшенной', 'Пушкинская, 10']],
-            ['rome', 'Рим в кино', 'По следам Феллини и «Римских каникул».', ['Уста истины', 'Фонтан Треви', 'Испанская лестница']],
-            ['rome', 'Вечерний Рим', 'Античность днём, панорама на закате.', ['Колизей', 'Рынок Тестаччо', 'Замочная скважина Мальтийского ордена', 'Закат на холме Джаниколо']],
-            ['tbilisi', 'Тбилиси для первого визита', 'Старый город и бани.', ['Мост Мира', 'Крепость Нарикала', 'Серные бани Абанотубани', 'Блошиный рынок «Сухой мост»']],
+            ['saint-petersburg', 'Classic Petersburg in a day', 'The main museums and cathedrals of the centre.', ['The Hermitage', 'Palace Square', 'Church of the Savior on Spilled Blood', "St. Isaac's Cathedral", 'Palace Bridge opening']],
+            ['saint-petersburg', 'Underground Petersburg', 'Boiler rooms, art centres and doughnuts.', ['Kamchatka Boiler Room', 'Pyshechnaya on Bolshaya Konyushennaya', 'Pushkinskaya 10']],
+            ['rome', 'Rome on film', 'In the footsteps of Fellini and "Roman Holiday".', ['Mouth of Truth', 'Trevi Fountain', 'Spanish Steps']],
+            ['rome', 'Rome until sunset', 'Antiquity by day, a panorama at dusk.', ['Colosseum', 'Testaccio Market', 'Aventine Keyhole', 'Sunset on the Janiculum']],
+            ['tbilisi', 'Tbilisi for first-timers', 'Old Town and the baths.', ['Bridge of Peace', 'Narikala Fortress', 'Abanotubani sulphur baths', 'Dry Bridge flea market']],
         ];
 
         $created = [];
@@ -38,9 +38,9 @@ class DemoContentSeeder extends Seeder
         }
 
         $selections = [
-            ['first-time', 'Первый раз в городе', null, 'Маршруты, с которых стоит начать знакомство с городом.', ['Классический Петербург за день', 'Тбилиси для первого визита', 'Вечерний Рим']],
-            ['cinema', 'Кинотуризм', null, 'Пройти по местам любимых фильмов.', ['Рим в кино']],
-            ['petersburg-locals', 'Петербург как местный', 'saint-petersburg', 'Без очередей и экскурсионных автобусов.', ['Неформальный Петербург']],
+            ['first-time', 'First time in town', null, 'Routes to start getting to know a city.', ['Classic Petersburg in a day', 'Tbilisi for first-timers', 'Rome until sunset']],
+            ['cinema', 'Film tourism', null, 'Walk through the scenes of your favourite films.', ['Rome on film']],
+            ['petersburg-locals', 'Petersburg like a local', 'saint-petersburg', 'No queues, no tour buses.', ['Underground Petersburg']],
         ];
 
         foreach ($selections as [$slug, $title, $citySlug, $description, $titles]) {
