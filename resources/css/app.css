@@ -156,3 +156,20 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Itinerarium: numbered stop labels on the route map */
+.leaflet-tooltip.itinerarium-stop-label {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 0;
+}
+.leaflet-tooltip.itinerarium-stop-label::before {
+    display: none;
+}
+.leaflet-container {
+    z-index: 0;
+}
