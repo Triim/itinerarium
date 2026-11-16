@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ItineraryController;
 use App\Models\Itinerary;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -9,6 +10,9 @@ Route::get('/', function () {
         'itinerary' => Itinerary::with(['city', 'user'])->first(),
     ]);
 })->name('home');
+
+Route::get('itineraries', [ItineraryController::class, 'index'])
+    ->name('itineraries.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
