@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
+import SiteLayout from '@/layouts/site-layout';
 
 type FeaturedItinerary = {
     title: string;
@@ -18,25 +19,17 @@ export default function Welcome() {
         <>
             <Head title="Itinerarium" />
 
-            <main className="min-h-screen bg-stone-50 px-6 py-8 text-stone-900">
-                <header className="mx-auto flex max-w-4xl items-center justify-between">
-                    <Link href={route('home')} className="text-xl font-semibold">
-                        Itinerarium
-                    </Link>
-
-                    {auth.user ? (
-                        <Link href={route('dashboard')} className="text-sm underline">
-                            Dashboard
-                        </Link>
-                    ) : (
-                        <nav className="flex gap-4 text-sm">
-                            <Link href={route('login')}>Log in</Link>
-                            <Link href={route('register')}>Register</Link>
-                        </nav>
-                    )}
-                </header>
-
-                <section className="mx-auto mt-20 max-w-4xl">
+            <SiteLayout
+                actions={auth.user ? (
+                    <Link href={route('dashboard')}>Dashboard</Link>
+                ) : (
+                    <>
+                        <Link href={route('login')}>Log in</Link>
+                        <Link href={route('register')}>Register</Link>
+                    </>
+                )}
+            >
+                <section className="mt-12">
                     <p className="text-sm font-medium uppercase tracking-widest text-stone-500">
                         City itineraries
                     </p>
@@ -52,7 +45,7 @@ export default function Welcome() {
                         <p className="mt-10 text-stone-600">No itineraries yet.</p>
                     )}
                 </section>
-            </main>
+            </SiteLayout>
         </>
     );
 }
