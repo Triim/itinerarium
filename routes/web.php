@@ -13,6 +13,8 @@ Route::get('/', function () {
 
 Route::get('itineraries', [ItineraryController::class, 'index'])
     ->name('itineraries.index');
+Route::get('itineraries/{itinerary}', [ItineraryController::class, 'show'])
+    ->name('itineraries.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {

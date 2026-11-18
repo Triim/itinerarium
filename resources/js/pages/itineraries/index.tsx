@@ -29,7 +29,11 @@ export default function Index({ itineraries }: Props) {
                             {itineraries.map((itinerary) => (
                                 <li key={itinerary.id} className="py-6">
                                     <p className="text-sm text-stone-500">{itinerary.city.name}</p>
-                                    <h2 className="mt-1 text-xl font-medium">{itinerary.title}</h2>
+                                    <h2 className="mt-1 text-xl font-medium">
+                                        <Link href={route('itineraries.show', itinerary.id)} className="underline">
+                                            {itinerary.title}
+                                        </Link>
+                                    </h2>
                                     <p className="mt-3 text-sm text-stone-500">By {itinerary.user.name}</p>
                                 </li>
                             ))}

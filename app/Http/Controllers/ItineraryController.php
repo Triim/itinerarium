@@ -16,4 +16,11 @@ class ItineraryController extends Controller
                 ->get(['id', 'title', 'city_id', 'user_id']),
         ]);
     }
+
+    public function show(Itinerary $itinerary): Response
+    {
+        return Inertia::render('itineraries/show', [
+            'itinerary' => $itinerary->load(['city:id,name', 'user:id,name']),
+        ]);
+    }
 }
