@@ -16,6 +16,7 @@ class PlaceController extends Controller
                 ->whereHas('places')
                 ->with(['places' => fn ($query) => $query
                     ->select(['id', 'name', 'city_id', 'image_path'])
+                    ->with('media')
                     ->withCount('itineraries')
                     ->orderBy('name')])
                 ->orderBy('name')

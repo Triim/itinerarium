@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use RuntimeException;
 
 class PlaceController extends Controller
 {
@@ -42,7 +41,7 @@ class PlaceController extends Controller
             $place = Place::create(Arr::except($validated, 'image'));
 
             if (isset($validated['image'])) {
-                $place->update(['image_path' => $this->storeImage($validated['image'])]);
+                $this->addImage($place, $validated['image']);
             }
         });
 
@@ -63,17 +62,25 @@ class PlaceController extends Controller
         $validated = $request->validate($this->rules());
 
         $attributes = Arr::except($validated, 'image');
-        $previousPath = $place->image_path;
+        $legacyPath = null;
 
         if (isset($validated['image'])) {
-            $attributes['image_path'] = $this->storeImage($validated['image']);
+            $legacyPath = $place->image_path;
+            $attributes['image_path'] = null;
         }
 
-        $place->update($attributes);
+        // A failed upload must leave the place and its previous image untouched.
+        DB::transaction(function () use ($place, $validated, $attributes) {
+            $place->update($attributes);
 
-        // Only remove the old file once the place points to the new one.
-        if (isset($validated['image']) && $previousPath !== null) {
-            Storage::disk('public')->delete($previousPath);
+            if (isset($validated['image'])) {
+                $this->addImage($place, $validated['image']);
+            }
+        });
+
+        // Only remove the legacy file once nothing refers to it anymore.
+        if ($legacyPath !== null) {
+            Storage::disk('public')->delete($legacyPath);
         }
 
         return redirect()->route('userzone.places.index');
@@ -90,16 +97,12 @@ class PlaceController extends Controller
         return redirect()->route('userzone.places.index');
     }
 
-    private function storeImage(UploadedFile $image): string
+    private function addImage(Place $place, UploadedFile $image): void
     {
-        $path = $image->store('places', 'public');
-
-        // The public disk reports a failed write by returning false.
-        if ($path === false) {
-            throw new RuntimeException('The place image could not be stored.');
-        }
-
-        return $path;
+        // A generated name keeps the client's file name and extension out of public storage.
+        $place->addMedia($image)
+            ->usingFileName($image->hashName())
+            ->toMediaCollection('images');
     }
 
     private function rules(): array
