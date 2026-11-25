@@ -54,6 +54,13 @@ class PlaceController extends Controller
         return redirect()->route('userzone.places.index');
     }
 
+    public function destroy(Place $place): RedirectResponse
+    {
+        $place->delete();
+
+        return redirect()->route('userzone.places.index');
+    }
+
     private function rules(): array
     {
         return [

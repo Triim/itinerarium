@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\City;
+use App\Models\Itinerary;
 use App\Models\Place;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -259,6 +261,103 @@ class UserzonePlaceTest extends TestCase
         $this->put('/user/places/9999', $this->validData())->assertNotFound();
 
         $this->assertDatabaseCount('places', 0);
+    }
+
+    public function test_guests_cannot_delete_a_place()
+    {
+        $place = Place::factory()->create();
+
+        $this->delete("/user/places/{$place->id}")->assertRedirect('/login');
+
+        $this->assertModelExists($place);
+    }
+
+    public function test_authenticated_users_can_delete_a_place()
+    {
+        $other = Place::factory()->create();
+        $place = Place::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->delete("/user/places/{$place->id}")
+            ->assertRedirect(route('userzone.places.index'));
+
+        $this->assertModelMissing($place);
+        $this->assertModelExists($other);
+
+        $this->get('/places')->assertOk();
+        $this->get("/places/{$place->id}")->assertNotFound();
+        $this->get("/places/{$other->id}")->assertOk();
+    }
+
+    public function test_deleting_a_place_only_removes_its_own_itinerary_links()
+    {
+        $city = City::factory()->create();
+        $place = Place::factory()->for($city)->create();
+        $other = Place::factory()->for($city)->create();
+        $itineraries = Itinerary::factory()->count(2)->create();
+        $itineraries->each(fn (Itinerary $itinerary) => $itinerary->places()->attach([$place->id, $other->id]));
+
+        $cityAttributes = $city->fresh()->getAttributes();
+        $itineraryAttributes = $itineraries->map(fn (Itinerary $itinerary) => $itinerary->fresh()->getAttributes());
+
+        $this->actingAs(User::factory()->create())
+            ->delete("/user/places/{$place->id}")
+            ->assertRedirect(route('userzone.places.index'));
+
+        $this->assertModelMissing($place);
+        $this->assertDatabaseMissing('itinerary_place', ['place_id' => $place->id]);
+        $this->assertDatabaseCount('itinerary_place', 2);
+        $this->assertEquals($cityAttributes, $city->fresh()->getAttributes());
+        $this->assertEquals(
+            $itineraryAttributes,
+            $itineraries->map(fn (Itinerary $itinerary) => $itinerary->fresh()->getAttributes()),
+        );
+
+        foreach ($itineraries as $itinerary) {
+            $this->assertDatabaseHas('itinerary_place', [
+                'itinerary_id' => $itinerary->id,
+                'place_id' => $other->id,
+            ]);
+        }
+    }
+
+    public function test_deleting_a_nonexistent_place_returns_not_found()
+    {
+        $place = Place::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->delete('/user/places/9999')
+            ->assertNotFound();
+
+        $this->assertModelExists($place);
+    }
+
+    #[DataProvider('resourceRoutes')]
+    public function test_resource_routes_have_the_expected_uris_and_methods(string $action, string $uri, array $methods)
+    {
+        $route = Route::getRoutes()->getByName("userzone.places.{$action}");
+
+        $this->assertNotNull($route);
+        $this->assertSame($uri, $route->uri());
+        $this->assertSame($methods, $route->methods());
+        $this->assertContains('auth', $route->gatherMiddleware());
+    }
+
+    public static function resourceRoutes(): array
+    {
+        return [
+            'index' => ['index', 'user/places', ['GET', 'HEAD']],
+            'create' => ['create', 'user/places/create', ['GET', 'HEAD']],
+            'store' => ['store', 'user/places', ['POST']],
+            'edit' => ['edit', 'user/places/{place}/edit', ['GET', 'HEAD']],
+            'update' => ['update', 'user/places/{place}', ['PUT', 'PATCH']],
+            'destroy' => ['destroy', 'user/places/{place}', ['DELETE']],
+        ];
+    }
+
+    public function test_there_is_no_private_show_route()
+    {
+        $this->assertFalse(Route::has('userzone.places.show'));
     }
 
     private function validData(array $overrides = []): array

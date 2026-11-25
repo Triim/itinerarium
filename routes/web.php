@@ -34,16 +34,9 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('user/places', [UserzonePlaceController::class, 'index'])
-        ->name('userzone.places.index');
-    Route::get('user/places/create', [UserzonePlaceController::class, 'create'])
-        ->name('userzone.places.create');
-    Route::post('user/places', [UserzonePlaceController::class, 'store'])
-        ->name('userzone.places.store');
-    Route::get('user/places/{place}/edit', [UserzonePlaceController::class, 'edit'])
-        ->name('userzone.places.edit');
-    Route::put('user/places/{place}', [UserzonePlaceController::class, 'update'])
-        ->name('userzone.places.update');
+    Route::prefix('user')->name('userzone.')->group(function () {
+        Route::resource('places', UserzonePlaceController::class)->except('show');
+    });
 });
 
 require __DIR__.'/settings.php';

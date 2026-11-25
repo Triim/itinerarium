@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,6 +21,12 @@ type Props = {
 };
 
 export default function Index({ places }: Props) {
+    const destroy = (place: Place) => {
+        if (window.confirm(`Delete "${place.name}"? This cannot be undone.`)) {
+            router.delete(route('userzone.places.destroy', place.id), { preserveScroll: true });
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage places" />
@@ -35,7 +41,7 @@ export default function Index({ places }: Props) {
                 {places.length > 0 ? (
                     <ul className="mt-4 divide-y border-y">
                         {places.map((place) => (
-                            <li key={place.id} className="flex justify-between gap-4 py-3">
+                            <li key={place.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-3">
                                 <span>{place.name}</span>
                                 <span className="flex items-baseline gap-4">
                                     <span className="text-muted-foreground">{place.city.name}</span>
@@ -46,6 +52,14 @@ export default function Index({ places }: Props) {
                                     >
                                         Edit
                                     </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => destroy(place)}
+                                        className="text-destructive cursor-pointer underline underline-offset-4"
+                                        aria-label={`Delete ${place.name}`}
+                                    >
+                                        Delete
+                                    </button>
                                 </span>
                             </li>
                         ))}
