@@ -6,6 +6,7 @@ use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\Userzone\CityController as UserzoneCityController;
 use App\Http\Controllers\Userzone\ItineraryController as UserzoneItineraryController;
 use App\Http\Controllers\Userzone\PlaceController as UserzonePlaceController;
+use App\Http\Middleware\IsAdmin;
 use App\Models\Itinerary;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -37,9 +38,12 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::prefix('user')->name('userzone.')->group(function () {
-        Route::resource('places', UserzonePlaceController::class)->except('show');
         Route::resource('itineraries', UserzoneItineraryController::class)->except('show');
-        Route::resource('cities', UserzoneCityController::class)->except('show');
+
+        Route::middleware(IsAdmin::class)->group(function () {
+            Route::resource('places', UserzonePlaceController::class)->except('show');
+            Route::resource('cities', UserzoneCityController::class)->except('show');
+        });
     });
 });
 

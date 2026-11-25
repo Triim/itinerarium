@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\IsAdmin;
 use App\Models\City;
 use App\Models\Itinerary;
 use App\Models\Place;
@@ -21,14 +22,94 @@ class UserzonePlaceTest extends TestCase
         $this->get('/user/places')->assertRedirect('/login');
     }
 
-    public function test_authenticated_users_can_see_all_places_with_their_city()
+    public function test_regular_users_cannot_open_the_place_management_pages()
+    {
+        $place = Place::factory()->create();
+
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/user/places')->assertForbidden();
+        $this->get('/user/places/create')->assertForbidden();
+        $this->get("/user/places/{$place->id}/edit")->assertForbidden();
+    }
+
+    public function test_regular_users_cannot_store_a_place()
+    {
+        $this->actingAs(User::factory()->create())
+            ->post('/user/places', $this->validData())
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('places', 0);
+    }
+
+    public function test_regular_users_are_rejected_before_validation()
+    {
+        $place = Place::factory()->create();
+
+        $this->actingAs(User::factory()->create());
+
+        $this->post('/user/places', [])->assertForbidden()->assertSessionHasNoErrors();
+        $this->put("/user/places/{$place->id}", [])->assertForbidden()->assertSessionHasNoErrors();
+    }
+
+    public function test_regular_users_cannot_update_a_place()
+    {
+        $place = Place::factory()->create();
+
+        $this->actingAs(User::factory()->create());
+
+        $this->put("/user/places/{$place->id}", $this->validData())->assertForbidden();
+        $this->patch("/user/places/{$place->id}", $this->validData())->assertForbidden();
+
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+    }
+
+    public function test_regular_users_cannot_delete_a_place_even_if_it_is_in_their_itinerary()
+    {
+        $user = User::factory()->create();
+        $place = Place::factory()->create();
+        $itineraries = [Itinerary::factory()->for($user)->create(), Itinerary::factory()->create()];
+
+        foreach ($itineraries as $itinerary) {
+            $itinerary->places()->attach($place);
+        }
+
+        $this->actingAs($user)
+            ->delete("/user/places/{$place->id}")
+            ->assertForbidden();
+
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+        $this->assertDatabaseCount('itinerary_place', 2);
+
+        foreach ($itineraries as $itinerary) {
+            $this->assertDatabaseHas('itinerary_place', [
+                'itinerary_id' => $itinerary->id,
+                'place_id' => $place->id,
+            ]);
+        }
+    }
+
+    public function test_public_place_pages_remain_accessible_to_guests_and_regular_users()
+    {
+        $place = Place::factory()->create();
+
+        $this->get('/places')->assertOk();
+        $this->get("/places/{$place->id}")->assertOk();
+
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/places')->assertOk();
+        $this->get("/places/{$place->id}")->assertOk();
+    }
+
+    public function test_administrators_can_see_all_places_with_their_city()
     {
         $barcelona = City::factory()->create(['name' => 'Barcelona']);
         $bangkok = City::factory()->create(['name' => 'Bangkok']);
         Place::factory()->for($bangkok)->create(['name' => 'Wat Pho']);
         Place::factory()->for($barcelona)->create(['name' => 'Casa Batlló']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get('/user/places')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -42,7 +123,7 @@ class UserzonePlaceTest extends TestCase
 
     public function test_overview_renders_when_there_are_no_places()
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get('/user/places')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -67,7 +148,7 @@ class UserzonePlaceTest extends TestCase
         $barcelona = City::factory()->create(['name' => 'Barcelona']);
         $bangkok = City::factory()->create(['name' => 'Bangkok']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get('/user/places/create')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -77,11 +158,11 @@ class UserzonePlaceTest extends TestCase
                 ->where('cities.1', ['id' => $barcelona->id, 'name' => 'Barcelona']));
     }
 
-    public function test_authenticated_users_can_create_a_place()
+    public function test_administrators_can_create_a_place()
     {
         $data = $this->validData();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->post('/user/places', $data)
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('userzone.places.index'));
@@ -104,7 +185,7 @@ class UserzonePlaceTest extends TestCase
     {
         $data = $this->validData(['latitude' => $latitude, 'longitude' => $longitude]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->post('/user/places', $data)
             ->assertSessionHasNoErrors();
 
@@ -123,7 +204,7 @@ class UserzonePlaceTest extends TestCase
     #[DataProvider('invalidValues')]
     public function test_invalid_values_are_rejected(string $field, mixed $value)
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->from('/user/places/create')
             ->post('/user/places', $this->validData([$field => $value]))
             ->assertRedirect('/user/places/create')
@@ -185,7 +266,7 @@ class UserzonePlaceTest extends TestCase
             'longitude' => 2.16489,
         ]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get("/user/places/{$place->id}/edit")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -203,13 +284,13 @@ class UserzonePlaceTest extends TestCase
                 ->where('cities.1', ['id' => $barcelona->id, 'name' => 'Barcelona']));
     }
 
-    public function test_authenticated_users_can_update_a_place()
+    public function test_administrators_can_update_a_place()
     {
         $other = Place::factory()->create();
         $place = Place::factory()->create();
         $data = $this->validData();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->put("/user/places/{$place->id}", $data)
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('userzone.places.index'));
@@ -231,7 +312,7 @@ class UserzonePlaceTest extends TestCase
         $place = Place::factory()->create();
         $data = $this->validData(['latitude' => $latitude, 'longitude' => $longitude]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->put("/user/places/{$place->id}", $data)
             ->assertSessionHasNoErrors();
 
@@ -243,7 +324,7 @@ class UserzonePlaceTest extends TestCase
     {
         $place = Place::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->from("/user/places/{$place->id}/edit")
             ->put("/user/places/{$place->id}", $this->validData([$field => $value]))
             ->assertRedirect("/user/places/{$place->id}/edit")
@@ -255,7 +336,7 @@ class UserzonePlaceTest extends TestCase
 
     public function test_editing_or_updating_a_nonexistent_place_returns_not_found()
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $this->get('/user/places/9999/edit')->assertNotFound();
         $this->put('/user/places/9999', $this->validData())->assertNotFound();
@@ -272,12 +353,12 @@ class UserzonePlaceTest extends TestCase
         $this->assertModelExists($place);
     }
 
-    public function test_authenticated_users_can_delete_a_place()
+    public function test_administrators_can_delete_a_place()
     {
         $other = Place::factory()->create();
         $place = Place::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->delete("/user/places/{$place->id}")
             ->assertRedirect(route('userzone.places.index'));
 
@@ -300,7 +381,7 @@ class UserzonePlaceTest extends TestCase
         $cityAttributes = $city->fresh()->getAttributes();
         $itineraryAttributes = $itineraries->map(fn (Itinerary $itinerary) => $itinerary->fresh()->getAttributes());
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->delete("/user/places/{$place->id}")
             ->assertRedirect(route('userzone.places.index'));
 
@@ -325,7 +406,7 @@ class UserzonePlaceTest extends TestCase
     {
         $place = Place::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->delete('/user/places/9999')
             ->assertNotFound();
 
@@ -341,6 +422,7 @@ class UserzonePlaceTest extends TestCase
         $this->assertSame($uri, $route->uri());
         $this->assertSame($methods, $route->methods());
         $this->assertContains('auth', $route->gatherMiddleware());
+        $this->assertContains(IsAdmin::class, $route->gatherMiddleware());
     }
 
     public static function resourceRoutes(): array
