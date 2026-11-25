@@ -1,0 +1,75 @@
+import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Itineraries',
+        href: '/user/itineraries',
+    },
+];
+
+type Itinerary = {
+    id: number;
+    title: string;
+    city: { name: string };
+    user: { name: string };
+};
+
+type Props = {
+    itineraries: Itinerary[];
+};
+
+export default function Index({ itineraries }: Props) {
+    const destroy = (itinerary: Itinerary) => {
+        if (window.confirm(`Delete "${itinerary.title}"? This cannot be undone.`)) {
+            router.delete(route('userzone.itineraries.destroy', itinerary.id), { preserveScroll: true });
+        }
+    };
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Manage itineraries" />
+            <div className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h1 className="text-xl font-semibold">Manage itineraries</h1>
+                    <Button asChild>
+                        <Link href={route('userzone.itineraries.create')}>Create Itinerary</Link>
+                    </Button>
+                </div>
+
+                {itineraries.length > 0 ? (
+                    <ul className="mt-4 divide-y border-y">
+                        {itineraries.map((itinerary) => (
+                            <li key={itinerary.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-3">
+                                <span className="min-w-0 break-words">{itinerary.title}</span>
+                                <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                                    <span className="text-muted-foreground">{itinerary.city.name}</span>
+                                    <span className="text-muted-foreground">By {itinerary.user.name}</span>
+                                    <Link
+                                        href={route('userzone.itineraries.edit', itinerary.id)}
+                                        className="underline underline-offset-4"
+                                        aria-label={`Edit ${itinerary.title}`}
+                                    >
+                                        Edit
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => destroy(itinerary)}
+                                        className="text-destructive cursor-pointer underline underline-offset-4"
+                                        aria-label={`Delete ${itinerary.title}`}
+                                    >
+                                        Delete
+                                    </button>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-muted-foreground mt-4">No itineraries yet.</p>
+                )}
+            </div>
+        </AppLayout>
+    );
+}

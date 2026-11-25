@@ -3,6 +3,7 @@
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\Userzone\ItineraryController as UserzoneItineraryController;
 use App\Http\Controllers\Userzone\PlaceController as UserzonePlaceController;
 use App\Models\Itinerary;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('user')->name('userzone.')->group(function () {
         Route::resource('places', UserzonePlaceController::class)->except('show');
+        Route::resource('itineraries', UserzoneItineraryController::class)->except('show');
     });
 });
 
