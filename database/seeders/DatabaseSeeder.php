@@ -22,8 +22,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        $city = City::factory()->for($user)->create();
+        $barcelona = City::create(['name' => 'Barcelona', 'user_id' => $user->id]);
+        $bangkok = City::create(['name' => 'Bangkok', 'user_id' => $user->id]);
 
-        Itinerary::factory()->for($user)->for($city)->create();
+        Itinerary::create(['title' => 'Sample: A Weekend in Barcelona', 'user_id' => $user->id, 'city_id' => $barcelona->id]);
+        Itinerary::create(['title' => 'Sample: Barcelona on Foot', 'user_id' => $user->id, 'city_id' => $barcelona->id]);
+        Itinerary::create(['title' => 'Sample: First Day in Bangkok', 'user_id' => $user->id, 'city_id' => $bangkok->id]);
     }
 }
