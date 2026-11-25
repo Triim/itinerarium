@@ -3,6 +3,7 @@
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\Userzone\PlaceController as UserzonePlaceController;
 use App\Models\Itinerary;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('user/places', [UserzonePlaceController::class, 'index'])
+        ->name('userzone.places.index');
 });
 
 require __DIR__.'/settings.php';
