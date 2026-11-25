@@ -475,6 +475,143 @@ class UserzoneItineraryTest extends TestCase
         $this->assertEquals($pivotRows, DB::table('itinerary_place')->get());
     }
 
+    public function test_only_the_owner_and_administrators_can_manage_an_itinerary()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->assertTrue($itinerary->canManage($itinerary->user));
+        $this->assertTrue($itinerary->canManage(User::factory()->admin()->create()));
+        $this->assertFalse($itinerary->canManage(User::factory()->create()));
+    }
+
+    public function test_administrators_see_all_itineraries_with_city_and_author()
+    {
+        $city = City::factory()->create(['name' => 'Barcelona']);
+        $admin = User::factory()->admin()->create(['name' => 'Admin']);
+        $ada = User::factory()->create(['name' => 'Ada']);
+        Itinerary::factory()->for($city)->for($ada)->create(['title' => 'Temples']);
+        Itinerary::factory()->for($city)->for($admin)->create(['title' => 'Gaudí']);
+        Itinerary::factory()->for($city)->create(['title' => 'Markets']);
+
+        $this->actingAs($admin)
+            ->get('/user/itineraries')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('userzone/itineraries/index')
+                ->has('itineraries', 3)
+                ->where('itineraries.0.title', 'Gaudí')
+                ->where('itineraries.0.user.name', 'Admin')
+                ->where('itineraries.1.title', 'Markets')
+                ->where('itineraries.2.title', 'Temples')
+                ->where('itineraries.2.city.name', 'Barcelona')
+                ->where('itineraries.2.user.name', 'Ada')
+                ->missing('itineraries.2.user.email'));
+    }
+
+    public function test_administrators_can_open_the_edit_page_of_another_users_itinerary()
+    {
+        $itinerary = Itinerary::factory()->create();
+        $place = Place::factory()->for($itinerary->city)->create();
+        $itinerary->places()->attach($place);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get("/user/itineraries/{$itinerary->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('userzone/itineraries/edit')
+                ->where('itinerary.id', $itinerary->id)
+                ->where('itinerary.place_ids', [$place->id]));
+    }
+
+    #[DataProvider('updateMethods')]
+    public function test_administrators_can_update_another_users_itinerary_without_changing_its_author(string $method)
+    {
+        $itinerary = Itinerary::factory()->create();
+        $itinerary->places()->attach(Place::factory()->for($itinerary->city)->create());
+        $newPlace = Place::factory()->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->call($method, "/user/itineraries/{$itinerary->id}", [
+                'title' => 'Reviewed title',
+                'city_id' => $newPlace->city_id,
+                'place_ids' => [$newPlace->id],
+                'user_id' => $admin->id,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('userzone.itineraries.index'));
+
+        $this->assertDatabaseHas('itineraries', [
+            'id' => $itinerary->id,
+            'title' => 'Reviewed title',
+            'city_id' => $newPlace->city_id,
+            'user_id' => $itinerary->user_id,
+        ]);
+        $this->assertPlaces([$newPlace->id], $itinerary);
+    }
+
+    public function test_administrator_updates_are_validated()
+    {
+        $itinerary = Itinerary::factory()->create();
+        $place = Place::factory()->for($itinerary->city)->create();
+        $itinerary->places()->attach($place);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData(['place_ids' => [$place->id]]))
+            ->assertSessionHasErrors(['place_ids.0']);
+
+        $this->assertUnchanged($itinerary, [$place->id]);
+    }
+
+    public function test_administrators_can_delete_another_users_itinerary()
+    {
+        $itinerary = Itinerary::factory()->create();
+        $place = Place::factory()->for($itinerary->city)->create();
+        $itinerary->places()->attach($place);
+        $other = Itinerary::factory()->for($itinerary->city)->create();
+        $other->places()->attach($place);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->delete("/user/itineraries/{$itinerary->id}")
+            ->assertRedirect(route('userzone.itineraries.index'));
+
+        $this->assertModelMissing($itinerary);
+        $this->assertDatabaseMissing('itinerary_place', ['itinerary_id' => $itinerary->id]);
+        $this->assertModelExists($itinerary->user);
+        $this->assertModelExists($place);
+        $this->assertUnchanged($other, [$place->id]);
+    }
+
+    public function test_administrators_are_the_author_of_itineraries_they_create()
+    {
+        $admin = User::factory()->admin()->create();
+        $other = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->post('/user/itineraries', $this->validData(['user_id' => $other->id]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($admin->id, Itinerary::sole()->user_id);
+    }
+
+    public function test_regular_users_cannot_manage_an_administrators_itinerary()
+    {
+        $itinerary = Itinerary::factory()->for(User::factory()->admin())->create();
+        $place = Place::factory()->for($itinerary->city)->create();
+        $itinerary->places()->attach($place);
+        $pivotRows = DB::table('itinerary_place')->get();
+
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/user/itineraries')->assertInertia(fn (Assert $page) => $page->has('itineraries', 0));
+        $this->get("/user/itineraries/{$itinerary->id}/edit")->assertForbidden();
+        $this->put("/user/itineraries/{$itinerary->id}", $this->validData(['is_admin' => true]))->assertForbidden();
+        $this->delete("/user/itineraries/{$itinerary->id}")->assertForbidden();
+
+        $this->assertUnchanged($itinerary, [$place->id]);
+        $this->assertEquals($pivotRows, DB::table('itinerary_place')->get());
+    }
+
     public function test_a_missing_itinerary_returns_not_found()
     {
         $this->actingAs(User::factory()->create());
@@ -544,6 +681,9 @@ class UserzoneItineraryTest extends TestCase
         $assertVisible();
 
         $this->actingAs($ada);
+        $assertVisible();
+
+        $this->actingAs(User::factory()->admin()->create());
         $assertVisible();
     }
 

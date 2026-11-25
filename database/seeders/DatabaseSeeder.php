@@ -23,6 +23,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        User::factory()->admin()->create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+        ]);
+
         $barcelona = City::create(['name' => 'Barcelona', 'user_id' => $user->id]);
         $bangkok = City::create(['name' => 'Bangkok', 'user_id' => $user->id]);
 

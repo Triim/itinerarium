@@ -17,9 +17,11 @@ class ItineraryController extends Controller
 {
     public function index(Request $request): Response
     {
+        $user = $request->user();
+
         return Inertia::render('userzone/itineraries/index', [
             'itineraries' => Itinerary::with(['city:id,name', 'user:id,name'])
-                ->where('user_id', $request->user()->id)
+                ->unless($user->is_admin, fn ($query) => $query->where('user_id', $user->id))
                 ->orderBy('title')
                 ->get(['id', 'title', 'city_id', 'user_id']),
         ]);
@@ -43,9 +45,7 @@ class ItineraryController extends Controller
 
     public function edit(Request $request, Itinerary $itinerary): Response
     {
-        if ($itinerary->user_id != $request->user()->id) {
-            abort(403);
-        }
+        abort_unless($itinerary->canManage($request->user()), 403);
 
         return Inertia::render('userzone/itineraries/edit', [
             'itinerary' => [
@@ -64,9 +64,7 @@ class ItineraryController extends Controller
 
     public function update(Request $request, Itinerary $itinerary): RedirectResponse
     {
-        if ($itinerary->user_id != $request->user()->id) {
-            abort(403);
-        }
+        abort_unless($itinerary->canManage($request->user()), 403);
 
         $validated = $this->validated($request);
 
@@ -79,9 +77,7 @@ class ItineraryController extends Controller
 
     public function destroy(Request $request, Itinerary $itinerary): RedirectResponse
     {
-        if ($itinerary->user_id != $request->user()->id) {
-            abort(403);
-        }
+        abort_unless($itinerary->canManage($request->user()), 403);
 
         $itinerary->places()->detach();
         $itinerary->delete();

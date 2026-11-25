@@ -27,4 +27,9 @@ class Itinerary extends Model
     {
         return $this->belongsToMany(Place::class);
     }
+
+    public function canManage(User $user): bool
+    {
+        return $user->is_admin || $this->user_id == $user->id;
+    }
 }
