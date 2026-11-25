@@ -22,4 +22,9 @@ class City extends Model
     {
         return $this->hasMany(Itinerary::class);
     }
+
+    public function places(): HasMany
+    {
+        return $this->hasMany(Place::class);
+    }
 }
