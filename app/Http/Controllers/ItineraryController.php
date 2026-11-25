@@ -20,7 +20,13 @@ class ItineraryController extends Controller
     public function show(Itinerary $itinerary): Response
     {
         return Inertia::render('itineraries/show', [
-            'itinerary' => $itinerary->load(['city:id,name', 'user:id,name']),
+            'itinerary' => $itinerary->load([
+                'city:id,name',
+                'user:id,name',
+                'places' => fn ($query) => $query
+                    ->select(['places.id', 'places.name'])
+                    ->orderBy('places.name'),
+            ]),
         ]);
     }
 }

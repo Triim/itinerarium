@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ItineraryController;
+use App\Http\Controllers\PlaceController;
 use App\Models\Itinerary;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,6 +22,11 @@ Route::get('cities', [CityController::class, 'index'])
     ->name('cities.index');
 Route::get('cities/{city}', [CityController::class, 'show'])
     ->name('cities.show');
+
+Route::get('places', [PlaceController::class, 'index'])
+    ->name('places.index');
+Route::get('places/{place}', [PlaceController::class, 'show'])
+    ->name('places.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
