@@ -27,6 +27,7 @@ export default function Create({ cities }: Props) {
         city_id: '',
         latitude: '',
         longitude: '',
+        image: null as File | null,
     });
 
     const submit: FormEventHandler = (e) => {

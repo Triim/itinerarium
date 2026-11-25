@@ -17,9 +17,10 @@ type Place = {
 type Props = {
     place: Place;
     cities: City[];
+    image_url: string | null;
 };
 
-export default function Edit({ place, cities }: Props) {
+export default function Edit({ place, cities, image_url }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Places',
@@ -31,18 +32,29 @@ export default function Edit({ place, cities }: Props) {
         },
     ];
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, put, transform, processing, errors } = useForm({
         name: place.name,
         description: place.description,
         city_id: String(place.city_id),
         latitude: String(place.latitude),
         longitude: String(place.longitude),
+        image: null as File | null,
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        put(route('userzone.places.update', place.id));
+        const url = route('userzone.places.update', place.id);
+
+        // PHP does not read files from a multipart PUT request, so an image is
+        // sent as a POST request with a spoofed method.
+        transform((data) => (data.image ? { ...data, _method: 'PUT' } : data));
+
+        if (data.image) {
+            post(url);
+        } else {
+            put(url);
+        }
     };
 
     return (
@@ -51,7 +63,7 @@ export default function Edit({ place, cities }: Props) {
             <div className="p-4">
                 <h1 className="text-xl font-semibold">Edit Place</h1>
 
-                <PlaceForm data={data} setData={setData} errors={errors} cities={cities} onSubmit={submit}>
+                <PlaceForm data={data} setData={setData} errors={errors} cities={cities} imageUrl={image_url} onSubmit={submit}>
                     <div className="flex gap-4">
                         <Button type="submit" disabled={processing}>
                             Update Place

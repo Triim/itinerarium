@@ -5,6 +5,7 @@ type Place = {
     id: number;
     name: string;
     description: string | null;
+    image_url: string | null;
 };
 
 type City = {
@@ -38,6 +39,7 @@ export default function Show({ place, city, itineraries }: Props) {
                     </Link>
                 </p>
                 <h1 className="mt-1 text-3xl font-semibold">{place.name}</h1>
+                {place.image_url && <img src={place.image_url} alt={`Photo of ${place.name}`} className="mt-4 max-h-96 max-w-full rounded-md" />}
                 {place.description && <p className="mt-4 text-stone-600">{place.description}</p>}
             </article>
 

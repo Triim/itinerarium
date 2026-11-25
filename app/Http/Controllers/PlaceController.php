@@ -15,18 +15,28 @@ class PlaceController extends Controller
             'cities' => City::select(['id', 'name'])
                 ->whereHas('places')
                 ->with(['places' => fn ($query) => $query
-                    ->select(['id', 'name', 'city_id'])
+                    ->select(['id', 'name', 'city_id', 'image_path'])
                     ->withCount('itineraries')
                     ->orderBy('name')])
                 ->orderBy('name')
-                ->get(),
+                ->get()
+                ->map(fn (City $city) => [
+                    ...$city->only(['id', 'name']),
+                    'places' => $city->places->map(fn (Place $place) => [
+                        ...$place->only(['id', 'name', 'itineraries_count']),
+                        'image_url' => $place->imageUrl(),
+                    ]),
+                ]),
         ]);
     }
 
     public function show(Place $place): Response
     {
         return Inertia::render('places/show', [
-            'place' => $place->only(['id', 'name', 'description']),
+            'place' => [
+                ...$place->only(['id', 'name', 'description']),
+                'image_url' => $place->imageUrl(),
+            ],
             'city' => $place->city->only(['id', 'name']),
             'itineraries' => $place->itineraries()
                 ->with('user:id,name')

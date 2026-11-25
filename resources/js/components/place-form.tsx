@@ -15,18 +15,20 @@ type PlaceFormData = {
     city_id: string;
     latitude: string;
     longitude: string;
+    image: File | null;
 };
 
 type Props = {
     data: PlaceFormData;
-    setData: (field: keyof PlaceFormData, value: string) => void;
+    setData: (field: keyof PlaceFormData, value: string | File | null) => void;
     errors: Partial<Record<keyof PlaceFormData, string>>;
     cities: City[];
+    imageUrl?: string | null;
     onSubmit: FormEventHandler;
     children: ReactNode;
 };
 
-export default function PlaceForm({ data, setData, errors, cities, onSubmit, children }: Props) {
+export default function PlaceForm({ data, setData, errors, cities, imageUrl, onSubmit, children }: Props) {
     return (
         <form onSubmit={onSubmit} className="mt-4 max-w-xl space-y-6">
             <div className="grid gap-2">
@@ -89,6 +91,24 @@ export default function PlaceForm({ data, setData, errors, cities, onSubmit, chi
                     required
                 />
                 <InputError message={errors.longitude} />
+            </div>
+
+            <div className="grid gap-2">
+                <Label htmlFor="image">Image (optional)</Label>
+                {imageUrl && (
+                    <img src={imageUrl} alt={`Current image of ${data.name}`} className="max-h-48 max-w-full justify-self-start rounded-md" />
+                )}
+                <Input
+                    id="image"
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    aria-describedby="image-help"
+                    onChange={(e) => setData('image', e.target.files?.[0] ?? null)}
+                />
+                <p id="image-help" className="text-muted-foreground text-sm">
+                    JPG or PNG, up to 8 MB.{imageUrl && ' Leave empty to keep the current image.'}
+                </p>
+                <InputError message={errors.image} />
             </div>
 
             {children}
