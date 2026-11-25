@@ -1,6 +1,6 @@
-import { Link, usePage } from '@inertiajs/react';
-import { type SharedData } from '@/types';
 import SiteLayout from '@/layouts/site-layout';
+import { type SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 
 type FeaturedItinerary = {
     title: string;
@@ -13,24 +13,12 @@ type WelcomeProps = SharedData & {
 };
 
 export default function Welcome() {
-    const { auth, itinerary } = usePage<WelcomeProps>().props;
+    const { itinerary } = usePage<WelcomeProps>().props;
 
     return (
-        <SiteLayout
-            title="Itinerarium"
-            actions={auth.user ? (
-                <Link href={route('dashboard')}>Dashboard</Link>
-            ) : (
-                <>
-                    <Link href={route('login')}>Log in</Link>
-                    <Link href={route('register')}>Register</Link>
-                </>
-            )}
-        >
+        <SiteLayout title="Itinerarium">
             <section className="mt-12">
-                <p className="text-sm font-medium uppercase tracking-widest text-stone-500">
-                    City itineraries
-                </p>
+                <p className="text-sm font-medium tracking-widest text-stone-500 uppercase">City itineraries</p>
                 <h1 className="mt-3 text-4xl font-semibold">Find a route for your next trip</h1>
 
                 {itinerary ? (

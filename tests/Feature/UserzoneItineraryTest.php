@@ -7,6 +7,7 @@ use App\Models\Itinerary;
 use App\Models\Place;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -31,16 +32,17 @@ class UserzoneItineraryTest extends TestCase
         $this->assertEquals($itinerary->getAttributes(), $itinerary->fresh()->getAttributes());
     }
 
-    public function test_authenticated_users_can_see_all_itineraries_with_city_and_author()
+    public function test_users_only_see_their_own_itineraries_with_city_and_author()
     {
         $barcelona = City::factory()->create(['name' => 'Barcelona']);
         $bangkok = City::factory()->create(['name' => 'Bangkok']);
         $ada = User::factory()->create(['name' => 'Ada']);
         $grace = User::factory()->create(['name' => 'Grace']);
-        Itinerary::factory()->for($bangkok)->for($grace)->create(['title' => 'Temples']);
+        Itinerary::factory()->for($bangkok)->for($ada)->create(['title' => 'Temples']);
         Itinerary::factory()->for($barcelona)->for($ada)->create(['title' => 'Gaudí']);
+        Itinerary::factory()->for($barcelona)->for($grace)->create(['title' => 'Markets']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($ada)
             ->get('/user/itineraries')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -52,7 +54,25 @@ class UserzoneItineraryTest extends TestCase
                 ->missing('itineraries.0.user.email')
                 ->where('itineraries.1.title', 'Temples')
                 ->where('itineraries.1.city.name', 'Bangkok')
-                ->where('itineraries.1.user.name', 'Grace'));
+                ->where('itineraries.1.user.name', 'Ada'));
+
+        $this->actingAs($grace)
+            ->get('/user/itineraries')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('itineraries', 1)
+                ->where('itineraries.0.title', 'Markets')
+                ->where('itineraries.0.user.name', 'Grace'));
+    }
+
+    public function test_overview_is_empty_when_only_other_users_have_itineraries()
+    {
+        Itinerary::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->get('/user/itineraries')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->has('itineraries', 0));
     }
 
     public function test_overview_renders_when_there_are_no_itineraries()
@@ -169,7 +189,7 @@ class UserzoneItineraryTest extends TestCase
         $place = Place::factory()->for($itinerary->city)->create();
         $itinerary->places()->attach($place);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->from("/user/itineraries/{$itinerary->id}/edit")
             ->put("/user/itineraries/{$itinerary->id}", $this->validData([$field => $value]))
             ->assertRedirect("/user/itineraries/{$itinerary->id}/edit")
@@ -223,13 +243,15 @@ class UserzoneItineraryTest extends TestCase
             'place_ids' => [$place->id, (string) $place->id],
         ]);
 
-        $this->actingAs(User::factory()->create())
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
             ->post('/user/itineraries', $data)
             ->assertSessionHasErrors(['place_ids.0' => 'Each place can only be selected once.']);
 
         $this->assertDatabaseCount('itineraries', 0);
 
-        $itinerary = Itinerary::factory()->for($place->city)->create();
+        $itinerary = Itinerary::factory()->for($place->city)->for($user)->create();
         $itinerary->places()->attach($place);
 
         $this->put("/user/itineraries/{$itinerary->id}", $data)
@@ -246,7 +268,7 @@ class UserzoneItineraryTest extends TestCase
         $itinerary = Itinerary::factory()->for($city)->create(['title' => 'Gaudí']);
         $itinerary->places()->attach($selected);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->get("/user/itineraries/{$itinerary->id}/edit")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -271,7 +293,7 @@ class UserzoneItineraryTest extends TestCase
         $itinerary->places()->attach([$place->id, $moved->id]);
         $moved->update(['city_id' => City::factory()->create()->id]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->get("/user/itineraries/{$itinerary->id}/edit")
             ->assertInertia(fn (Assert $page) => $page
                 ->where('itinerary.place_ids', [$place->id]));
@@ -284,14 +306,14 @@ class UserzoneItineraryTest extends TestCase
         $oldPlace = Place::factory()->for($itinerary->city)->create();
         $itinerary->places()->attach($oldPlace);
         $newPlace = Place::factory()->create();
-        $editor = User::factory()->create();
+        $newAuthor = User::factory()->create();
 
-        $this->actingAs($editor)
+        $this->actingAs($itinerary->user)
             ->put("/user/itineraries/{$itinerary->id}", [
                 'title' => 'A new title',
                 'city_id' => $newPlace->city_id,
                 'place_ids' => [$newPlace->id],
-                'user_id' => $editor->id,
+                'user_id' => $newAuthor->id,
             ])
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('userzone.itineraries.index'));
@@ -316,7 +338,7 @@ class UserzoneItineraryTest extends TestCase
         $other = Itinerary::factory()->for($city)->create();
         $other->places()->attach($removed);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->put("/user/itineraries/{$itinerary->id}", $this->validData([
                 'city_id' => $city->id,
                 'place_ids' => [$kept->id, $added->id],
@@ -333,7 +355,7 @@ class UserzoneItineraryTest extends TestCase
         $place = Place::factory()->for($itinerary->city)->create();
         $itinerary->places()->attach($place);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->put("/user/itineraries/{$itinerary->id}", $this->validData(['place_ids' => [$place->id]]))
             ->assertSessionHasErrors(['place_ids.0']);
 
@@ -346,7 +368,7 @@ class UserzoneItineraryTest extends TestCase
         $itinerary = Itinerary::factory()->create();
         $itinerary->places()->attach(Place::factory()->for($itinerary->city)->create());
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->put("/user/itineraries/{$itinerary->id}", $this->validData([
                 'city_id' => $itinerary->city_id,
                 ...$selection,
@@ -373,7 +395,7 @@ class UserzoneItineraryTest extends TestCase
         $other = Itinerary::factory()->for($itinerary->city)->create();
         $other->places()->attach($place);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($itinerary->user)
             ->delete("/user/itineraries/{$itinerary->id}")
             ->assertRedirect(route('userzone.itineraries.index'));
 
@@ -384,6 +406,73 @@ class UserzoneItineraryTest extends TestCase
         $this->assertModelExists($place);
         $this->assertModelExists($other);
         $this->assertPlaces([$place->id], $other);
+    }
+
+    public function test_non_owners_cannot_open_the_edit_page()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->get("/user/itineraries/{$itinerary->id}/edit")
+            ->assertForbidden();
+    }
+
+    #[DataProvider('updateMethods')]
+    public function test_non_owners_cannot_update_an_itinerary(string $method)
+    {
+        $itinerary = Itinerary::factory()->create();
+        $place = Place::factory()->for($itinerary->city)->create();
+        $itinerary->places()->attach($place);
+        $newPlace = Place::factory()->create();
+        $pivotRows = DB::table('itinerary_place')->get();
+        $intruder = User::factory()->create();
+
+        $this->actingAs($intruder)
+            ->call($method, "/user/itineraries/{$itinerary->id}", [
+                'title' => 'Taken over',
+                'city_id' => $newPlace->city_id,
+                'place_ids' => [$newPlace->id],
+                'user_id' => $intruder->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertUnchanged($itinerary, [$place->id]);
+        $this->assertEquals($pivotRows, DB::table('itinerary_place')->get());
+    }
+
+    public static function updateMethods(): array
+    {
+        return [
+            'put' => ['PUT'],
+            'patch' => ['PATCH'],
+        ];
+    }
+
+    public function test_ownership_is_checked_before_validation()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->put("/user/itineraries/{$itinerary->id}", [])
+            ->assertForbidden()
+            ->assertSessionHasNoErrors();
+
+        $this->assertUnchanged($itinerary, []);
+    }
+
+    public function test_non_owners_cannot_delete_an_itinerary()
+    {
+        $itinerary = Itinerary::factory()->create();
+        $place = Place::factory()->for($itinerary->city)->create();
+        $itinerary->places()->attach($place);
+        $pivotRows = DB::table('itinerary_place')->get();
+
+        $this->actingAs(User::factory()->create())
+            ->delete("/user/itineraries/{$itinerary->id}")
+            ->assertForbidden();
+
+        $this->assertUnchanged($itinerary, [$place->id]);
+        $this->assertEquals($pivotRows, DB::table('itinerary_place')->get());
     }
 
     public function test_a_missing_itinerary_returns_not_found()
@@ -423,6 +512,39 @@ class UserzoneItineraryTest extends TestCase
                 ->component('itineraries/show')
                 ->where('itinerary.title', 'Gaudí')
                 ->where('itinerary.places.0.name', 'Park Güell'));
+    }
+
+    public function test_public_pages_show_itineraries_from_different_users()
+    {
+        $ada = User::factory()->create(['name' => 'Ada']);
+        $grace = User::factory()->create(['name' => 'Grace']);
+        $itineraries = collect([
+            Itinerary::factory()->for($ada)->create(['title' => 'Gaudí']),
+            Itinerary::factory()->for($grace)->create(['title' => 'Temples']),
+        ]);
+
+        $assertVisible = function () use ($itineraries) {
+            $this->get('/itineraries')
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page
+                    ->component('itineraries/index')
+                    ->has('itineraries', 2)
+                    ->where('itineraries', fn ($shown) => $shown->pluck('title')->sort()->values()->all() === ['Gaudí', 'Temples']));
+
+            foreach ($itineraries as $itinerary) {
+                $this->get("/itineraries/{$itinerary->id}")
+                    ->assertOk()
+                    ->assertInertia(fn (Assert $page) => $page
+                        ->component('itineraries/show')
+                        ->where('itinerary.title', $itinerary->title)
+                        ->where('itinerary.user.name', $itinerary->user->name));
+            }
+        };
+
+        $assertVisible();
+
+        $this->actingAs($ada);
+        $assertVisible();
     }
 
     #[DataProvider('resourceRoutes')]

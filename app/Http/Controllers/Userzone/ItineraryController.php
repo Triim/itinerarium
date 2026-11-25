@@ -15,10 +15,11 @@ use Inertia\Response;
 
 class ItineraryController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('userzone/itineraries/index', [
             'itineraries' => Itinerary::with(['city:id,name', 'user:id,name'])
+                ->where('user_id', $request->user()->id)
                 ->orderBy('title')
                 ->get(['id', 'title', 'city_id', 'user_id']),
         ]);
@@ -40,8 +41,12 @@ class ItineraryController extends Controller
         return redirect()->route('userzone.itineraries.index');
     }
 
-    public function edit(Itinerary $itinerary): Response
+    public function edit(Request $request, Itinerary $itinerary): Response
     {
+        if ($itinerary->user_id != $request->user()->id) {
+            abort(403);
+        }
+
         return Inertia::render('userzone/itineraries/edit', [
             'itinerary' => [
                 ...$itinerary->only(['id', 'title', 'city_id']),
@@ -59,6 +64,10 @@ class ItineraryController extends Controller
 
     public function update(Request $request, Itinerary $itinerary): RedirectResponse
     {
+        if ($itinerary->user_id != $request->user()->id) {
+            abort(403);
+        }
+
         $validated = $this->validated($request);
 
         $itinerary->update(Arr::except($validated, 'place_ids'));
@@ -68,8 +77,12 @@ class ItineraryController extends Controller
         return redirect()->route('userzone.itineraries.index');
     }
 
-    public function destroy(Itinerary $itinerary): RedirectResponse
+    public function destroy(Request $request, Itinerary $itinerary): RedirectResponse
     {
+        if ($itinerary->user_id != $request->user()->id) {
+            abort(403);
+        }
+
         $itinerary->places()->detach();
         $itinerary->delete();
 
