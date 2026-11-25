@@ -1,3 +1,4 @@
+import { siteMenu } from '@/config/site-menu';
 import { Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 
@@ -14,7 +15,11 @@ export default function SiteHeader({ actions }: Props) {
                 </Link>
 
                 <nav className="flex items-center gap-5 text-sm">
-                    <Link href={route('itineraries.index')}>Itineraries</Link>
+                    {siteMenu.map((item) => (
+                        <Link key={item.routeName} href={route(item.routeName)}>
+                            {item.label}
+                        </Link>
+                    ))}
                     {actions}
                 </nav>
             </div>
