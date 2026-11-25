@@ -37,7 +37,16 @@ export default function Index({ places }: Props) {
                         {places.map((place) => (
                             <li key={place.id} className="flex justify-between gap-4 py-3">
                                 <span>{place.name}</span>
-                                <span className="text-muted-foreground">{place.city.name}</span>
+                                <span className="flex items-baseline gap-4">
+                                    <span className="text-muted-foreground">{place.city.name}</span>
+                                    <Link
+                                        href={route('userzone.places.edit', place.id)}
+                                        className="underline underline-offset-4"
+                                        aria-label={`Edit ${place.name}`}
+                                    >
+                                        Edit
+                                    </Link>
+                                </span>
                             </li>
                         ))}
                     </ul>

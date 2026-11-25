@@ -155,6 +155,112 @@ class UserzonePlaceTest extends TestCase
         ];
     }
 
+    public function test_guests_cannot_open_the_edit_page()
+    {
+        $place = Place::factory()->create();
+
+        $this->get("/user/places/{$place->id}/edit")->assertRedirect('/login');
+    }
+
+    public function test_guests_cannot_update_a_place()
+    {
+        $place = Place::factory()->create();
+
+        $this->put("/user/places/{$place->id}", $this->validData())->assertRedirect('/login');
+
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+    }
+
+    public function test_edit_page_receives_the_place_and_the_available_cities()
+    {
+        $barcelona = City::factory()->create(['name' => 'Barcelona']);
+        $bangkok = City::factory()->create(['name' => 'Bangkok']);
+        Place::factory()->for($bangkok)->create();
+        $place = Place::factory()->for($barcelona)->create([
+            'name' => 'Casa Batlló',
+            'description' => 'A house by Gaudí.',
+            'latitude' => 41.39164,
+            'longitude' => 2.16489,
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->get("/user/places/{$place->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('userzone/places/edit')
+                ->where('place', [
+                    'id' => $place->id,
+                    'name' => 'Casa Batlló',
+                    'description' => 'A house by Gaudí.',
+                    'city_id' => $barcelona->id,
+                    'latitude' => 41.39164,
+                    'longitude' => 2.16489,
+                ])
+                ->has('cities', 2)
+                ->where('cities.0', ['id' => $bangkok->id, 'name' => 'Bangkok'])
+                ->where('cities.1', ['id' => $barcelona->id, 'name' => 'Barcelona']));
+    }
+
+    public function test_authenticated_users_can_update_a_place()
+    {
+        $other = Place::factory()->create();
+        $place = Place::factory()->create();
+        $data = $this->validData();
+
+        $this->actingAs(User::factory()->create())
+            ->put("/user/places/{$place->id}", $data)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('userzone.places.index'));
+
+        $this->assertDatabaseCount('places', 2);
+        $this->assertDatabaseHas('places', ['id' => $place->id, ...$data]);
+        $this->assertEquals($other->getAttributes(), $other->fresh()->getAttributes());
+
+        $this->get('/places')->assertOk();
+        $this->get("/places/{$place->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('place.name', 'Sagrada Família'));
+    }
+
+    #[DataProvider('boundaryCoordinates')]
+    public function test_boundary_coordinates_are_accepted_when_updating(int $latitude, int $longitude)
+    {
+        $place = Place::factory()->create();
+        $data = $this->validData(['latitude' => $latitude, 'longitude' => $longitude]);
+
+        $this->actingAs(User::factory()->create())
+            ->put("/user/places/{$place->id}", $data)
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('places', ['id' => $place->id, ...$data]);
+    }
+
+    #[DataProvider('invalidValues')]
+    public function test_invalid_values_are_rejected_when_updating(string $field, mixed $value)
+    {
+        $place = Place::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->from("/user/places/{$place->id}/edit")
+            ->put("/user/places/{$place->id}", $this->validData([$field => $value]))
+            ->assertRedirect("/user/places/{$place->id}/edit")
+            ->assertSessionHasErrors([$field]);
+
+        $this->assertDatabaseCount('places', 1);
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+    }
+
+    public function test_editing_or_updating_a_nonexistent_place_returns_not_found()
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get('/user/places/9999/edit')->assertNotFound();
+        $this->put('/user/places/9999', $this->validData())->assertNotFound();
+
+        $this->assertDatabaseCount('places', 0);
+    }
+
     private function validData(array $overrides = []): array
     {
         return array_merge([
