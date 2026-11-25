@@ -1,6 +1,7 @@
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,7 +25,12 @@ export default function Index({ places }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage places" />
             <div className="p-4">
-                <h1 className="text-xl font-semibold">Manage places</h1>
+                <div className="flex items-center justify-between gap-4">
+                    <h1 className="text-xl font-semibold">Manage places</h1>
+                    <Button asChild>
+                        <Link href={route('userzone.places.create')}>Create Place</Link>
+                    </Button>
+                </div>
 
                 {places.length > 0 ? (
                     <ul className="mt-4 divide-y border-y">

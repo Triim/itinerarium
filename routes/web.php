@@ -36,6 +36,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('user/places', [UserzonePlaceController::class, 'index'])
         ->name('userzone.places.index');
+    Route::get('user/places/create', [UserzonePlaceController::class, 'create'])
+        ->name('userzone.places.create');
+    Route::post('user/places', [UserzonePlaceController::class, 'store'])
+        ->name('userzone.places.store');
 });
 
 require __DIR__.'/settings.php';
