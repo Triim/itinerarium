@@ -5,17 +5,30 @@ namespace App\Http\Controllers\Userzone;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Place;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Image\Exceptions\CouldNotLoadImage;
+use Spatie\Image\Image;
 
 class PlaceController extends Controller
 {
+    private const IMAGE_EXTENSIONS = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+    ];
+
+    private const MAX_IMAGE_SIDE = 5000;
+
+    private const MAX_IMAGE_PIXELS = 8_000_000;
+
     public function index(): Response
     {
         return Inertia::render('userzone/places/index', [
@@ -99,9 +112,11 @@ class PlaceController extends Controller
 
     private function addImage(Place $place, UploadedFile $image): void
     {
-        // A generated name keeps the client's file name and extension out of public storage.
+        // The name is random and the extension follows the inspected content, never the client's file name.
+        $extension = self::IMAGE_EXTENSIONS[$image->getMimeType()];
+
         $place->addMedia($image)
-            ->usingFileName($image->hashName())
+            ->usingFileName(Str::random(40).'.'.$extension)
             ->toMediaCollection('images');
     }
 
@@ -113,7 +128,44 @@ class PlaceController extends Controller
             'city_id' => ['required', 'integer', 'exists:cities,id'],
             'latitude' => ['required', 'numeric', 'decimal:0,6', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'decimal:0,6', 'between:-180,180'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:8192'],
+            'image' => [
+                'bail',
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png',
+                'mimetypes:'.implode(',', array_keys(self::IMAGE_EXTENSIONS)),
+                'max:8192',
+                $this->imageWithinLimits(...),
+                $this->readableImage(...),
+            ],
         ];
+    }
+
+    private function imageWithinLimits(string $attribute, UploadedFile $value, Closure $fail): void
+    {
+        // Only reads the file header: decoding a huge image could exhaust the memory.
+        $size = @getimagesize($value->getPathname());
+
+        if ($size === false) {
+            $fail('validation.image')->translate();
+
+            return;
+        }
+
+        [$width, $height] = $size;
+
+        if (max($width, $height) > self::MAX_IMAGE_SIDE || $width * $height > self::MAX_IMAGE_PIXELS) {
+            $fail('The :attribute must not exceed 5000 pixels on either side or 8 megapixels in total.');
+        }
+    }
+
+    private function readableImage(string $attribute, UploadedFile $value, Closure $fail): void
+    {
+        // Damaged files can pass the type checks, but would break the image conversions.
+        try {
+            Image::useImageDriver(config('media-library.image_driver'))->loadFile($value->getPathname());
+        } catch (CouldNotLoadImage) {
+            $fail('validation.image')->translate();
+        }
     }
 }

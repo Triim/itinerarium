@@ -25,7 +25,7 @@ class PlaceController extends Controller
                     ...$city->only(['id', 'name']),
                     'places' => $city->places->map(fn (Place $place) => [
                         ...$place->only(['id', 'name', 'itineraries_count']),
-                        'image_url' => $place->imageUrl(),
+                        'image_url' => $place->imageUrl('thumbnail'),
                     ]),
                 ]),
         ]);
@@ -36,7 +36,7 @@ class PlaceController extends Controller
         return Inertia::render('places/show', [
             'place' => [
                 ...$place->only(['id', 'name', 'description']),
-                'image_url' => $place->imageUrl(),
+                'image_url' => $place->imageUrl('details'),
             ],
             'city' => $place->city->only(['id', 'name']),
             'itineraries' => $place->itineraries()

@@ -485,7 +485,7 @@ class UserzonePlaceTest extends TestCase
         $this->assertSame('images', $media->collection_name);
         $this->assertSame('public', $media->disk);
         $this->assertMatchesRegularExpression("#^{$media->id}/[A-Za-z0-9]{40}\\.{$extension}$#", $path);
-        $this->assertSame([$path], Storage::disk('public')->allFiles());
+        $this->assertEqualsCanonicalizing($this->mediaFiles($media), Storage::disk('public')->allFiles());
         $this->assertSame($contents, Storage::disk('public')->get($path));
         $this->assertSame(Storage::disk('public')->url($path), $place->imageUrl());
     }
@@ -567,6 +567,8 @@ class UserzonePlaceTest extends TestCase
             'svg' => ['drawing.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>'],
             'gif' => ['animation.gif', base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')],
             'php file with image content' => ['photo.php', base64_decode(self::PNG)],
+            'truncated png' => ['photo.png', substr(base64_decode(self::PNG), 0, 45)],
+            'html disguised as an image' => ['photo.png', '<html><script>alert(1)</script></html>'],
             'oversized image' => ['photo.png', base64_decode(self::PNG), 8193],
         ];
     }
@@ -684,7 +686,8 @@ class UserzonePlaceTest extends TestCase
             ]))
             ->assertSessionHasNoErrors();
 
-        $this->assertSame([$place->fresh()->getFirstMedia('images')->getPathRelativeToRoot()], Storage::disk('public')->allFiles());
+        $this->assertEqualsCanonicalizing($this->mediaFiles(Media::sole()), Storage::disk('public')->allFiles());
+        $this->assertTrue(Media::sole()->model->is($place));
     }
 
     public function test_deleting_a_place_removes_only_its_own_image()
@@ -761,7 +764,7 @@ class UserzonePlaceTest extends TestCase
         $this->assertDatabaseCount('media', 3);
 
         foreach (Storage::disk('public')->allFiles() as $path) {
-            $this->assertMatchesRegularExpression('#^\d+/[A-Za-z0-9]{40}\.png$#', $path);
+            $this->assertMatchesRegularExpression('#^\d+/(conversions/)?[A-Za-z0-9]{40}(-thumbnail|-details)?\.png$#', $path);
         }
     }
 
@@ -786,8 +789,8 @@ class UserzonePlaceTest extends TestCase
         $this->assertSame($media->getUrl(), $place->fresh()->imageUrl());
         $this->assertNotNull($other->fresh()->imageUrl());
         $this->assertEqualsCanonicalizing([
-            $media->getPathRelativeToRoot(),
-            $other->getFirstMedia('images')->getPathRelativeToRoot(),
+            ...$this->mediaFiles($media),
+            ...$this->mediaFiles($other->getFirstMedia('images')),
         ], Storage::disk('public')->allFiles());
     }
 
@@ -799,7 +802,7 @@ class UserzonePlaceTest extends TestCase
         $place->addMedia(UploadedFile::fake()->image('third.jpg'))->toMediaCollection('images');
 
         $this->assertSame('third.jpg', $place->media()->sole()->file_name);
-        $this->assertCount(1, Storage::disk('public')->allFiles());
+        $this->assertEqualsCanonicalizing($this->mediaFiles($place->media()->sole()), Storage::disk('public')->allFiles());
     }
 
     #[DataProvider('updatesWithoutAnImage')]
@@ -910,7 +913,7 @@ class UserzonePlaceTest extends TestCase
 
         $this->assertModelMissing($place);
         $this->assertTrue(Media::sole()->model->is($other));
-        $this->assertSame([Media::sole()->getPathRelativeToRoot()], Storage::disk('public')->allFiles());
+        $this->assertEqualsCanonicalizing($this->mediaFiles(Media::sole()), Storage::disk('public')->allFiles());
         $this->assertSame([$other->id], $itinerary->places()->pluck('places.id')->all());
         $this->assertModelExists($place->city);
     }
@@ -934,12 +937,14 @@ class UserzonePlaceTest extends TestCase
         $place = $this->placeWithMedia();
         $media = $place->getFirstMedia('images');
         $url = Storage::disk('public')->url("{$media->id}/{$media->file_name}");
+        $thumbnailUrl = Storage::disk('public')->url("{$media->id}/conversions/old-thumbnail.jpg");
+        $detailsUrl = Storage::disk('public')->url("{$media->id}/conversions/old-details.jpg");
 
         $this->get('/places')->assertInertia(fn (Assert $page) => $page
-            ->where('cities.0.places.0.image_url', $url)
+            ->where('cities.0.places.0.image_url', $thumbnailUrl)
             ->missing('cities.0.places.0.media'));
         $this->get("/places/{$place->id}")->assertInertia(fn (Assert $page) => $page
-            ->where('place.image_url', $url)
+            ->where('place.image_url', $detailsUrl)
             ->missing('place.media'));
         $this->actingAs(User::factory()->admin()->create())
             ->get("/user/places/{$place->id}/edit")
@@ -959,6 +964,244 @@ class UserzonePlaceTest extends TestCase
             DB::getQueryLog(),
             fn (array $query) => str_contains($query['query'], 'from "media"'),
         ));
+    }
+
+    #[DataProvider('conversionImages')]
+    public function test_uploads_generate_proportional_conversions(string $filename, string $type, int $width, int $height, array $thumbnail, array $details)
+    {
+        Storage::fake('public');
+        $image = UploadedFile::fake()->image($filename, $width, $height);
+        $contents = $image->getContent();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post('/user/places', $this->validData(['image' => $image]))
+            ->assertSessionHasNoErrors();
+
+        $media = Media::sole();
+        $disk = Storage::disk('public');
+
+        $this->assertEqualsCanonicalizing($this->mediaFiles($media), $disk->allFiles());
+        $this->assertSame($contents, $disk->get($media->getPathRelativeToRoot()));
+
+        foreach (['thumbnail' => $thumbnail, 'details' => $details] as $conversion => $size) {
+            $this->assertTrue($media->hasGeneratedConversion($conversion));
+            $info = getimagesizefromstring($disk->get($media->getPathRelativeToRoot($conversion)));
+            $this->assertSame($size, [$info[0], $info[1]]);
+            $this->assertSame($type, $info['mime']);
+        }
+
+        $place = Place::sole();
+        $this->assertSame($media->getUrl(), $place->imageUrl());
+        $this->assertSame($media->getUrl('thumbnail'), $place->imageUrl('thumbnail'));
+        $this->assertSame($media->getUrl('details'), $place->imageUrl('details'));
+    }
+
+    public static function conversionImages(): array
+    {
+        return [
+            'landscape jpeg' => ['photo.jpg', 'image/jpeg', 1200, 800, [300, 200], [450, 300]],
+            'portrait png' => ['photo.png', 'image/png', 800, 1200, [200, 300], [200, 300]],
+            'panorama jpeg' => ['photo.jpeg', 'image/jpeg', 1200, 300, [300, 75], [600, 150]],
+            'small png is not enlarged' => ['photo.png', 'image/png', 100, 50, [100, 50], [100, 50]],
+        ];
+    }
+
+    public function test_png_conversions_keep_their_transparency()
+    {
+        Storage::fake('public');
+        $canvas = imagecreatetruecolor(800, 400);
+        imagesavealpha($canvas, true);
+        imagefill($canvas, 0, 0, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post('/user/places', $this->validData(['image' => $this->upload('photo.png', $this->encode('imagepng', $canvas), null)]))
+            ->assertSessionHasNoErrors();
+
+        foreach (['thumbnail', 'details'] as $conversion) {
+            $converted = imagecreatefromstring(Storage::disk('public')->get(Media::sole()->getPathRelativeToRoot($conversion)));
+            $this->assertSame(127, imagecolorsforindex($converted, imagecolorat($converted, 10, 10))['alpha']);
+        }
+    }
+
+    public function test_conversions_only_apply_to_the_images_collection()
+    {
+        $place = $this->placeWithMedia();
+        $media = $place->addMedia(UploadedFile::fake()->image('other.jpg'))->toMediaCollection('other', 'public');
+
+        $this->assertSame([], $media->fresh()->generated_conversions);
+    }
+
+    public function test_media_without_conversions_falls_back_to_the_original()
+    {
+        $place = $this->placeWithMedia();
+        $media = Media::sole();
+        $media->update(['generated_conversions' => []]);
+        Storage::disk('public')->deleteDirectory("{$media->id}/conversions");
+        $url = Storage::disk('public')->url("{$media->id}/old.jpg");
+
+        $this->assertSame($url, $place->fresh()->imageUrl());
+        $this->get('/places')->assertInertia(fn (Assert $page) => $page->where('cities.0.places.0.image_url', $url));
+        $this->get("/places/{$place->id}")->assertInertia(fn (Assert $page) => $page->where('place.image_url', $url));
+    }
+
+    public function test_requested_conversions_fall_back_for_legacy_and_missing_images()
+    {
+        $legacy = $this->placeWithImage();
+        $without = Place::factory()->create();
+
+        foreach (['thumbnail', 'details'] as $conversion) {
+            $this->assertSame(Storage::disk('public')->url('places/old.jpg'), $legacy->imageUrl($conversion));
+            $this->assertNull($without->imageUrl($conversion));
+        }
+    }
+
+    #[DataProvider('misleadingFilenames')]
+    public function test_stored_extensions_follow_the_image_content(string $encoder, string $filename, string $extension)
+    {
+        $place = $this->placeWithMedia();
+        $contents = $this->encode($encoder, imagecreatetruecolor(40, 20));
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->post('/user/places', $this->validData(['image' => $this->upload($filename, $contents, null)]))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('userzone.places.index'));
+        $this->post("/user/places/{$place->id}", $this->validData(['_method' => 'PUT', 'image' => $this->upload($filename, $contents, null)]))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('userzone.places.index'));
+
+        $media = Media::all();
+
+        $this->assertCount(2, $media);
+        $this->assertCount(2, $media->pluck('file_name')->unique());
+        $media->each(fn (Media $item) => $this->assertMatchesRegularExpression("#^[A-Za-z0-9]{40}\\.{$extension}$#", $item->file_name));
+        $this->assertEqualsCanonicalizing(
+            $media->flatMap(fn (Media $item) => $this->mediaFiles($item))->all(),
+            Storage::disk('public')->allFiles(),
+        );
+    }
+
+    public static function misleadingFilenames(): array
+    {
+        return [
+            'png with php segment' => ['imagepng', 'shell.php.png', 'png'],
+            'png as html' => ['imagepng', 'page.html', 'png'],
+            'png as jpg' => ['imagepng', 'photo.jpg', 'png'],
+            'jpeg as htm' => ['imagejpeg', 'weird name #1.phtml.HTM', 'jpg'],
+            'jpeg as png' => ['imagejpeg', 'photo.png', 'jpg'],
+            'jpeg without extension' => ['imagejpeg', 'photo', 'jpg'],
+        ];
+    }
+
+    #[DataProvider('imagesWithinLimits')]
+    public function test_images_within_the_dimension_limits_are_accepted(string $filename, int $width, int $height)
+    {
+        Storage::fake('public');
+        $image = UploadedFile::fake()->image($filename, $width, $height);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post('/user/places', $this->validData(['image' => $image]))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('userzone.places.index'));
+
+        $this->assertEqualsCanonicalizing($this->mediaFiles(Media::sole()), Storage::disk('public')->allFiles());
+    }
+
+    public static function imagesWithinLimits(): array
+    {
+        return [
+            'exactly 8 megapixels' => ['photo.jpg', 3200, 2500],
+            'maximum width' => ['photo.png', 5000, 100],
+            'maximum height' => ['photo.jpg', 100, 5000],
+        ];
+    }
+
+    #[DataProvider('imagesOverLimits')]
+    public function test_images_over_the_dimension_limits_are_rejected(string $type, int $width, int $height)
+    {
+        Storage::fake('public');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->from('/user/places/create')
+            ->post('/user/places', $this->validData(['image' => $this->imageClaiming($type, $width, $height)]))
+            ->assertRedirect('/user/places/create')
+            ->assertSessionHasErrors(['image' => 'The image must not exceed 5000 pixels on either side or 8 megapixels in total.']);
+
+        $this->assertDatabaseCount('places', 0);
+        $this->assertDatabaseCount('media', 0);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    #[DataProvider('imagesOverLimits')]
+    public function test_a_replacement_over_the_dimension_limits_preserves_the_image_and_its_conversions(string $type, int $width, int $height)
+    {
+        $place = $this->placeWithMedia();
+        $media = Media::sole();
+        $contents = collect($this->mediaFiles($media))->map(fn (string $path) => Storage::disk('public')->get($path));
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->from("/user/places/{$place->id}/edit")
+            ->post("/user/places/{$place->id}", $this->validData([
+                '_method' => 'PUT',
+                'image' => $this->imageClaiming($type, $width, $height),
+            ]))
+            ->assertRedirect("/user/places/{$place->id}/edit")
+            ->assertSessionHasErrors(['image' => 'The image must not exceed 5000 pixels on either side or 8 megapixels in total.']);
+
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+        $this->assertEquals($media->getAttributes(), Media::sole()->getAttributes());
+        $this->assertEqualsCanonicalizing($this->mediaFiles($media), Storage::disk('public')->allFiles());
+        $this->assertEquals($contents, collect($this->mediaFiles($media))->map(fn (string $path) => Storage::disk('public')->get($path)));
+    }
+
+    public static function imagesOverLimits(): array
+    {
+        return [
+            'jpeg just over 8 megapixels' => ['jpeg', 4000, 2001],
+            'png just over 8 megapixels' => ['png', 4000, 2001],
+            'too wide' => ['jpeg', 5001, 10],
+            'too high' => ['png', 10, 5001],
+            '48 megapixel jpeg' => ['jpeg', 8000, 6000],
+            '48 megapixel png' => ['png', 8000, 6000],
+        ];
+    }
+
+    private function imageClaiming(string $type, int $width, int $height): UploadedFile
+    {
+        // A small image whose header states other dimensions, as a real 48 MP canvas would not fit in memory.
+        $contents = $this->encode("image{$type}", imagecreatetruecolor(16, 16));
+
+        if ($type === 'jpeg') {
+            $offset = strpos($contents, "\xFF\xC0") + 5;
+            $contents = substr_replace($contents, pack('nn', $height, $width), $offset, 4);
+        } else {
+            $header = 'IHDR'.pack('NN', $width, $height).substr($contents, 24, 5);
+            $contents = substr_replace($contents, $header.pack('N', crc32($header)), 12, 21);
+        }
+
+        $image = $this->upload("photo.{$type}", $contents, null);
+        $this->assertSame([$width, $height], array_slice(getimagesize($image->getPathname()), 0, 2));
+
+        return $image;
+    }
+
+    private function encode(string $encoder, \GdImage $image): string
+    {
+        ob_start();
+        $encoder($image);
+
+        return ob_get_clean();
+    }
+
+    private function mediaFiles(Media $media): array
+    {
+        ['filename' => $name, 'extension' => $extension] = pathinfo($media->file_name);
+
+        return [
+            "{$media->id}/{$media->file_name}",
+            "{$media->id}/conversions/{$name}-thumbnail.{$extension}",
+            "{$media->id}/conversions/{$name}-details.{$extension}",
+        ];
     }
 
     private function failUploads(): void

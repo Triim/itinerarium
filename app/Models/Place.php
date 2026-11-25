@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Place extends Model implements HasMedia
 {
@@ -44,12 +46,30 @@ class Place extends Model implements HasMedia
             ->singleFile();
     }
 
-    public function imageUrl(): ?string
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        // Fit::Max keeps the proportions and never enlarges small images.
+        $this->addMediaConversion('thumbnail')
+            ->performOnCollections('images')
+            ->fit(Fit::Max, 300, 300)
+            ->keepOriginalImageFormat()
+            ->nonQueued();
+
+        $this->addMediaConversion('details')
+            ->performOnCollections('images')
+            ->fit(Fit::Max, 600, 300)
+            ->keepOriginalImageFormat()
+            ->nonQueued();
+    }
+
+    public function imageUrl(?string $conversion = null): ?string
     {
         $image = $this->getFirstMedia('images');
 
         if ($image !== null) {
-            return $image->getUrl();
+            return $conversion === null
+                ? $image->getUrl()
+                : $image->getAvailableUrl([$conversion]);
         }
 
         // Images uploaded before MediaLibrary are still referenced by their path.
