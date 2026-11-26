@@ -58,21 +58,46 @@ class QueryEfficiencyTest extends TestCase
         $this->assertSame($before, $after);
     }
 
-    public function test_home_page_shares_only_the_featured_itinerary_fields_it_displays()
+    public function test_home_page_shares_only_the_itinerary_fields_it_displays()
     {
-        $itinerary = Itinerary::factory()->create();
+        $itinerary = Itinerary::factory()->hasAttached(Place::factory()->count(2))->create();
 
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('welcome')
-                ->has('itinerary', fn (Assert $prop) => $prop
+                ->has('itineraries', 1)
+                ->has('itineraries.0', fn (Assert $prop) => $prop
                     ->where('id', $itinerary->id)
                     ->where('title', $itinerary->title)
-                    ->where('city_id', $itinerary->city_id)
-                    ->where('user_id', $itinerary->user_id)
+                    ->where('places_count', 2)
                     ->where('city', ['id' => $itinerary->city_id, 'name' => $itinerary->city->name])
                     ->where('user', ['id' => $itinerary->user_id, 'name' => $itinerary->user->name])));
+    }
+
+    public function test_home_page_query_count_does_not_grow_with_displayed_itineraries()
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $city = City::factory()->create();
+
+        $counts = [];
+        foreach ([1, 2, 3, 10] as $total) {
+            while (Itinerary::count() < $total) {
+                Itinerary::factory()
+                    ->for(City::factory())
+                    ->hasAttached(Place::factory()->count(3)->for($city))
+                    ->create();
+            }
+
+            $counts[$total] = [
+                'guest' => $this->countHomeQueries(null, min($total, 3)),
+                'user' => $this->countHomeQueries($admin, min($total, 3)),
+            ];
+        }
+
+        // One query for the itineraries with their place counts, one each for their cities and authors.
+        $this->assertSame(3, $counts[1]['guest']);
+        $this->assertSame(array_fill_keys([1, 2, 3, 10], $counts[1]), $counts);
     }
 
     private function placeWithImage(City $city): Place
@@ -81,6 +106,24 @@ class QueryEfficiencyTest extends TestCase
         $place->addMedia(UploadedFile::fake()->image('place.jpg', 400, 300))->toMediaCollection('images');
 
         return $place;
+    }
+
+    private function countHomeQueries(?User $user, int $expectedCards): int
+    {
+        $this->app['auth']->forgetGuards();
+        $request = $user ? $this->actingAs($user) : $this;
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $request->get('/')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('auth.user', fn ($authUser) => $authUser?->offsetGet('id') === $user?->id)
+                ->has('itineraries', $expectedCards));
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $count;
     }
 
     private function countQueries(string $url, User $admin): int
