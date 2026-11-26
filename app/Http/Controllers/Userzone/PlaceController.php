@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -74,27 +73,14 @@ class PlaceController extends Controller
     {
         $validated = $request->validate($this->rules());
 
-        $attributes = Arr::except($validated, 'image');
-        $legacyPath = null;
-
-        if (isset($validated['image'])) {
-            $legacyPath = $place->image_path;
-            $attributes['image_path'] = null;
-        }
-
         // A failed upload must leave the place and its previous image untouched.
-        DB::transaction(function () use ($place, $validated, $attributes) {
-            $place->update($attributes);
+        DB::transaction(function () use ($place, $validated) {
+            $place->update(Arr::except($validated, 'image'));
 
             if (isset($validated['image'])) {
                 $this->addImage($place, $validated['image']);
             }
         });
-
-        // Only remove the legacy file once nothing refers to it anymore.
-        if ($legacyPath !== null) {
-            Storage::disk('public')->delete($legacyPath);
-        }
 
         return redirect()->route('userzone.places.index');
     }
@@ -102,10 +88,6 @@ class PlaceController extends Controller
     public function destroy(Place $place): RedirectResponse
     {
         $place->delete();
-
-        if ($place->image_path !== null) {
-            Storage::disk('public')->delete($place->image_path);
-        }
 
         return redirect()->route('userzone.places.index');
     }

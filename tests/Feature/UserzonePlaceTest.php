@@ -459,7 +459,6 @@ class UserzonePlaceTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('userzone.places.index'));
 
-        $this->assertNull(Place::sole()->image_path);
         $this->assertNull(Place::sole()->imageUrl());
         $this->assertSame([], Storage::disk('public')->allFiles());
     }
@@ -480,7 +479,6 @@ class UserzonePlaceTest extends TestCase
         $media = Media::sole();
         $path = $media->getPathRelativeToRoot();
 
-        $this->assertNull($place->image_path);
         $this->assertTrue($media->model->is($place));
         $this->assertSame('images', $media->collection_name);
         $this->assertSame('public', $media->disk);
@@ -522,7 +520,9 @@ class UserzonePlaceTest extends TestCase
         $this->put("/user/places/{$place->id}", $this->validData(['image_path' => 'places/other.jpg']))->assertSessionHasNoErrors();
 
         $this->assertDatabaseCount('places', 2);
-        $this->assertSame(0, Place::whereNotNull('image_path')->count());
+        $this->assertDatabaseCount('media', 0);
+        $this->assertSame([null, null], Place::all()->map->imageUrl()->all());
+        $this->assertSame(['places/other.jpg'], Storage::disk('public')->allFiles());
     }
 
     #[DataProvider('invalidImages')]
@@ -538,24 +538,6 @@ class UserzonePlaceTest extends TestCase
 
         $this->assertDatabaseCount('places', 0);
         $this->assertSame([], Storage::disk('public')->allFiles());
-    }
-
-    #[DataProvider('invalidImages')]
-    public function test_an_invalid_replacement_preserves_the_existing_image(string $filename, string $contents, ?int $kilobytes = null)
-    {
-        $place = $this->placeWithImage();
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->from("/user/places/{$place->id}/edit")
-            ->post("/user/places/{$place->id}", $this->validData([
-                '_method' => 'PUT',
-                'image' => $this->upload($filename, $contents, $kilobytes),
-            ]))
-            ->assertRedirect("/user/places/{$place->id}/edit")
-            ->assertSessionHasErrors(['image']);
-
-        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
-        $this->assertSame(['places/old.jpg'], Storage::disk('public')->allFiles());
     }
 
     public static function invalidImages(): array
@@ -584,7 +566,8 @@ class UserzonePlaceTest extends TestCase
 
     public function test_an_image_is_not_stored_when_another_field_is_invalid()
     {
-        $place = $this->placeWithImage();
+        $place = $this->placeWithMedia();
+        $files = Storage::disk('public')->allFiles();
         $image = UploadedFile::fake()->image('new.png');
 
         $this->actingAs(User::factory()->admin()->create());
@@ -596,12 +579,14 @@ class UserzonePlaceTest extends TestCase
 
         $this->assertDatabaseCount('places', 1);
         $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
-        $this->assertSame(['places/old.jpg'], Storage::disk('public')->allFiles());
+        $this->assertModelExists($place->getFirstMedia('images'));
+        $this->assertSame($files, Storage::disk('public')->allFiles());
     }
 
     public function test_regular_users_cannot_upload_replace_or_delete_an_image()
     {
-        $place = $this->placeWithImage();
+        $place = $this->placeWithMedia();
+        $files = Storage::disk('public')->allFiles();
         $image = UploadedFile::fake()->image('new.png');
 
         $this->actingAs(User::factory()->create());
@@ -612,12 +597,14 @@ class UserzonePlaceTest extends TestCase
 
         $this->assertDatabaseCount('places', 1);
         $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
-        $this->assertSame(['places/old.jpg'], Storage::disk('public')->allFiles());
+        $this->assertModelExists($place->getFirstMedia('images'));
+        $this->assertSame($files, Storage::disk('public')->allFiles());
     }
 
     public function test_guests_cannot_upload_replace_or_delete_an_image()
     {
-        $place = $this->placeWithImage();
+        $place = $this->placeWithMedia();
+        $files = Storage::disk('public')->allFiles();
         $image = UploadedFile::fake()->image('new.png');
 
         $this->post('/user/places', $this->validData(['image' => $image]))->assertRedirect('/login');
@@ -626,21 +613,8 @@ class UserzonePlaceTest extends TestCase
 
         $this->assertDatabaseCount('places', 1);
         $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
-        $this->assertSame(['places/old.jpg'], Storage::disk('public')->allFiles());
-    }
-
-    #[DataProvider('updatesWithoutAnImage')]
-    public function test_administrators_can_edit_a_place_without_changing_its_image(array $overrides)
-    {
-        $place = $this->placeWithImage();
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->put("/user/places/{$place->id}", $this->validData(['name' => 'Renamed place', ...$overrides]))
-            ->assertSessionHasNoErrors()
-            ->assertRedirect(route('userzone.places.index'));
-
-        $this->assertDatabaseHas('places', ['id' => $place->id, 'name' => 'Renamed place', 'image_path' => 'places/old.jpg']);
-        $this->assertSame(['places/old.jpg'], Storage::disk('public')->allFiles());
+        $this->assertModelExists($place->getFirstMedia('images'));
+        $this->assertSame($files, Storage::disk('public')->allFiles());
     }
 
     public static function updatesWithoutAnImage(): array
@@ -649,29 +623,6 @@ class UserzonePlaceTest extends TestCase
             'image field absent' => [[]],
             'image field empty' => [['image' => null]],
         ];
-    }
-
-    public function test_administrators_can_replace_a_legacy_image()
-    {
-        $place = $this->placeWithImage();
-        Storage::disk('public')->put('places/other.jpg', 'other');
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->post("/user/places/{$place->id}", $this->validData([
-                '_method' => 'PUT',
-                'image' => UploadedFile::fake()->image('new.png'),
-            ]))
-            ->assertSessionHasNoErrors()
-            ->assertRedirect(route('userzone.places.index'));
-
-        $path = Media::sole()->getPathRelativeToRoot();
-
-        $this->assertNull($place->fresh()->image_path);
-        $this->assertSame(Storage::disk('public')->url($path), $place->fresh()->imageUrl());
-        $this->assertSame('Sagrada Família', $place->fresh()->name);
-        Storage::disk('public')->assertExists($path);
-        Storage::disk('public')->assertMissing('places/old.jpg');
-        Storage::disk('public')->assertExists('places/other.jpg');
     }
 
     public function test_administrators_can_add_an_image_to_an_existing_place()
@@ -690,37 +641,6 @@ class UserzonePlaceTest extends TestCase
         $this->assertTrue(Media::sole()->model->is($place));
     }
 
-    public function test_deleting_a_place_removes_only_its_own_image()
-    {
-        $place = $this->placeWithImage();
-        Storage::disk('public')->put('places/other.jpg', 'other');
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->delete("/user/places/{$place->id}")
-            ->assertRedirect(route('userzone.places.index'));
-
-        $this->assertModelMissing($place);
-        $this->assertSame(['places/other.jpg'], Storage::disk('public')->allFiles());
-    }
-
-    public function test_pages_receive_the_image_url()
-    {
-        $place = $this->placeWithImage();
-        $url = Storage::disk('public')->url('places/old.jpg');
-
-        $this->assertSame($url, $place->imageUrl());
-
-        $this->get('/places')->assertInertia(fn (Assert $page) => $page
-            ->where('cities.0.places.0.image_url', $url)
-            ->missing('cities.0.places.0.image_path'));
-        $this->get("/places/{$place->id}")->assertInertia(fn (Assert $page) => $page
-            ->where('place.image_url', $url)
-            ->missing('place.image_path'));
-        $this->actingAs(User::factory()->admin()->create())
-            ->get("/user/places/{$place->id}/edit")
-            ->assertInertia(fn (Assert $page) => $page->where('image_url', $url));
-    }
-
     public function test_places_without_an_image_remain_functional()
     {
         Storage::fake('public');
@@ -736,7 +656,6 @@ class UserzonePlaceTest extends TestCase
         $this->get("/user/places/{$place->id}/edit")->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('image_url', null));
         $this->put("/user/places/{$place->id}", $this->validData())->assertSessionHasNoErrors();
-        $this->assertNull($place->fresh()->image_path);
         $this->delete("/user/places/{$place->id}")->assertRedirect(route('userzone.places.index'));
         $this->assertModelMissing($place);
     }
@@ -746,7 +665,7 @@ class UserzonePlaceTest extends TestCase
         $this->assertTrue(Schema::hasColumns('media', [
             'id', 'model_type', 'model_id', 'uuid', 'collection_name', 'name', 'file_name', 'mime_type', 'disk', 'size',
         ]));
-        $this->assertTrue(Schema::hasColumn('places', 'image_path'));
+        $this->assertFalse(Schema::hasColumn('places', 'image_path'));
     }
 
     public function test_the_stored_file_name_does_not_depend_on_the_client_file_name()
@@ -851,10 +770,9 @@ class UserzonePlaceTest extends TestCase
         $this->assertDatabaseCount('media', 0);
     }
 
-    #[DataProvider('imageSources')]
-    public function test_a_failed_upload_preserves_the_place_and_its_image(string $source)
+    public function test_a_failed_upload_preserves_the_place_and_its_image()
     {
-        $place = $this->{$source}();
+        $place = $this->placeWithMedia();
         $files = Storage::disk('public')->allFiles();
         $mediaIds = Media::pluck('id')->all();
         $this->failUploads();
@@ -870,14 +788,6 @@ class UserzonePlaceTest extends TestCase
         $this->assertSame($place->imageUrl(), $place->fresh()->imageUrl());
         $this->assertSame($mediaIds, Media::pluck('id')->all());
         $this->assertSame($files, Storage::disk('public')->allFiles());
-    }
-
-    public static function imageSources(): array
-    {
-        return [
-            'legacy' => ['placeWithImage'],
-            'media library' => ['placeWithMedia'],
-        ];
     }
 
     public function test_unauthorized_users_cannot_replace_or_delete_a_media_library_image()
@@ -916,20 +826,6 @@ class UserzonePlaceTest extends TestCase
         $this->assertEqualsCanonicalizing($this->mediaFiles(Media::sole()), Storage::disk('public')->allFiles());
         $this->assertSame([$other->id], $itinerary->places()->pluck('places.id')->all());
         $this->assertModelExists($place->city);
-    }
-
-    public function test_deleting_a_place_removes_both_its_media_and_a_remaining_legacy_image()
-    {
-        $place = $this->placeWithImage();
-        $place->addMedia(UploadedFile::fake()->image('new.jpg'))->toMediaCollection('images');
-
-        $this->assertSame(Media::sole()->getUrl(), $place->fresh()->imageUrl());
-
-        $this->actingAs(User::factory()->admin()->create())->delete("/user/places/{$place->id}");
-
-        $this->assertModelMissing($place);
-        $this->assertDatabaseCount('media', 0);
-        $this->assertSame([], Storage::disk('public')->allFiles());
     }
 
     public function test_pages_receive_the_media_library_image_url()
@@ -1044,14 +940,12 @@ class UserzonePlaceTest extends TestCase
         $this->get("/places/{$place->id}")->assertInertia(fn (Assert $page) => $page->where('place.image_url', $url));
     }
 
-    public function test_requested_conversions_fall_back_for_legacy_and_missing_images()
+    public function test_places_without_an_image_have_no_conversion_urls()
     {
-        $legacy = $this->placeWithImage();
-        $without = Place::factory()->create();
+        $place = Place::factory()->create();
 
         foreach (['thumbnail', 'details'] as $conversion) {
-            $this->assertSame(Storage::disk('public')->url('places/old.jpg'), $legacy->imageUrl($conversion));
-            $this->assertNull($without->imageUrl($conversion));
+            $this->assertNull($place->imageUrl($conversion));
         }
     }
 
@@ -1219,14 +1113,6 @@ class UserzonePlaceTest extends TestCase
         $place->addMedia(UploadedFile::fake()->image('old.jpg'))->toMediaCollection('images');
 
         return $place;
-    }
-
-    private function placeWithImage(): Place
-    {
-        Storage::fake('public');
-        Storage::disk('public')->put('places/old.jpg', 'old');
-
-        return Place::factory()->create(['image_path' => 'places/old.jpg'])->fresh();
     }
 
     private function upload(string $filename, string $contents, ?int $kilobytes): UploadedFile
