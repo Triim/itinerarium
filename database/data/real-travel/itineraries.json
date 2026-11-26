@@ -1,0 +1,165 @@
+{
+    "itineraries": [
+        {
+            "key": "madrid-day-two-centre-and-cinema",
+            "city": "madrid",
+            "title": "Madrid in a day: Habsburg squares, Egyptian temple and Almodóvar rooftops",
+            "stops": [
+                "madrid-plaza-mayor",
+                "madrid-mercado-de-san-miguel",
+                "madrid-palacio-real-almudena",
+                "madrid-plaza-de-oriente",
+                "madrid-plaza-de-espana",
+                "madrid-templo-de-debod",
+                "madrid-gran-via-callao",
+                "madrid-puerta-del-sol",
+                "madrid-circulo-de-bellas-artes",
+                "madrid-plaza-de-cibeles",
+                "madrid-puerta-de-alcala",
+                "madrid-retiro-estanque-grande",
+                "madrid-palacio-de-cristal",
+                "madrid-angel-caido",
+                "madrid-museo-del-prado",
+                "madrid-museo-reina-sofia",
+                "madrid-atocha-station"
+            ]
+        },
+        {
+            "key": "berlin-west-cinema-bauhaus-modernism",
+            "city": "berlin",
+            "title": "West Berlin: cinema, Bauhaus and modernism",
+            "stops": [
+                "berlin-bauhaus-archiv-temporary",
+                "berlin-bahnhof-zoo",
+                "berlin-kaiser-wilhelm-gedaechtniskirche",
+                "berlin-lego-store",
+                "berlin-shell-haus",
+                "berlin-bendlerblock",
+                "berlin-neue-nationalgalerie",
+                "berlin-staatsbibliothek",
+                "berlin-holocaust-memorial",
+                "berlin-hansa-studios",
+                "berlin-topography-of-terror",
+                "berlin-victoria-spaeti",
+                "berlin-anhalter-bahnhof",
+                "berlin-platz-der-luftbruecke",
+                "berlin-tempelhofer-feld",
+                "berlin-schwerbelastungskoerper",
+                "berlin-pallasbunker-pallasseum"
+            ]
+        },
+        {
+            "key": "berlin-east-gdr-history-and-films",
+            "city": "berlin",
+            "title": "Berlin south to east: Germania, the Stasi and Good Bye, Lenin!",
+            "stops": [
+                "berlin-pallasbunker-pallasseum",
+                "berlin-schwerbelastungskoerper",
+                "berlin-tempelhofer-feld",
+                "berlin-platz-der-luftbruecke",
+                "berlin-anhalter-bahnhof",
+                "berlin-victoria-spaeti",
+                "berlin-stasi-headquarters",
+                "berlin-frankfurter-tor",
+                "berlin-cafe-sibylle",
+                "berlin-strausberger-platz",
+                "berlin-kino-international-cafe-moskau",
+                "berlin-karl-marx-allee-24-flying-lenin",
+                "berlin-berolinastrasse-21-kerner-home",
+                "berlin-haus-des-lehrers",
+                "berlin-hackesche-hoefe",
+                "berlin-claerchens-ballhaus",
+                "berlin-berlin-wall-memorial"
+            ]
+        },
+        {
+            "key": "paris-film-locations",
+            "city": "paris",
+            "title": "Paris on film",
+            "stops": [
+                "paris-louvre",
+                "paris-pont-de-bir-hakeim",
+                "paris-saint-etienne-du-mont",
+                "paris-square-louis-xvi",
+                "paris-moulin-rouge",
+                "paris-cafe-des-deux-moulins",
+                "paris-rue-foyatier",
+                "paris-pont-neuf",
+                "paris-shakespeare-and-company",
+                "paris-place-de-la-concorde",
+                "paris-caveau-de-la-huchette",
+                "paris-aurouze",
+                "paris-cafe-de-flore",
+                "paris-tuileries-metro",
+                "paris-passerelle-senghor",
+                "paris-lecoute-statue",
+                "paris-pont-alexandre-iii",
+                "paris-pere-lachaise",
+                "paris-palais-royal",
+                "paris-36-quai-des-orfevres",
+                "paris-notre-dame",
+                "paris-arc-de-triomphe",
+                "paris-residence-rose-garden",
+                "paris-temple-de-la-sibylle"
+            ]
+        },
+        {
+            "key": "brussels-waffles-statues-and-views",
+            "city": "brussels",
+            "title": "Brussels: a waffle, three statues and three views",
+            "stops": [
+                "brussels-waffle-breakfast",
+                "brussels-zinneke-pis",
+                "brussels-jeanneke-pis",
+                "brussels-manneken-pis",
+                "brussels-mont-des-arts",
+                "brussels-galeries-royales-saint-hubert",
+                "brussels-grand-place"
+            ]
+        },
+        {
+            "key": "bruges-in-bruges",
+            "city": "bruges",
+            "title": "Bruges, after In Bruges",
+            "stops": [
+                "bruges-breakfast-stop",
+                "bruges-lunch-stop",
+                "bruges-dinner-stop",
+                "bruges-let-it-go-stop",
+                "bruges-belfry",
+                "bruges-basilica-of-the-holy-blood",
+                "bruges-canal-boat-ride",
+                "bruges-groeningemuseum",
+                "bruges-wait-for-the-call-stop"
+            ]
+        },
+        {
+            "key": "hamburg-eight-hour-walk",
+            "city": "hamburg",
+            "title": "Hamburg on foot in eight hours",
+            "stops": [
+                "hamburg-hauptbahnhof",
+                "hamburg-rathaus",
+                "hamburg-nikolaifleet",
+                "hamburg-deichstrasse",
+                "hamburg-chilehaus",
+                "hamburg-speicherstadt",
+                "hamburg-magellan-terrassen",
+                "hamburg-elbphilharmonie",
+                "hamburg-traditionsschiffhafen",
+                "hamburg-landungsbruecken",
+                "hamburg-alter-elbtunnel",
+                "hamburg-st-michaelis",
+                "hamburg-zum-goldenen-handschuh",
+                "hamburg-grosse-freiheit",
+                "hamburg-beatles-platz",
+                "hamburg-feldstrassenbunker",
+                "hamburg-karolinenviertel",
+                "hamburg-schanzenviertel",
+                "hamburg-dockland",
+                "hamburg-grosse-elbstrasse",
+                "hamburg-fischmarkt"
+            ]
+        }
+    ]
+}

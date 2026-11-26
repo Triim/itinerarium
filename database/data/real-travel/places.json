@@ -1,0 +1,1715 @@
+{
+    "cities": [
+        {
+            "key": "madrid",
+            "name": "Madrid"
+        },
+        {
+            "key": "berlin",
+            "name": "Berlin"
+        },
+        {
+            "key": "paris",
+            "name": "Paris"
+        },
+        {
+            "key": "brussels",
+            "name": "Brussels"
+        },
+        {
+            "key": "bruges",
+            "name": "Bruges"
+        },
+        {
+            "key": "hamburg",
+            "name": "Hamburg"
+        }
+    ],
+    "places": [
+        {
+            "key": "madrid-plaza-mayor",
+            "city": "madrid",
+            "name": "Plaza Mayor",
+            "description": "Enclosed 17th-century arcaded square with the equestrian statue of Philip III — the heart of Habsburg Madrid.",
+            "latitude": 40.4155,
+            "longitude": -3.7074,
+            "themes": [
+                "landmark",
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-mercado-de-san-miguel",
+            "city": "madrid",
+            "name": "Mercado de San Miguel",
+            "description": "Glass-and-iron market hall from 1916, now full of gastro stalls for tapas and jamón. Two steps from Plaza Mayor.",
+            "latitude": 40.4154,
+            "longitude": -3.709,
+            "themes": [
+                "architecture",
+                "unusual",
+                "local_food"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-palacio-real-almudena",
+            "city": "madrid",
+            "name": "Royal Palace and Almudena Cathedral",
+            "description": "Western Europe's largest royal palace by floor area, with Almudena Cathedral opposite — seen from outside, from the esplanade.",
+            "latitude": 40.4179,
+            "longitude": -3.7143,
+            "themes": [
+                "landmark",
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-plaza-de-oriente",
+            "city": "madrid",
+            "name": "Plaza de Oriente and Teatro Real",
+            "description": "The opera house and the semicircle of Visigothic king statues facing the palace.",
+            "latitude": 40.4181,
+            "longitude": -3.7107,
+            "themes": [
+                "landmark",
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-plaza-de-espana",
+            "city": "madrid",
+            "name": "Plaza de España",
+            "description": "Cervantes monument with Don Quixote and Sancho Panza, flanked by the 1950s skyscrapers Edificio España and Torre de Madrid.",
+            "latitude": 40.4234,
+            "longitude": -3.7122,
+            "themes": [
+                "landmark",
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-templo-de-debod",
+            "city": "madrid",
+            "name": "Temple of Debod",
+            "description": "A genuine 2nd-century BC Egyptian temple, gifted to Spain and rebuilt stone by stone. A good sunset spot.",
+            "latitude": 40.424,
+            "longitude": -3.7178,
+            "themes": [
+                "history",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-gran-via-callao",
+            "city": "madrid",
+            "name": "Gran Vía and Callao",
+            "description": "The 1910s showpiece boulevard: Edificio Carrión with the Schweppes neon sign, old cinemas and the Metrópolis building. Filmed in The Day of the Beast and in the empty-street dawn of Open Your Eyes.",
+            "latitude": 40.42,
+            "longitude": -3.7058,
+            "themes": [
+                "landmark",
+                "film",
+                "architecture"
+            ],
+            "films": [
+                "The Day of the Beast",
+                "Open Your Eyes"
+            ],
+            "image": null
+        },
+        {
+            "key": "madrid-puerta-del-sol",
+            "city": "madrid",
+            "name": "Puerta del Sol",
+            "description": "Kilometre zero of Spain's road network and the Bear and Strawberry Tree statue, the symbol of the city.",
+            "latitude": 40.4169,
+            "longitude": -3.7033,
+            "themes": [
+                "landmark",
+                "film",
+                "history"
+            ],
+            "films": [
+                "May God Save Us"
+            ],
+            "image": null
+        },
+        {
+            "key": "madrid-circulo-de-bellas-artes",
+            "city": "madrid",
+            "name": "Círculo de Bellas Artes rooftop",
+            "description": "Rooftop terrace (paid lift) with one of the best views over the centre. The rooftop panorama in Women on the Verge of a Nervous Breakdown was shot from here.",
+            "latitude": 40.4184,
+            "longitude": -3.6968,
+            "themes": [
+                "film",
+                "architecture",
+                "experience"
+            ],
+            "films": [
+                "Women on the Verge of a Nervous Breakdown"
+            ],
+            "image": null
+        },
+        {
+            "key": "madrid-plaza-de-cibeles",
+            "city": "madrid",
+            "name": "Plaza de Cibeles",
+            "description": "The Cibeles fountain and Palacio de Cibeles, the city hall with a viewing terrace at the top.",
+            "latitude": 40.4193,
+            "longitude": -3.6926,
+            "themes": [
+                "landmark",
+                "architecture",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-puerta-de-alcala",
+            "city": "madrid",
+            "name": "Puerta de Alcalá",
+            "description": "Neoclassical triumphal gate from 1778 at the entrance to the Retiro.",
+            "latitude": 40.42,
+            "longitude": -3.6884,
+            "themes": [
+                "landmark",
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-retiro-estanque-grande",
+            "city": "madrid",
+            "name": "Retiro Park: Great Pond",
+            "description": "The large boating lake with the Alfonso XII colonnade monument, the centre of Retiro Park.",
+            "latitude": 40.4152,
+            "longitude": -3.6845,
+            "themes": [
+                "landmark",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-palacio-de-cristal",
+            "city": "madrid",
+            "name": "Palacio de Cristal",
+            "description": "Glass-and-iron pavilion from 1887 beside a pond in the Retiro, now an exhibition space of the Reina Sofía museum.",
+            "latitude": 40.4131,
+            "longitude": -3.6826,
+            "themes": [
+                "architecture",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-angel-caido",
+            "city": "madrid",
+            "name": "Fountain of the Fallen Angel",
+            "description": "One of the few public monuments to Lucifer in the world, said to stand 666 m above sea level. The finale of The Day of the Beast takes place here.",
+            "latitude": 40.4109,
+            "longitude": -3.682,
+            "themes": [
+                "film",
+                "unusual",
+                "experience"
+            ],
+            "films": [
+                "The Day of the Beast"
+            ],
+            "image": null
+        },
+        {
+            "key": "madrid-museo-del-prado",
+            "city": "madrid",
+            "name": "Prado Museum",
+            "description": "Seen from outside today: the façade and the Paseo del Prado boulevard, with the Velázquez statue at the entrance.",
+            "latitude": 40.4138,
+            "longitude": -3.6921,
+            "themes": [
+                "landmark",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-museo-reina-sofia",
+            "city": "madrid",
+            "name": "Reina Sofía Museum",
+            "description": "Home of Picasso's Guernica. In Jarmusch's The Limits of Control the hitman walks in here; outside are Jean Nouvel's glass lifts.",
+            "latitude": 40.408,
+            "longitude": -3.6946,
+            "themes": [
+                "film",
+                "architecture",
+                "experience"
+            ],
+            "films": [
+                "The Limits of Control"
+            ],
+            "image": null
+        },
+        {
+            "key": "madrid-atocha-station",
+            "city": "madrid",
+            "name": "Madrid Atocha Station",
+            "description": "A tropical garden under the iron vaults of the old station hall. The day's walk ends here.",
+            "latitude": 40.4066,
+            "longitude": -3.6892,
+            "themes": [
+                "architecture",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-museo-cerralbo",
+            "city": "madrid",
+            "name": "Cerralbo Museum",
+            "description": "A marquis's mansion left as it was in 1922: paintings, weapons and crystal up to the ceiling. Near Plaza de España and Debod.",
+            "latitude": 40.4243,
+            "longitude": -3.7148,
+            "themes": [
+                "history",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-san-antonio-de-los-alemanes",
+            "city": "madrid",
+            "name": "San Antonio de los Alemanes",
+            "description": "A tiny oval church whose walls and dome are entirely covered in Baroque frescoes. Near Gran Vía and Callao.",
+            "latitude": 40.4223,
+            "longitude": -3.7028,
+            "themes": [
+                "architecture",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-casa-de-las-siete-chimeneas",
+            "city": "madrid",
+            "name": "House of the Seven Chimneys",
+            "description": "16th-century house where a woman's skeleton was found inside a wall — supposedly Philip II's lover, whose ghost is said to walk the roof. Near Cibeles.",
+            "latitude": 40.4198,
+            "longitude": -3.6968,
+            "themes": [
+                "history",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-mirador-alfonso-xii",
+            "city": "madrid",
+            "name": "Alfonso XII Monument viewpoint",
+            "description": "You can climb into the colonnade above the Retiro pond for a view over the whole park and the centre.",
+            "latitude": 40.418,
+            "longitude": -3.6835,
+            "themes": [
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "madrid-jardin-del-principe-de-anglona",
+            "city": "madrid",
+            "name": "Prince of Anglona Garden",
+            "description": "A tiny walled 18th-century garden — step inside and the city disappears. Near the Royal Palace and La Latina.",
+            "latitude": 40.4118,
+            "longitude": -3.7112,
+            "themes": [
+                "history",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-bauhaus-archiv-temporary",
+            "city": "berlin",
+            "name": "Temporary Bauhaus-Archiv and Bauhaus Shop",
+            "description": "The Bauhaus-Archiv's temporary home with the official Bauhaus shop — a quick design stop to start the day.",
+            "latitude": 52.510912,
+            "longitude": 13.32267,
+            "themes": [
+                "architecture",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-bahnhof-zoo",
+            "city": "berlin",
+            "name": "Bahnhof Zoologischer Garten",
+            "description": "West Berlin's old main station, the setting of Christiane F.",
+            "latitude": 52.508588,
+            "longitude": 13.33424,
+            "themes": [
+                "film",
+                "history"
+            ],
+            "films": [
+                "Christiane F. (1981)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-kaiser-wilhelm-gedaechtniskirche",
+            "city": "berlin",
+            "name": "Kaiser Wilhelm Memorial Church",
+            "description": "The war-damaged church tower on Breitscheidplatz, a location in Wings of Desire.",
+            "latitude": 52.504968,
+            "longitude": 13.335294,
+            "themes": [
+                "landmark",
+                "film",
+                "history"
+            ],
+            "films": [
+                "Wings of Desire (1987)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-lego-store",
+            "city": "berlin",
+            "name": "LEGO Store Berlin",
+            "description": "A quick stop to collect a stamp in the LEGO Passport.",
+            "latitude": 52.503621,
+            "longitude": 13.338765,
+            "themes": [
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-shell-haus",
+            "city": "berlin",
+            "name": "Shell-Haus",
+            "description": "Classic modernist office building — worth the detour for the façade alone.",
+            "latitude": 52.506059,
+            "longitude": 13.362988,
+            "themes": [
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-bendlerblock",
+            "city": "berlin",
+            "name": "Bendlerblock (German Resistance Memorial Center)",
+            "description": "The courtyard where Stauffenberg and his fellow conspirators were shot after the 20 July 1944 plot.",
+            "latitude": 52.507605,
+            "longitude": 13.362986,
+            "themes": [
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-neue-nationalgalerie",
+            "city": "berlin",
+            "name": "Neue Nationalgalerie",
+            "description": "Mies van der Rohe's glass-and-steel gallery; walk around the building from outside.",
+            "latitude": 52.507041,
+            "longitude": 13.367621,
+            "themes": [
+                "architecture",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-staatsbibliothek",
+            "city": "berlin",
+            "name": "Berlin State Library (Potsdamer Straße)",
+            "description": "The State Library on Potsdamer Straße, a location in Wings of Desire.",
+            "latitude": 52.50737,
+            "longitude": 13.370841,
+            "themes": [
+                "film",
+                "architecture"
+            ],
+            "films": [
+                "Wings of Desire (1987)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-holocaust-memorial",
+            "city": "berlin",
+            "name": "Memorial to the Murdered Jews of Europe",
+            "description": "Walk through the field of concrete stelae. Marked as a mandatory stop.",
+            "latitude": 52.513873,
+            "longitude": 13.378735,
+            "themes": [
+                "landmark",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-hansa-studios",
+            "city": "berlin",
+            "name": "Hansa Studios",
+            "description": "Recording studio by the former Wall: Bowie's \"Heroes\", plus Iggy Pop, Eno, Nick Cave, Depeche Mode and U2.",
+            "latitude": 52.506266,
+            "longitude": 13.377013,
+            "themes": [
+                "history",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-topography-of-terror",
+            "city": "berlin",
+            "name": "Topography of Terror",
+            "description": "Site of the former Gestapo and SS headquarters; walk through the grounds and along a surviving stretch of the Berlin Wall.",
+            "latitude": 52.506214,
+            "longitude": 13.384155,
+            "themes": [
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-victoria-spaeti",
+            "city": "berlin",
+            "name": "Victoria late-night shop (Späti)",
+            "description": "The real Späti from the single-take film Victoria; its actual owner played himself.",
+            "latitude": 52.503577,
+            "longitude": 13.390787,
+            "themes": [
+                "film",
+                "unusual"
+            ],
+            "films": [
+                "Victoria (2015)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-anhalter-bahnhof",
+            "city": "berlin",
+            "name": "Anhalter Bahnhof ruin",
+            "description": "A single surreal fragment of façade is all that remains of the vast pre-war terminus. Emigrant and Kindertransport trains left from here — and, during the war, deportation trains.",
+            "latitude": 52.503678,
+            "longitude": 13.382522,
+            "themes": [
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-platz-der-luftbruecke",
+            "city": "berlin",
+            "name": "Platz der Luftbrücke U-Bahn station",
+            "description": "The station and underground passage from the famous Isabelle Adjani scene in Possession. Not a museum — recognise it and walk on.",
+            "latitude": 52.486084,
+            "longitude": 13.385951,
+            "themes": [
+                "film",
+                "unusual"
+            ],
+            "films": [
+                "Possession (1981)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-tempelhofer-feld",
+            "city": "berlin",
+            "name": "Tempelhofer Feld",
+            "description": "The former Tempelhof airport, one of the largest open spaces in the city. Step onto the field, take in the scale of the runways and carry on.",
+            "latitude": 52.474419,
+            "longitude": 13.402601,
+            "themes": [
+                "history",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-schwerbelastungskoerper",
+            "city": "berlin",
+            "name": "Schwerbelastungskörper (Germania test load)",
+            "description": "12,000 tonnes of concrete poured to test whether Berlin's soil could carry the giant triumphal arch planned for the Nazi capital 'Germania'. Grounds have limited opening hours.",
+            "latitude": 52.484019,
+            "longitude": 13.371613,
+            "themes": [
+                "history",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-pallasbunker-pallasseum",
+            "city": "berlin",
+            "name": "Pallasbunker and Pallasseum",
+            "description": "A 1943–45 bunker that could not be demolished, so the 1970s Pallasseum housing block was built right over it on stilts.",
+            "latitude": 52.494206,
+            "longitude": 13.358685,
+            "themes": [
+                "architecture",
+                "history",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-stasi-headquarters",
+            "city": "berlin",
+            "name": "Former Stasi Headquarters (Normannenstraße)",
+            "description": "The vast administrative complex of the GDR Ministry for State Security and a real location of The Lives of Others. The museum is optional — walking through the Campus für Demokratie is enough.",
+            "latitude": 52.51528,
+            "longitude": 13.487664,
+            "themes": [
+                "film",
+                "history"
+            ],
+            "films": [
+                "The Lives of Others"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-frankfurter-tor",
+            "city": "berlin",
+            "name": "Frankfurter Tor",
+            "description": "Monumental towers that open the grandest Stalinist stretch of Karl-Marx-Allee. The area is also linked to street scenes in The Lives of Others.",
+            "latitude": 52.515818,
+            "longitude": 13.453974,
+            "themes": [
+                "film",
+                "architecture",
+                "history"
+            ],
+            "films": [
+                "The Lives of Others"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-cafe-sibylle",
+            "city": "berlin",
+            "name": "Café Sibylle",
+            "description": "A short coffee stop right on Karl-Marx-Allee, with a small exhibition on the history of Stalinallee.",
+            "latitude": 52.517183,
+            "longitude": 13.436985,
+            "themes": [
+                "history",
+                "local_food"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-strausberger-platz",
+            "city": "berlin",
+            "name": "Strausberger Platz",
+            "description": "One of the most ceremonial ensembles of socialist Berlin and a filming location of Good Bye, Lenin!",
+            "latitude": 52.518098,
+            "longitude": 13.431526,
+            "themes": [
+                "film",
+                "architecture",
+                "history"
+            ],
+            "films": [
+                "Good Bye, Lenin! (2003)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-kino-international-cafe-moskau",
+            "city": "berlin",
+            "name": "Kino International and Café Moskau",
+            "description": "Two near-neighbours from a different 1960s East Berlin: instead of Stalinist pomp — glass, mosaics and light modernist volumes.",
+            "latitude": 52.520682,
+            "longitude": 13.423045,
+            "themes": [
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-karl-marx-allee-24-flying-lenin",
+            "city": "berlin",
+            "name": "Karl-Marx-Allee 24 — the flying Lenin",
+            "description": "Where Christiane steps out and sees the dismantled Lenin statue float past under a helicopter — one of the key images of Good Bye, Lenin!",
+            "latitude": 52.520095,
+            "longitude": 13.420543,
+            "themes": [
+                "film"
+            ],
+            "films": [
+                "Good Bye, Lenin! (2003)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-berolinastrasse-21-kerner-home",
+            "city": "berlin",
+            "name": "Berolinastraße 21 — the Kerner family home",
+            "description": "Exterior of the Kerner family's apartment block, around which much of the everyday world of Good Bye, Lenin! is built.",
+            "latitude": 52.522253,
+            "longitude": 13.419844,
+            "themes": [
+                "film"
+            ],
+            "films": [
+                "Good Bye, Lenin! (2003)"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-haus-des-lehrers",
+            "city": "berlin",
+            "name": "Haus des Lehrers",
+            "description": "Look up at 'Unser Leben', a 125-metre socialist mosaic frieze that wraps the building and depicts ideal life in the GDR. On Alexanderplatz.",
+            "latitude": 52.521267,
+            "longitude": 13.416258,
+            "themes": [
+                "architecture",
+                "history",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-hackesche-hoefe",
+            "city": "berlin",
+            "name": "Hackesche Höfe and Scheunenviertel",
+            "description": "Eight connected courtyards with Jugendstil façades in the old Spandauer Vorstadt / Scheunenviertel — easy to walk straight through.",
+            "latitude": 52.524001,
+            "longitude": 13.402501,
+            "themes": [
+                "architecture",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "berlin-claerchens-ballhaus",
+            "city": "berlin",
+            "name": "Clärchens Ballhaus",
+            "description": "Historic dance hall that stood in for a Paris café in Tarantino's Inglourious Basterds.",
+            "latitude": 52.526614,
+            "longitude": 13.396864,
+            "themes": [
+                "film",
+                "history",
+                "local_food"
+            ],
+            "films": [
+                "Inglourious Basterds"
+            ],
+            "image": null
+        },
+        {
+            "key": "berlin-berlin-wall-memorial",
+            "city": "berlin",
+            "name": "Berlin Wall Memorial (Bernauer Straße)",
+            "description": "Not the East Side Gallery: here the logic of the border itself is preserved — the former death strip, wall segments and the street where in 1961 house façades literally became the border.",
+            "latitude": 52.5353,
+            "longitude": 13.389554,
+            "themes": [
+                "landmark",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-hauptbahnhof",
+            "city": "hamburg",
+            "name": "Hamburg Central Station",
+            "description": "Start of the walk.",
+            "latitude": 53.552984,
+            "longitude": 10.006757,
+            "themes": [
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-rathaus",
+            "city": "hamburg",
+            "name": "Rathausmarkt and Hamburg City Hall",
+            "description": "The main city square and town hall — a quick pass without a separate stop.",
+            "latitude": 53.550329,
+            "longitude": 9.992566,
+            "themes": [
+                "landmark",
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-nikolaifleet",
+            "city": "hamburg",
+            "name": "Nikolaifleet",
+            "description": "One of the most atmospheric old canals in the centre.",
+            "latitude": 53.54651,
+            "longitude": 9.992339,
+            "themes": [
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-deichstrasse",
+            "city": "hamburg",
+            "name": "Deichstraße",
+            "description": "Historic houses on the canal — much more interesting than an ordinary walk through the centre.",
+            "latitude": 53.545711,
+            "longitude": 9.98702,
+            "themes": [
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-chilehaus",
+            "city": "hamburg",
+            "name": "Chilehaus and Kontorhaus District",
+            "description": "Expressionist brick architecture and the famous ship's-bow corner of the Chilehaus.",
+            "latitude": 53.548269,
+            "longitude": 10.001909,
+            "themes": [
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-speicherstadt",
+            "city": "hamburg",
+            "name": "Speicherstadt",
+            "description": "Red-brick warehouses, canals and bridges.",
+            "latitude": 53.544015,
+            "longitude": 9.986979,
+            "themes": [
+                "landmark",
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-magellan-terrassen",
+            "city": "hamburg",
+            "name": "Magellan Terraces",
+            "description": "HafenCity and views over the water; a good point to begin the walk along the Elbe.",
+            "latitude": 53.542403,
+            "longitude": 9.992564,
+            "themes": [
+                "architecture",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-elbphilharmonie",
+            "city": "hamburg",
+            "name": "Elbphilharmonie",
+            "description": "The city's main modern symbol — seen from outside.",
+            "latitude": 53.541292,
+            "longitude": 9.984206,
+            "themes": [
+                "landmark",
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-traditionsschiffhafen",
+            "city": "hamburg",
+            "name": "Traditionsschiffhafen",
+            "description": "A small harbour full of old historic vessels — a less obvious stop.",
+            "latitude": 53.541943,
+            "longitude": 9.985643,
+            "themes": [
+                "history",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-landungsbruecken",
+            "city": "hamburg",
+            "name": "St. Pauli Landungsbrücken",
+            "description": "The classic view over the port and the Elbe. Planned food stop: a Fischbrötchen here (for example at Brücke 10) — try Matjes, Bismarck herring, smoked fish or North Sea shrimp.",
+            "latitude": 53.546233,
+            "longitude": 9.971144,
+            "themes": [
+                "landmark",
+                "local_food",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-alter-elbtunnel",
+            "city": "hamburg",
+            "name": "Old Elbe Tunnel",
+            "description": "Walk under the Elbe on foot — one of the most unusual free parts of the route.",
+            "latitude": 53.54587,
+            "longitude": 9.9666,
+            "themes": [
+                "architecture",
+                "history",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-st-michaelis",
+            "city": "hamburg",
+            "name": "St. Michael's Church (Michel)",
+            "description": "Hamburg's main historic church; we walk past.",
+            "latitude": 53.548428,
+            "longitude": 9.978889,
+            "themes": [
+                "landmark",
+                "architecture"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-zum-goldenen-handschuh",
+            "city": "hamburg",
+            "name": "Zum Goldenen Handschuh",
+            "description": "The real bar from The Golden Glove. The film is a bonus — the place is interesting in its own right.",
+            "latitude": 53.550013,
+            "longitude": 9.961109,
+            "themes": [
+                "film",
+                "history",
+                "unusual"
+            ],
+            "films": [
+                "The Golden Glove"
+            ],
+            "image": null
+        },
+        {
+            "key": "hamburg-grosse-freiheit",
+            "city": "hamburg",
+            "name": "Große Freiheit",
+            "description": "The street of St. Pauli nightlife history and the early Beatles.",
+            "latitude": 53.55237,
+            "longitude": 9.958154,
+            "themes": [
+                "history",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-beatles-platz",
+            "city": "hamburg",
+            "name": "Beatles-Platz",
+            "description": "A small square that serves as a Beatles memorial.",
+            "latitude": 53.549908,
+            "longitude": 9.957331,
+            "themes": [
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-feldstrassenbunker",
+            "city": "hamburg",
+            "name": "Feldstraße Bunker",
+            "description": "A huge former military bunker with a modern extension on top.",
+            "latitude": 53.556546,
+            "longitude": 9.970424,
+            "themes": [
+                "architecture",
+                "history",
+                "unusual"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-karolinenviertel",
+            "city": "hamburg",
+            "name": "Karolinenviertel",
+            "description": "A lively alternative neighbourhood; walk through the side streets.",
+            "latitude": 53.558448,
+            "longitude": 9.97267,
+            "themes": [
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-schanzenviertel",
+            "city": "hamburg",
+            "name": "Schanzenviertel",
+            "description": "Bars, graffiti and a completely different side of the city.",
+            "latitude": 53.56211,
+            "longitude": 9.962886,
+            "themes": [
+                "local_food",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-dockland",
+            "city": "hamburg",
+            "name": "Dockland",
+            "description": "An unusual building on the water; a strong architecture stop with a view of the port.",
+            "latitude": 53.543002,
+            "longitude": 9.935499,
+            "themes": [
+                "architecture",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-grosse-elbstrasse",
+            "city": "hamburg",
+            "name": "Große Elbstraße",
+            "description": "Walk along the Elbe past fish restaurants and working-port atmosphere.",
+            "latitude": 53.544709,
+            "longitude": 9.949806,
+            "themes": [
+                "local_food",
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "hamburg-fischmarkt",
+            "city": "hamburg",
+            "name": "Hamburg Fish Market",
+            "description": "Finish by the water. If the market is open, a good place for local fish.",
+            "latitude": 53.54584,
+            "longitude": 9.951773,
+            "themes": [
+                "history",
+                "local_food"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "paris-louvre",
+            "city": "paris",
+            "name": "Louvre Museum",
+            "description": "The Louvre courtyard and galleries — the run through the museum in The Dreamers, the Winged Victory staircase in Funny Face and the pyramid of The Da Vinci Code.",
+            "latitude": 48.860611,
+            "longitude": 2.337644,
+            "themes": [
+                "landmark",
+                "film",
+                "architecture",
+                "experience"
+            ],
+            "films": [
+                "The Dreamers",
+                "Funny Face",
+                "The Da Vinci Code"
+            ],
+            "image": "paris/louvre-the-dreamers.jpg"
+        },
+        {
+            "key": "paris-pont-de-bir-hakeim",
+            "city": "paris",
+            "name": "Pont de Bir-Hakeim",
+            "description": "Two-level steel bridge with the metro running on top, where Last Tango in Paris opens.",
+            "latitude": 48.855513,
+            "longitude": 2.287657,
+            "themes": [
+                "film",
+                "architecture"
+            ],
+            "films": [
+                "Last Tango in Paris"
+            ],
+            "image": "paris/pont-de-bir-hakeim.jpg"
+        },
+        {
+            "key": "paris-saint-etienne-du-mont",
+            "city": "paris",
+            "name": "Saint-Étienne-du-Mont steps",
+            "description": "The church steps on the Montagne Sainte-Geneviève where the old car picks up Gil at midnight in Midnight in Paris.",
+            "latitude": 48.846539,
+            "longitude": 2.34809,
+            "themes": [
+                "film",
+                "architecture",
+                "history"
+            ],
+            "films": [
+                "Midnight in Paris"
+            ],
+            "image": "paris/saint-etienne-du-mont.jpg"
+        },
+        {
+            "key": "paris-square-louis-xvi",
+            "city": "paris",
+            "name": "Square Louis XVI",
+            "description": "Quiet square around the Expiatory Chapel, a location in Bertolucci's The Conformist.",
+            "latitude": 48.873749,
+            "longitude": 2.323024,
+            "themes": [
+                "film",
+                "history",
+                "experience"
+            ],
+            "films": [
+                "The Conformist"
+            ],
+            "image": "paris/square-louis-xvi.jpg"
+        },
+        {
+            "key": "paris-moulin-rouge",
+            "city": "paris",
+            "name": "Moulin Rouge",
+            "description": "The red windmill cabaret of Pigalle that gave its name to Baz Luhrmann's musical.",
+            "latitude": 48.884123,
+            "longitude": 2.332252,
+            "themes": [
+                "landmark",
+                "film",
+                "experience"
+            ],
+            "films": [
+                "Moulin Rouge!"
+            ],
+            "image": null
+        },
+        {
+            "key": "paris-cafe-des-deux-moulins",
+            "city": "paris",
+            "name": "Café des Deux Moulins",
+            "description": "The Montmartre café where Amélie works as a waitress.",
+            "latitude": 48.88492,
+            "longitude": 2.333624,
+            "themes": [
+                "film",
+                "local_food"
+            ],
+            "films": [
+                "Amélie"
+            ],
+            "image": "paris/cafe-des-deux-moulins.jpg"
+        },
+        {
+            "key": "paris-rue-foyatier",
+            "city": "paris",
+            "name": "Rue Foyatier stairs",
+            "description": "The long staircase up to Sacré-Cœur from the stair fight in John Wick.",
+            "latitude": 48.885256,
+            "longitude": 2.342411,
+            "themes": [
+                "film",
+                "unusual",
+                "experience"
+            ],
+            "films": [
+                "John Wick"
+            ],
+            "image": "paris/rue-foyatier.jpg"
+        },
+        {
+            "key": "paris-pont-neuf",
+            "city": "paris",
+            "name": "Pont Neuf",
+            "description": "The oldest standing bridge in Paris, the setting of The Lovers on the Bridge (Les Amants du Pont-Neuf).",
+            "latitude": 48.856697,
+            "longitude": 2.340841,
+            "themes": [
+                "landmark",
+                "film",
+                "history"
+            ],
+            "films": [
+                "The Lovers on the Bridge"
+            ],
+            "image": "paris/pont-neuf.jpg"
+        },
+        {
+            "key": "paris-shakespeare-and-company",
+            "city": "paris",
+            "name": "Shakespeare and Company café",
+            "description": "The café of the Left Bank English bookshop where Before Sunset begins.",
+            "latitude": 48.852617,
+            "longitude": 2.347218,
+            "themes": [
+                "film",
+                "history",
+                "local_food"
+            ],
+            "films": [
+                "Before Sunset"
+            ],
+            "image": "paris/shakespeare-and-company.jpg"
+        },
+        {
+            "key": "paris-place-de-la-concorde",
+            "city": "paris",
+            "name": "Place de la Concorde",
+            "description": "The largest square in Paris, with the obelisk and fountains — the Paris fountain scene in The Devil Wears Prada.",
+            "latitude": 48.865633,
+            "longitude": 2.321236,
+            "themes": [
+                "landmark",
+                "film",
+                "history"
+            ],
+            "films": [
+                "The Devil Wears Prada"
+            ],
+            "image": "paris/place-de-la-concorde.jpg"
+        },
+        {
+            "key": "paris-caveau-de-la-huchette",
+            "city": "paris",
+            "name": "Caveau de la Huchette",
+            "description": "Historic jazz cellar in the Latin Quarter, a location in La La Land.",
+            "latitude": 48.852763,
+            "longitude": 2.346282,
+            "themes": [
+                "film",
+                "history",
+                "experience"
+            ],
+            "films": [
+                "La La Land"
+            ],
+            "image": "paris/caveau-de-la-huchette.jpg"
+        },
+        {
+            "key": "paris-aurouze",
+            "city": "paris",
+            "name": "Aurouze pest-control shop",
+            "description": "Old pest-control shop with stuffed rats hanging in the window — the shop window in Ratatouille.",
+            "latitude": 48.859431,
+            "longitude": 2.347238,
+            "themes": [
+                "film",
+                "unusual"
+            ],
+            "films": [
+                "Ratatouille"
+            ],
+            "image": "paris/aurouze.jpg"
+        },
+        {
+            "key": "paris-cafe-de-flore",
+            "city": "paris",
+            "name": "Café de Flore",
+            "description": "Classic Saint-Germain café, a regular location in Emily in Paris.",
+            "latitude": 48.854159,
+            "longitude": 2.332605,
+            "themes": [
+                "film",
+                "history",
+                "local_food"
+            ],
+            "films": [
+                "Emily in Paris"
+            ],
+            "image": "paris/cafe-de-flore.jpg"
+        },
+        {
+            "key": "paris-tuileries-metro",
+            "city": "paris",
+            "name": "Tuileries metro station",
+            "description": "The metro platform from the 'Tuileries' segment of Paris, je t'aime.",
+            "latitude": 48.86427,
+            "longitude": 2.33018,
+            "themes": [
+                "film",
+                "unusual"
+            ],
+            "films": [
+                "Paris, je t'aime"
+            ],
+            "image": "paris/tuileries-metro.png"
+        },
+        {
+            "key": "paris-passerelle-senghor",
+            "city": "paris",
+            "name": "Passerelle Léopold-Sédar-Senghor",
+            "description": "Footbridge between the Tuileries and the Musée d'Orsay, a location in The Intouchables.",
+            "latitude": 48.861894,
+            "longitude": 2.324697,
+            "themes": [
+                "film",
+                "architecture"
+            ],
+            "films": [
+                "The Intouchables"
+            ],
+            "image": "paris/passerelle-senghor.jpg"
+        },
+        {
+            "key": "paris-lecoute-statue",
+            "city": "paris",
+            "name": "L'Écoute sculpture",
+            "description": "Henri de Miller's giant stone head resting on a hand, in front of Saint-Eustache — a location in La Haine.",
+            "latitude": 48.862985,
+            "longitude": 2.345136,
+            "themes": [
+                "film",
+                "unusual",
+                "experience"
+            ],
+            "films": [
+                "La Haine"
+            ],
+            "image": "paris/lecoute-statue.jpg"
+        },
+        {
+            "key": "paris-pont-alexandre-iii",
+            "city": "paris",
+            "name": "Pont Alexandre III",
+            "description": "The most ornate bridge in Paris, a key location in Luc Besson's Angel-A.",
+            "latitude": 48.8639,
+            "longitude": 2.313559,
+            "themes": [
+                "landmark",
+                "film",
+                "architecture"
+            ],
+            "films": [
+                "Angel-A"
+            ],
+            "image": "paris/pont-alexandre-iii.jpg"
+        },
+        {
+            "key": "paris-pere-lachaise",
+            "city": "paris",
+            "name": "Père Lachaise Cemetery",
+            "description": "The city's most famous cemetery, the setting of the 'Père-Lachaise' segment of Paris, je t'aime.",
+            "latitude": 48.861472,
+            "longitude": 2.393473,
+            "themes": [
+                "film",
+                "history",
+                "experience"
+            ],
+            "films": [
+                "Paris, je t'aime"
+            ],
+            "image": "paris/pere-lachaise.png"
+        },
+        {
+            "key": "paris-palais-royal",
+            "city": "paris",
+            "name": "Palais-Royal",
+            "description": "Palace gardens and arcades with the Buren columns, a location in Mission: Impossible.",
+            "latitude": 48.863757,
+            "longitude": 2.337126,
+            "themes": [
+                "film",
+                "architecture",
+                "history",
+                "experience"
+            ],
+            "films": [
+                "Mission: Impossible"
+            ],
+            "image": "paris/palais-royal.jpg"
+        },
+        {
+            "key": "paris-36-quai-des-orfevres",
+            "city": "paris",
+            "name": "36 Quai des Orfèvres",
+            "description": "The historic Paris police headquarters on Île de la Cité that gives Olivier Marchal's thriller its name.",
+            "latitude": 48.855753,
+            "longitude": 2.344506,
+            "themes": [
+                "film",
+                "history"
+            ],
+            "films": [
+                "36 Quai des Orfèvres"
+            ],
+            "image": null
+        },
+        {
+            "key": "paris-notre-dame",
+            "city": "paris",
+            "name": "Notre-Dame Cathedral",
+            "description": "The Gothic cathedral on Île de la Cité, home of The Hunchback of Notre Dame.",
+            "latitude": 48.852937,
+            "longitude": 2.35005,
+            "themes": [
+                "landmark",
+                "film",
+                "architecture",
+                "history"
+            ],
+            "films": [
+                "The Hunchback of Notre Dame"
+            ],
+            "image": "paris/notre-dame.jpg"
+        },
+        {
+            "key": "paris-arc-de-triomphe",
+            "city": "paris",
+            "name": "Arc de Triomphe",
+            "description": "The triumphal arch at the top of the Champs-Élysées, circled at speed in Taxi.",
+            "latitude": 48.873779,
+            "longitude": 2.295037,
+            "themes": [
+                "landmark",
+                "film",
+                "history"
+            ],
+            "films": [
+                "Taxi"
+            ],
+            "image": "paris/arc-de-triomphe.jpg"
+        },
+        {
+            "key": "paris-residence-rose-garden",
+            "city": "paris",
+            "name": "Residence Rose Garden",
+            "description": "Residential building used as a location in François Ozon's In the House.",
+            "latitude": 48.879,
+            "longitude": 2.149931,
+            "themes": [
+                "film"
+            ],
+            "films": [
+                "In the House"
+            ],
+            "image": "paris/residence-rose-garden.jpg"
+        },
+        {
+            "key": "paris-temple-de-la-sibylle",
+            "city": "paris",
+            "name": "Temple de la Sibylle (Buttes-Chaumont)",
+            "description": "Small round temple on a cliff top in the Parc des Buttes-Chaumont, with a view over north-east Paris.",
+            "latitude": 48.881104,
+            "longitude": 2.382959,
+            "themes": [
+                "film",
+                "architecture",
+                "experience"
+            ],
+            "films": [
+                "Amour"
+            ],
+            "image": "paris/temple-de-la-sibylle.png"
+        },
+        {
+            "key": "brussels-waffle-breakfast",
+            "city": "brussels",
+            "name": "Waffle breakfast stop",
+            "description": "The booklet's first stop: 'Time for breakfast. Ready for your first waffle?' — with a score card for crunch, sweetness, filling and taste.",
+            "latitude": 50.848277,
+            "longitude": 4.351101,
+            "themes": [
+                "local_food"
+            ],
+            "films": [],
+            "image": "brussels/waffle-breakfast.jpg"
+        },
+        {
+            "key": "brussels-zinneke-pis",
+            "city": "brussels",
+            "name": "Zinneke Pis",
+            "description": "Bronze of a dog cocking its leg — one of the three 'pissing' statues the booklet asks you to find.",
+            "latitude": 50.848918,
+            "longitude": 4.345655,
+            "themes": [
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": "brussels/zinneke-pis.jpg"
+        },
+        {
+            "key": "brussels-jeanneke-pis",
+            "city": "brussels",
+            "name": "Jeanneke Pis",
+            "description": "The squatting-girl counterpart of Manneken Pis, tucked into a dead-end alley — the second of the three statues.",
+            "latitude": 50.848833,
+            "longitude": 4.354234,
+            "themes": [
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": "brussels/jeanneke-pis.jpg"
+        },
+        {
+            "key": "brussels-manneken-pis",
+            "city": "brussels",
+            "name": "Manneken Pis",
+            "description": "The city's famous little bronze boy — the third of the three statues.",
+            "latitude": 50.84544,
+            "longitude": 4.349946,
+            "themes": [
+                "landmark",
+                "unusual",
+                "experience"
+            ],
+            "films": [],
+            "image": "brussels/manneken-pis.jpg"
+        },
+        {
+            "key": "brussels-mont-des-arts",
+            "city": "brussels",
+            "name": "Mont des Arts",
+            "description": "'Three views of one city' — the view from above: the terraced garden looking over the lower town.",
+            "latitude": 50.843872,
+            "longitude": 4.357378,
+            "themes": [
+                "experience"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "brussels-galeries-royales-saint-hubert",
+            "city": "brussels",
+            "name": "Royal Galleries of Saint-Hubert",
+            "description": "'Three views of one city' — the view through glass: the 19th-century glass-roofed shopping arcade.",
+            "latitude": 50.848257,
+            "longitude": 4.355404,
+            "themes": [
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "brussels-grand-place",
+            "city": "brussels",
+            "name": "Grand-Place",
+            "description": "'Three views of one city' — the view in the dark: the guild-house square at night.",
+            "latitude": 50.846852,
+            "longitude": 4.35246,
+            "themes": [
+                "landmark",
+                "architecture",
+                "history"
+            ],
+            "films": [],
+            "image": "brussels/grand-place.jpg"
+        },
+        {
+            "key": "bruges-breakfast-stop",
+            "city": "bruges",
+            "name": "Breakfast stop",
+            "description": "Booklet meal page ('one normal one for me, because I'm normal' — an In Bruges quote): breakfast.",
+            "latitude": 51.207301,
+            "longitude": 3.220214,
+            "themes": [
+                "local_food"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "bruges-lunch-stop",
+            "city": "bruges",
+            "name": "Lunch stop",
+            "description": "Booklet meal page: lunch.",
+            "latitude": 51.206137,
+            "longitude": 3.220313,
+            "themes": [
+                "local_food"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "bruges-dinner-stop",
+            "city": "bruges",
+            "name": "Dinner stop",
+            "description": "Booklet meal page: dinner.",
+            "latitude": 51.210445,
+            "longitude": 3.222877,
+            "themes": [
+                "local_food"
+            ],
+            "films": [],
+            "image": null
+        },
+        {
+            "key": "bruges-let-it-go-stop",
+            "city": "bruges",
+            "name": "'Let it go' stop",
+            "description": "Booklet clue in the spirit of In Bruges: 'Let go here of everything that troubled you.'",
+            "latitude": 51.211749,
+            "longitude": 3.225572,
+            "themes": [
+                "unusual"
+            ],
+            "films": [],
+            "image": "bruges/let-it-go-stop.jpg"
+        },
+        {
+            "key": "bruges-belfry",
+            "city": "bruges",
+            "name": "Belfry of Bruges",
+            "description": "The medieval bell tower on the Markt. 'In the film not everyone climbs to the top — someone stays below.'",
+            "latitude": 51.208299,
+            "longitude": 3.224772,
+            "themes": [
+                "landmark",
+                "film",
+                "history",
+                "experience"
+            ],
+            "films": [
+                "In Bruges"
+            ],
+            "image": null
+        },
+        {
+            "key": "bruges-basilica-of-the-holy-blood",
+            "city": "bruges",
+            "name": "Basilica of the Holy Blood",
+            "description": "Small basilica on the Burg that keeps the relic of the Holy Blood ('not a violet, and not basil' is the booklet's pun). The booklet points here twice.",
+            "latitude": 51.208416,
+            "longitude": 3.226477,
+            "themes": [
+                "film",
+                "architecture",
+                "history"
+            ],
+            "films": [
+                "In Bruges"
+            ],
+            "image": "bruges/basilica-of-the-holy-blood.jpg"
+        },
+        {
+            "key": "bruges-canal-boat-ride",
+            "city": "bruges",
+            "name": "Canal boat ride",
+            "description": "'So, what do you like? Riding around and looking at things?' — a canal boat ride from the landings near Rozenhoedkaai.",
+            "latitude": 51.207959,
+            "longitude": 3.227538,
+            "themes": [
+                "film",
+                "unusual",
+                "experience"
+            ],
+            "films": [
+                "In Bruges"
+            ],
+            "image": null
+        },
+        {
+            "key": "bruges-groeningemuseum",
+            "city": "bruges",
+            "name": "Groeningemuseum",
+            "description": "Fine-art museum with Hieronymus Bosch's Last Judgment, the painting Ray and Ken study in In Bruges. 'Not Magritte — and there's nothing scary about that.'",
+            "latitude": 51.205584,
+            "longitude": 3.226733,
+            "themes": [
+                "film",
+                "experience"
+            ],
+            "films": [
+                "In Bruges"
+            ],
+            "image": "bruges/groeningemuseum.jpg"
+        },
+        {
+            "key": "bruges-wait-for-the-call-stop",
+            "city": "bruges",
+            "name": "'Wait for the call' stop",
+            "description": "In Bruges reference — Ken waiting for Harry's phone call.",
+            "latitude": 51.207856,
+            "longitude": 3.226669,
+            "themes": [
+                "film",
+                "unusual"
+            ],
+            "films": [
+                "In Bruges"
+            ],
+            "image": null
+        }
+    ]
+}

@@ -8,6 +8,7 @@ use App\Models\Place;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PlaceTest extends TestCase
@@ -75,12 +76,14 @@ class PlaceTest extends TestCase
 
     public function test_seeder_creates_the_expected_places_for_each_city_and_itinerary()
     {
+        Storage::fake('public');
         $this->seed(DatabaseSeeder::class);
 
+        // The real travel data seeded after the samples is covered by RealTravelSeederTest.
         $this->assertSame([
             'Barcelona' => ['Sagrada Família', 'Park Güell', 'Casa Batlló', 'Barcelona Cathedral'],
             'Bangkok' => ['Grand Palace', 'Wat Pho', 'Wat Arun'],
-        ], City::with('places')->orderBy('id')->get()
+        ], City::with('places')->orderBy('id')->take(2)->get()
             ->mapWithKeys(fn (City $city) => [$city->name => $city->places->sortBy('id')->pluck('name')->all()])
             ->all());
 
@@ -88,13 +91,14 @@ class PlaceTest extends TestCase
             'Sample: A Weekend in Barcelona' => ['Sagrada Família', 'Park Güell', 'Casa Batlló'],
             'Sample: Barcelona on Foot' => ['Casa Batlló', 'Barcelona Cathedral'],
             'Sample: First Day in Bangkok' => ['Grand Palace', 'Wat Pho', 'Wat Arun'],
-        ], Itinerary::with('places')->orderBy('id')->get()
+        ], Itinerary::with('places')->orderBy('id')->take(3)->get()
             ->mapWithKeys(fn (Itinerary $itinerary) => [$itinerary->title => $itinerary->places->sortBy('id')->pluck('name')->all()])
             ->all());
     }
 
     public function test_seeded_itineraries_only_contain_places_from_their_own_city()
     {
+        Storage::fake('public');
         $this->seed(DatabaseSeeder::class);
 
         foreach (Itinerary::with('places')->get() as $itinerary) {

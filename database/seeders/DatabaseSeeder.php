@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->admin()->create([
             'name' => 'Admin',
-            'email' => 'admin@example.com',
+            'email' => 'admin@admin.com',
         ]);
 
         $barcelona = City::create(['name' => 'Barcelona', 'user_id' => $user->id]);
@@ -89,5 +89,8 @@ class DatabaseSeeder extends Seeder
         $barcelonaWeekend->places()->attach([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
         $barcelonaOnFoot->places()->attach([$casaBatllo->id, $barcelonaCathedral->id]);
         $bangkokFirstDay->places()->attach([$grandPalace->id, $watPho->id, $watArun->id]);
+
+        // Real routes come after the samples, so they are the newest itineraries on the welcome page.
+        $this->call(RealTravelSeeder::class);
     }
 }

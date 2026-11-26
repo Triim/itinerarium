@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminUserTest extends TestCase
@@ -89,19 +90,37 @@ class AdminUserTest extends TestCase
 
     public function test_the_seeder_creates_one_administrator_and_keeps_the_sample_data()
     {
+        Storage::fake('public');
         $this->seed(DatabaseSeeder::class);
 
         $admin = User::where('is_admin', true)->sole();
         $this->assertSame('Admin', $admin->name);
-        $this->assertSame('admin@example.com', $admin->email);
+        $this->assertSame('admin@admin.com', $admin->email);
         $this->assertTrue(Hash::check('password', $admin->password));
 
+        // 3 sample and 7 real itineraries, 2 sample and 6 real cities, 7 sample and 111 real places.
         $testUser = User::where('email', 'test@example.com')->sole();
         $this->assertFalse($testUser->is_admin);
-        $this->assertSame(3, $testUser->itineraries()->count());
-        $this->assertSame(2, City::count());
-        $this->assertSame(7, Place::count());
-        $this->assertDatabaseCount('itineraries', 3);
-        $this->assertDatabaseCount('itinerary_place', 8);
+        $this->assertSame(2, User::count());
+        $this->assertSame(10, $testUser->itineraries()->count());
+        $this->assertSame(8, City::count());
+        $this->assertSame(118, Place::count());
+        $this->assertDatabaseCount('itineraries', 10);
+        $this->assertDatabaseCount('itinerary_place', 8 + 112);
+    }
+
+    public function test_the_seeded_administrator_can_log_in_and_manage_other_users_records()
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $this->post('/login', ['email' => 'admin@admin.com', 'password' => 'password'])
+            ->assertRedirect(route('dashboard', absolute: false));
+        $this->assertAuthenticatedAs($admin = User::where('email', 'admin@admin.com')->sole());
+
+        $itinerary = Itinerary::where('title', 'Hamburg on foot in eight hours')->sole();
+        $this->assertNotSame($admin->id, $itinerary->user_id);
+        $this->assertTrue($itinerary->canManage($admin));
+        $this->get(route('userzone.itineraries.edit', $itinerary))->assertOk();
     }
 }
