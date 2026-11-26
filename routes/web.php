@@ -13,14 +13,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
-        'itineraries' => Itinerary::select(['id', 'title', 'city_id', 'user_id'])
-            ->with(['city:id,name', 'user:id,name'])
-            ->withCount('places')
-            ->latest()
-            ->orderByDesc('id')
-            ->take(3)
-            ->get()
-            ->makeHidden(['city_id', 'user_id']),
+        'itineraries' => Itinerary::recentForWelcome(),
     ]);
 })->name('home');
 

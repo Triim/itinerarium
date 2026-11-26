@@ -40,6 +40,9 @@ class ItineraryController extends Controller
 
         $itinerary->places()->sync($validated['place_ids'] ?? []);
 
+        // sync() fires no model events, and the saved event ran before it changed places_count.
+        Itinerary::forgetWelcomeCache();
+
         return redirect()->route('userzone.itineraries.index');
     }
 
@@ -71,6 +74,9 @@ class ItineraryController extends Controller
         $itinerary->update(Arr::except($validated, 'place_ids'));
 
         $itinerary->places()->sync($validated['place_ids'] ?? []);
+
+        // sync() fires no model events, and the saved event ran before it changed places_count.
+        Itinerary::forgetWelcomeCache();
 
         return redirect()->route('userzone.itineraries.index');
     }

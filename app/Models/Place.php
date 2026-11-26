@@ -18,6 +18,12 @@ class Place extends Model implements HasMedia
 
     protected $fillable = ['name', 'description', 'latitude', 'longitude', 'city_id'];
 
+    protected static function booted(): void
+    {
+        // The database cascade removes its itinerary links, changing places_count.
+        static::deleted(fn () => Itinerary::forgetWelcomeCache());
+    }
+
     protected function casts(): array
     {
         return [

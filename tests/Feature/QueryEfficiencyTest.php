@@ -100,6 +100,20 @@ class QueryEfficiencyTest extends TestCase
         $this->assertSame(array_fill_keys([1, 2, 3, 10], $counts[1]), $counts);
     }
 
+    public function test_a_warm_home_page_request_skips_the_itinerary_queries()
+    {
+        $viewer = User::factory()->create();
+        Itinerary::factory()->count(3)->hasAttached(Place::factory()->count(2))->create();
+
+        foreach ([null, $viewer] as $user) {
+            $cold = $this->homeQueries($user, true);
+            $warm = $this->homeQueries($user, false);
+
+            $this->assertNotEmpty($this->welcomeQueries($cold));
+            $this->assertSame([], $this->welcomeQueries($warm));
+        }
+    }
+
     private function placeWithImage(City $city): Place
     {
         $place = Place::factory()->for($city)->create();
@@ -110,6 +124,18 @@ class QueryEfficiencyTest extends TestCase
 
     private function countHomeQueries(?User $user, int $expectedCards): int
     {
+        return count($this->homeQueries($user, true, $expectedCards));
+    }
+
+    /**
+     * Query log of one home page request; a cold request starts with an empty Welcome cache.
+     */
+    private function homeQueries(?User $user, bool $cold, int $expectedCards = 3): array
+    {
+        if ($cold) {
+            Itinerary::forgetWelcomeCache();
+        }
+
         $this->app['auth']->forgetGuards();
         $request = $user ? $this->actingAs($user) : $this;
 
@@ -120,14 +146,27 @@ class QueryEfficiencyTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('auth.user', fn ($authUser) => $authUser?->offsetGet('id') === $user?->id)
                 ->has('itineraries', $expectedCards));
-        $count = count(DB::getQueryLog());
+        $queries = DB::getQueryLog();
         DB::disableQueryLog();
 
-        return $count;
+        return $queries;
+    }
+
+    /**
+     * The queries that build the Welcome cards: itineraries with place counts, cities and authors.
+     */
+    private function welcomeQueries(array $queries): array
+    {
+        return array_values(array_filter(
+            array_column($queries, 'query'),
+            fn ($sql) => preg_match('/from "(itineraries|cities|users)"/', $sql),
+        ));
     }
 
     private function countQueries(string $url, User $admin): int
     {
+        // Measure the home page cold, so the cache cannot hide queries that grow with the data.
+        Itinerary::forgetWelcomeCache();
         $request = str_starts_with($url, '/user/') ? $this->actingAs($admin) : $this;
 
         DB::flushQueryLog();

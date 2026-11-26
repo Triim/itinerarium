@@ -13,6 +13,15 @@ class City extends Model
 
     protected $fillable = ['name', 'user_id'];
 
+    protected static function booted(): void
+    {
+        static::updated(function (self $city) {
+            if ($city->wasChanged('name')) {
+                Itinerary::forgetWelcomeCache();
+            }
+        });
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

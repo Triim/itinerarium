@@ -34,6 +34,19 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected static function booted(): void
+    {
+        // Only the name is shown on Welcome cards; email or password changes keep the cache.
+        static::updated(function (self $user) {
+            if ($user->wasChanged('name')) {
+                Itinerary::forgetWelcomeCache();
+            }
+        });
+
+        // Deleting an account cascades to its itineraries in the database, without model events.
+        static::deleted(fn () => Itinerary::forgetWelcomeCache());
+    }
+
     /**
      * Get the attributes that should be cast.
      *
