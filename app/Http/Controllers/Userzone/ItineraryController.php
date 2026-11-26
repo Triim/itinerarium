@@ -23,7 +23,7 @@ class ItineraryController extends Controller
             'itineraries' => Itinerary::with(['city:id,name', 'user:id,name'])
                 ->unless($user->is_admin, fn ($query) => $query->where('user_id', $user->id))
                 ->orderBy('title')
-                ->get(['id', 'title', 'city_id', 'user_id']),
+                ->get(['id', 'title', 'city_id', 'user_id', 'status']),
         ]);
     }
 
@@ -47,13 +47,16 @@ class ItineraryController extends Controller
     }
 
     /**
-     * The public page already shows an itinerary, so the private resource route only checks access and sends the user there.
+     * The public page already shows a published itinerary, so the private resource route only checks access and sends the user there.
      */
     public function show(Request $request, Itinerary $itinerary): RedirectResponse
     {
         abort_unless($itinerary->canManage($request->user()), 403);
 
-        return redirect()->route('itineraries.show', $itinerary);
+        // Drafts and pending itineraries have no public page yet.
+        return $itinerary->status === Itinerary::PUBLISHED
+            ? redirect()->route('itineraries.show', $itinerary)
+            : redirect()->route('userzone.itineraries.edit', $itinerary);
     }
 
     public function edit(Request $request, Itinerary $itinerary): Response
@@ -80,7 +83,15 @@ class ItineraryController extends Controller
 
         $validated = $this->validated($request);
 
-        $itinerary->update(Arr::except($validated, 'place_ids'));
+        $itinerary->fill(Arr::except($validated, 'place_ids'));
+
+        // A pending review must cover the edited content, so the owner submits it again.
+        // A published itinerary stays published: approval controls only the first publication.
+        if ($itinerary->status === Itinerary::PENDING) {
+            $itinerary->status = Itinerary::DRAFT;
+        }
+
+        $itinerary->save();
 
         $itinerary->syncStops($validated['place_ids'] ?? []);
 

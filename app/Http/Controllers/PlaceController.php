@@ -17,7 +17,7 @@ class PlaceController extends Controller
             ->with(['places' => fn ($query) => $query
                 ->select(['id', 'name', 'city_id', 'themes'])
                 ->with('media')
-                ->withCount('itineraries')
+                ->withCount(['itineraries' => fn ($query) => $query->published()])
                 ->orderBy('name')])
             ->orderBy('name')
             ->get();
@@ -50,6 +50,7 @@ class PlaceController extends Controller
             ],
             'city' => $place->city->only(['id', 'name']),
             'itineraries' => $place->itineraries()
+                ->published()
                 ->with('user:id,name')
                 ->orderBy('title')
                 ->get(['itineraries.id', 'title', 'user_id']),

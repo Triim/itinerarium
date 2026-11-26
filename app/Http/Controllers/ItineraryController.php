@@ -13,6 +13,7 @@ class ItineraryController extends Controller
     {
         return Inertia::render('itineraries/index', [
             'itineraries' => Itinerary::select(['id', 'title', 'city_id', 'user_id'])
+                ->published()
                 ->with(['city:id,name', 'user:id,name'])
                 ->withCount('places')
                 ->orderBy('title')
@@ -27,6 +28,9 @@ class ItineraryController extends Controller
 
     public function show(Itinerary $itinerary): Response
     {
+        // Drafts and pending itineraries are managed in the Userzone, even by their owner.
+        abort_unless($itinerary->status === Itinerary::PUBLISHED, 404);
+
         $itinerary->load([
             'city:id,name',
             'user:id,name',

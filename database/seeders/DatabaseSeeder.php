@@ -80,9 +80,9 @@ class DatabaseSeeder extends Seeder
             'longitude' => 100.488919,
         ]);
 
-        $barcelonaWeekend = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: A Weekend in Barcelona']);
-        $barcelonaOnFoot = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: Barcelona on Foot']);
-        $bangkokFirstDay = Itinerary::factory()->for($user)->for($bangkok)->create(['title' => 'Sample: First Day in Bangkok']);
+        $barcelonaWeekend = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: A Weekend in Barcelona', 'status' => Itinerary::PUBLISHED]);
+        $barcelonaOnFoot = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: Barcelona on Foot', 'status' => Itinerary::PUBLISHED]);
+        $bangkokFirstDay = Itinerary::factory()->for($user)->for($bangkok)->create(['title' => 'Sample: First Day in Bangkok', 'status' => Itinerary::PUBLISHED]);
 
         $barcelonaWeekend->places()->attach([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
         $barcelonaOnFoot->places()->attach([$casaBatllo->id, $barcelonaCathedral->id]);

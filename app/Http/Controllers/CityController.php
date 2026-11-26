@@ -13,7 +13,7 @@ class CityController extends Controller
     {
         return Inertia::render('cities/index', [
             'cities' => City::select(['id', 'name'])
-                ->withCount(['itineraries', 'places'])
+                ->withCount(['itineraries' => fn ($query) => $query->published(), 'places'])
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -21,11 +21,12 @@ class CityController extends Controller
 
     public function show(City $city): Response
     {
-        $city->loadCount(['itineraries', 'places']);
+        $city->loadCount(['itineraries' => fn ($query) => $query->published(), 'places']);
 
         return Inertia::render('cities/show', [
             'city' => $city->only(['id', 'name', 'itineraries_count', 'places_count']),
             'itineraries' => $city->itineraries()
+                ->published()
                 ->select(['id', 'title', 'user_id'])
                 ->with('user:id,name')
                 ->withCount('places')

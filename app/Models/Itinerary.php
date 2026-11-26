@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,17 @@ class Itinerary extends Model
     /** Seconds the cached list is fresh, and the most it may be served stale while it refreshes. */
     public const WELCOME_CACHE_TTL = [60, 300];
 
-    protected $fillable = ['title', 'user_id', 'city_id'];
+    /** Publication states: the owner submits a draft, an administrator approves it. */
+    public const DRAFT = 'draft';
+
+    public const PENDING = 'pending';
+
+    public const PUBLISHED = 'published';
+
+    protected $fillable = ['title', 'user_id', 'city_id', 'status'];
+
+    /** Matches the database default, so a new itinerary is a draft before it is saved too. */
+    protected $attributes = ['status' => self::DRAFT];
 
     protected static function booted(): void
     {
@@ -26,11 +37,20 @@ class Itinerary extends Model
     }
 
     /**
-     * The three most recent itineraries as plain public card data, cached.
+     * Only published itineraries are shown on public pages.
+     */
+    public function scopePublished(Builder $query): void
+    {
+        $query->where('itineraries.status', self::PUBLISHED);
+    }
+
+    /**
+     * The three most recent published itineraries as plain public card data, cached.
      */
     public static function recentForWelcome(): array
     {
         return Cache::flexible(self::WELCOME_CACHE_KEY, self::WELCOME_CACHE_TTL, fn () => static::select(['id', 'title', 'city_id', 'user_id'])
+            ->published()
             ->with(['city:id,name', 'user:id,name'])
             ->withCount('places')
             ->latest()
@@ -86,6 +106,32 @@ class Itinerary extends Model
             ->values()
             ->mapWithKeys(fn ($id, int $index) => [(int) $id => ['position' => $index + 1]])
             ->all());
+    }
+
+    /**
+     * draft → pending. Returns false, changing nothing, from any other state.
+     */
+    public function submitForReview(): bool
+    {
+        return $this->moveTo(self::DRAFT, self::PENDING);
+    }
+
+    /**
+     * pending → published. Returns false, changing nothing, from any other state.
+     */
+    public function approve(): bool
+    {
+        return $this->moveTo(self::PENDING, self::PUBLISHED);
+    }
+
+    private function moveTo(string $from, string $to): bool
+    {
+        if ($this->status !== $from) {
+            return false;
+        }
+
+        // Saving fires the saved event, which clears the Welcome cache.
+        return $this->update(['status' => $to]);
     }
 
     public function canManage(User $user): bool
