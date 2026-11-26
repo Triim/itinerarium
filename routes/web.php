@@ -1,21 +1,17 @@
 <?php
 
 use App\Http\Controllers\CityController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\Userzone\CityController as UserzoneCityController;
 use App\Http\Controllers\Userzone\ItineraryController as UserzoneItineraryController;
 use App\Http\Controllers\Userzone\PlaceController as UserzonePlaceController;
+use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\IsAdmin;
-use App\Models\Itinerary;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'itineraries' => Itinerary::recentForWelcome(),
-    ]);
-})->name('home');
+Route::get('/', WelcomeController::class)->name('home');
 
 Route::get('itineraries', [ItineraryController::class, 'index'])
     ->name('itineraries.index');
@@ -33,12 +29,10 @@ Route::get('places/{place}', [PlaceController::class, 'show'])
     ->name('places.show');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::prefix('user')->name('userzone.')->group(function () {
-        Route::resource('itineraries', UserzoneItineraryController::class)->except('show');
+        Route::resource('itineraries', UserzoneItineraryController::class);
 
         Route::middleware(IsAdmin::class)->group(function () {
             Route::resource('places', UserzonePlaceController::class)->except('show');

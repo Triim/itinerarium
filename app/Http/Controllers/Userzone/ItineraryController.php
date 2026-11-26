@@ -46,6 +46,16 @@ class ItineraryController extends Controller
         return redirect()->route('userzone.itineraries.index');
     }
 
+    /**
+     * The public page already shows an itinerary, so the private resource route only checks access and sends the user there.
+     */
+    public function show(Request $request, Itinerary $itinerary): RedirectResponse
+    {
+        abort_unless($itinerary->canManage($request->user()), 403);
+
+        return redirect()->route('itineraries.show', $itinerary);
+    }
+
     public function edit(Request $request, Itinerary $itinerary): Response
     {
         abort_unless($itinerary->canManage($request->user()), 403);

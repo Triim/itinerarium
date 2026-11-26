@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Userzone\ItineraryController;
 use App\Models\City;
 use App\Models\Itinerary;
 use App\Models\Place;
@@ -704,15 +705,65 @@ class UserzoneItineraryTest extends TestCase
             'index' => ['index', 'user/itineraries', ['GET', 'HEAD']],
             'create' => ['create', 'user/itineraries/create', ['GET', 'HEAD']],
             'store' => ['store', 'user/itineraries', ['POST']],
+            'show' => ['show', 'user/itineraries/{itinerary}', ['GET', 'HEAD']],
             'edit' => ['edit', 'user/itineraries/{itinerary}/edit', ['GET', 'HEAD']],
             'update' => ['update', 'user/itineraries/{itinerary}', ['PUT', 'PATCH']],
             'destroy' => ['destroy', 'user/itineraries/{itinerary}', ['DELETE']],
         ];
     }
 
-    public function test_there_is_no_private_show_route()
+    public function test_the_resource_controller_has_all_seven_actions()
     {
-        $this->assertFalse(Route::has('userzone.itineraries.show'));
+        foreach (['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'] as $action) {
+            $this->assertSame(
+                ItineraryController::class.'@'.$action,
+                Route::getRoutes()->getByName("userzone.itineraries.{$action}")->getActionName(),
+            );
+        }
+    }
+
+    public function test_guests_cannot_open_the_private_show_action()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->get(route('userzone.itineraries.show', $itinerary))->assertRedirect('/login');
+    }
+
+    public function test_the_owner_is_sent_from_the_private_show_action_to_the_public_page()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->actingAs($itinerary->user)
+            ->get(route('userzone.itineraries.show', $itinerary))
+            ->assertRedirect(route('itineraries.show', $itinerary));
+    }
+
+    public function test_an_administrator_can_open_the_private_show_action_for_another_users_itinerary()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('userzone.itineraries.show', $itinerary))
+            ->assertRedirect(route('itineraries.show', $itinerary));
+    }
+
+    public function test_other_users_get_403_from_the_private_show_action()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('userzone.itineraries.show', $itinerary))
+            ->assertForbidden();
+    }
+
+    public function test_the_public_show_page_stays_open_to_guests()
+    {
+        $itinerary = Itinerary::factory()->create();
+
+        $this->assertGuest();
+        $this->get(route('itineraries.show', $itinerary))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('itineraries/show'));
     }
 
     public function test_creating_saves_the_selected_order_as_stops()
