@@ -6,6 +6,8 @@ type Place = {
     name: string;
     description: string | null;
     image_url: string | null;
+    themes: { id: string; label: string }[];
+    films: string[];
 };
 
 type City = {
@@ -41,7 +43,27 @@ export default function Show({ place, city, itineraries }: Props) {
                 <h1 className="mt-1 text-3xl font-semibold">{place.name}</h1>
                 {place.image_url && <img src={place.image_url} alt={`Photo of ${place.name}`} className="mt-4 max-h-96 max-w-full rounded-md" />}
                 {place.description && <p className="mt-4 text-stone-600">{place.description}</p>}
+                {place.themes.length > 0 && (
+                    <ul aria-label="Themes" className="mt-4 flex flex-wrap gap-2">
+                        {place.themes.map((theme) => (
+                            <li key={theme.id} className="rounded-full border border-stone-300 px-3 py-1 text-sm text-stone-700">
+                                {theme.label}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </article>
+
+            {place.films.length > 0 && (
+                <>
+                    <h2 className="mt-8 text-xl font-medium">Films &amp; TV</h2>
+                    <ul className="mt-4 list-disc space-y-1 pl-5 text-stone-700">
+                        {place.films.map((film) => (
+                            <li key={film}>{film}</li>
+                        ))}
+                    </ul>
+                </>
+            )}
 
             <h2 className="mt-8 text-xl font-medium">Itineraries</h2>
 

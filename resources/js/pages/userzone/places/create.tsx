@@ -1,4 +1,4 @@
-import PlaceForm, { type City } from '@/components/place-form';
+import PlaceForm, { type City, type ThemeOption } from '@/components/place-form';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -18,15 +18,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 type Props = {
     cities: City[];
+    theme_options: ThemeOption[];
 };
 
-export default function Create({ cities }: Props) {
+export default function Create({ cities, theme_options }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         description: '',
         city_id: '',
         latitude: '',
         longitude: '',
+        themes: [] as string[],
+        films: [] as string[],
         image: null as File | null,
     });
 
@@ -42,7 +45,7 @@ export default function Create({ cities }: Props) {
             <div className="p-4">
                 <h1 className="text-xl font-semibold">Create Place</h1>
 
-                <PlaceForm data={data} setData={setData} errors={errors} cities={cities} onSubmit={submit}>
+                <PlaceForm data={data} setData={setData} errors={errors} cities={cities} themeOptions={theme_options} onSubmit={submit}>
                     <Button type="submit" disabled={processing}>
                         Create Place
                     </Button>

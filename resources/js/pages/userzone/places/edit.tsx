@@ -1,4 +1,4 @@
-import PlaceForm, { type City } from '@/components/place-form';
+import PlaceForm, { type City, type ThemeOption } from '@/components/place-form';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -12,15 +12,18 @@ type Place = {
     city_id: number;
     latitude: number;
     longitude: number;
+    themes: string[];
+    films: string[];
 };
 
 type Props = {
     place: Place;
     cities: City[];
     image_url: string | null;
+    theme_options: ThemeOption[];
 };
 
-export default function Edit({ place, cities, image_url }: Props) {
+export default function Edit({ place, cities, image_url, theme_options }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Places',
@@ -38,6 +41,8 @@ export default function Edit({ place, cities, image_url }: Props) {
         city_id: String(place.city_id),
         latitude: String(place.latitude),
         longitude: String(place.longitude),
+        themes: place.themes,
+        films: place.films,
         image: null as File | null,
     });
 
@@ -63,7 +68,15 @@ export default function Edit({ place, cities, image_url }: Props) {
             <div className="p-4">
                 <h1 className="text-xl font-semibold">Edit Place</h1>
 
-                <PlaceForm data={data} setData={setData} errors={errors} cities={cities} imageUrl={image_url} onSubmit={submit}>
+                <PlaceForm
+                    data={data}
+                    setData={setData}
+                    errors={errors}
+                    cities={cities}
+                    themeOptions={theme_options}
+                    imageUrl={image_url}
+                    onSubmit={submit}
+                >
                     <div className="flex gap-4">
                         <Button type="submit" disabled={processing}>
                             Update Place

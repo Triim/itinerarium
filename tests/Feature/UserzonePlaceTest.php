@@ -62,7 +62,7 @@ class UserzonePlaceTest extends TestCase
 
     public function test_regular_users_cannot_update_a_place()
     {
-        $place = Place::factory()->create();
+        $place = Place::factory()->create()->fresh();
 
         $this->actingAs(User::factory()->create());
 
@@ -75,7 +75,7 @@ class UserzonePlaceTest extends TestCase
     public function test_regular_users_cannot_delete_a_place_even_if_it_is_in_their_itinerary()
     {
         $user = User::factory()->create();
-        $place = Place::factory()->create();
+        $place = Place::factory()->create()->fresh();
         $itineraries = [Itinerary::factory()->for($user)->create(), Itinerary::factory()->create()];
 
         foreach ($itineraries as $itinerary) {
@@ -255,7 +255,7 @@ class UserzonePlaceTest extends TestCase
 
     public function test_guests_cannot_update_a_place()
     {
-        $place = Place::factory()->create();
+        $place = Place::factory()->create()->fresh();
 
         $this->put("/user/places/{$place->id}", $this->validData())->assertRedirect('/login');
 
@@ -286,6 +286,8 @@ class UserzonePlaceTest extends TestCase
                     'city_id' => $barcelona->id,
                     'latitude' => 41.39164,
                     'longitude' => 2.16489,
+                    'themes' => [],
+                    'films' => [],
                 ])
                 ->has('cities', 2)
                 ->where('cities.0', ['id' => $bangkok->id, 'name' => 'Bangkok'])
@@ -294,7 +296,7 @@ class UserzonePlaceTest extends TestCase
 
     public function test_administrators_can_update_a_place()
     {
-        $other = Place::factory()->create();
+        $other = Place::factory()->create()->fresh();
         $place = Place::factory()->create();
         $data = $this->validData();
 
@@ -330,7 +332,7 @@ class UserzonePlaceTest extends TestCase
     #[DataProvider('invalidValues')]
     public function test_invalid_values_are_rejected_when_updating(string $field, mixed $value)
     {
-        $place = Place::factory()->create();
+        $place = Place::factory()->create()->fresh();
 
         $this->actingAs(User::factory()->admin()->create())
             ->from("/user/places/{$place->id}/edit")
@@ -1128,6 +1130,284 @@ class UserzonePlaceTest extends TestCase
         $this->beforeApplicationDestroyed(fn () => @unlink($path));
 
         return new UploadedFile($path, $filename, null, null, true);
+    }
+
+    public function test_the_metadata_migration_keeps_existing_places_and_their_links()
+    {
+        $migration = '2026_11_27_000001_add_themes_and_films_to_places_table';
+        $database = tempnam(sys_get_temp_dir(), 'itinerarium');
+        config(['database.connections.legacy' => [...config('database.connections.sqlite'), 'url' => null, 'database' => $database]]);
+        $this->beforeApplicationDestroyed(function () use ($database) {
+            DB::purge('legacy');
+            @unlink($database);
+        });
+        $migrations = glob(database_path('migrations/*.php'));
+        $migrate = fn (callable $filter) => $this->artisan('migrate', [
+            '--database' => 'legacy',
+            '--path' => array_values(array_filter($migrations, fn (string $path) => $filter(basename($path, '.php')))),
+            '--realpath' => true,
+        ])->assertSuccessful();
+
+        $migrate(fn (string $name) => $name < $migration);
+        $db = DB::connection('legacy');
+        $now = now()->toDateTimeString();
+        $userId = $db->table('users')->insertGetId(['name' => 'Ada', 'email' => 'ada@example.com', 'password' => 'x', 'created_at' => $now, 'updated_at' => $now]);
+        $cityId = $db->table('cities')->insertGetId(['name' => 'Barcelona', 'user_id' => $userId, 'created_at' => $now, 'updated_at' => $now]);
+        $placeId = $db->table('places')->insertGetId([
+            'name' => 'Casa Batlló', 'description' => 'A house by Gaudí.', 'latitude' => 41.391640, 'longitude' => 2.164890,
+            'city_id' => $cityId, 'created_at' => $now, 'updated_at' => $now,
+        ]);
+        $itineraryId = $db->table('itineraries')->insertGetId(['title' => 'Gaudí', 'user_id' => $userId, 'city_id' => $cityId, 'created_at' => $now, 'updated_at' => $now]);
+        $db->table('itinerary_place')->insert(['itinerary_id' => $itineraryId, 'place_id' => $placeId, 'position' => 1]);
+        $before = (array) $db->table('places')->sole();
+        $links = $db->table('itinerary_place')->get();
+
+        $migrate(fn (string $name) => $name === $migration);
+
+        $this->assertEquals([...$before, 'themes' => null, 'films' => null], (array) $db->table('places')->sole());
+        $this->assertEquals($links, $db->table('itinerary_place')->get());
+    }
+
+    public function test_a_place_can_be_created_without_themes_or_films()
+    {
+        $this->actingAs(User::factory()->admin()->create())
+            ->post('/user/places', $this->validData())
+            ->assertSessionHasNoErrors();
+
+        $place = Place::sole();
+        $this->assertSame([], $place->themes);
+        $this->assertSame([], $place->films);
+    }
+
+    public function test_a_place_can_be_created_with_several_themes_and_films()
+    {
+        $this->actingAs(User::factory()->admin()->create())
+            ->post('/user/places', $this->validData([
+                'themes' => ['history', 'film', 'landmark'],
+                'films' => ['The Dreamers', 'Funny Face', 'The Da Vinci Code'],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $place = Place::sole();
+        // Themes are stored in vocabulary order; films keep the entered order.
+        $this->assertSame(['landmark', 'film', 'history'], $place->themes);
+        $this->assertSame(['The Dreamers', 'Funny Face', 'The Da Vinci Code'], $place->films);
+    }
+
+    public function test_create_and_edit_pages_receive_the_theme_vocabulary_and_saved_values()
+    {
+        $place = Place::factory()->create(['themes' => ['film', 'local_food'], 'films' => ['Ratatouille']]);
+        $admin = User::factory()->admin()->create();
+        $vocabulary = [
+            ['id' => 'landmark', 'label' => 'Landmark'],
+            ['id' => 'film', 'label' => 'Film & TV'],
+            ['id' => 'architecture', 'label' => 'Architecture'],
+            ['id' => 'history', 'label' => 'History'],
+            ['id' => 'unusual', 'label' => 'Unusual places'],
+            ['id' => 'local_food', 'label' => 'Local food'],
+            ['id' => 'experience', 'label' => 'Experiences'],
+        ];
+
+        $this->actingAs($admin)
+            ->get('/user/places/create')
+            ->assertInertia(fn (Assert $page) => $page->where('theme_options', $vocabulary));
+
+        $this->get("/user/places/{$place->id}/edit")
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('theme_options', $vocabulary)
+                ->where('place.themes', ['film', 'local_food'])
+                ->where('place.films', ['Ratatouille']));
+    }
+
+    public function test_updating_changes_themes_and_films()
+    {
+        $place = Place::factory()->create(['themes' => ['film', 'history'], 'films' => ['Amélie', 'La Haine']]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put("/user/places/{$place->id}", $this->validData([
+                'themes' => ['film', 'experience'],
+                'films' => ['Amélie (2001)', 'Before Sunset'],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $place->refresh();
+        $this->assertSame(['film', 'experience'], $place->themes);
+        $this->assertSame(['Amélie (2001)', 'Before Sunset'], $place->films);
+    }
+
+    #[DataProvider('emptyMetadata')]
+    public function test_updating_can_clear_all_themes_and_films(array $metadata)
+    {
+        $place = Place::factory()->create(['themes' => ['film'], 'films' => ['Amélie']]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put("/user/places/{$place->id}", $this->validData($metadata))
+            ->assertSessionHasNoErrors();
+
+        $place->refresh();
+        $this->assertSame([], $place->themes);
+        $this->assertSame([], $place->films);
+    }
+
+    public static function emptyMetadata(): array
+    {
+        return [
+            'omitted' => [[]],
+            'null' => [['themes' => null, 'films' => null]],
+            'empty lists' => [['themes' => [], 'films' => []]],
+        ];
+    }
+
+    #[DataProvider('invalidMetadata')]
+    public function test_invalid_themes_and_films_are_rejected(string $field, mixed $value, string $error)
+    {
+        $place = Place::factory()->create(['themes' => ['film'], 'films' => ['Amélie']]);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post('/user/places', $this->validData([$field => $value]))
+            ->assertSessionHasErrors([$error]);
+        $this->assertDatabaseCount('places', 1);
+
+        $this->put("/user/places/{$place->id}", $this->validData([$field => $value]))
+            ->assertSessionHasErrors([$error]);
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+    }
+
+    public static function invalidMetadata(): array
+    {
+        return [
+            'unknown theme' => ['themes', ['food'], 'themes.0'],
+            'theme label instead of identifier' => ['themes', ['Film & TV'], 'themes.0'],
+            'duplicate theme' => ['themes', ['film', 'film'], 'themes.0'],
+            'nested theme' => ['themes', [['film']], 'themes.0'],
+            'themes not a list' => ['themes', ['a' => 'film'], 'themes'],
+            'themes not an array' => ['themes', 'film', 'themes'],
+            'empty film title' => ['films', ['Amélie', ''], 'films.1'],
+            'blank film title' => ['films', ['   '], 'films.0'],
+            'too long film title' => ['films', [str_repeat('a', 256)], 'films.0'],
+            'nested film title' => ['films', [['Amélie']], 'films.0'],
+            'duplicate film title' => ['films', ['Amélie', 'amélie'], 'films.0'],
+            'films not a list' => ['films', ['a' => 'Amélie'], 'films'],
+            'films not an array' => ['films', 'Amélie', 'films'],
+            'too many films' => ['films', array_map(fn ($i) => "Film {$i}", range(1, 21)), 'films'],
+        ];
+    }
+
+    public function test_the_longest_film_title_is_accepted()
+    {
+        $this->actingAs(User::factory()->admin()->create())
+            ->post('/user/places', $this->validData(['films' => [str_repeat('a', 255)]]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame([str_repeat('a', 255)], Place::sole()->films);
+    }
+
+    public function test_regular_users_cannot_change_themes_or_films()
+    {
+        $place = Place::factory()->create(['themes' => ['film'], 'films' => ['Amélie']]);
+
+        $this->actingAs(User::factory()->create());
+
+        $this->post('/user/places', $this->validData(['themes' => ['history'], 'films' => ['La Haine']]))->assertForbidden();
+        $this->put("/user/places/{$place->id}", $this->validData(['themes' => [], 'films' => []]))->assertForbidden();
+        $this->get("/user/places/{$place->id}/edit")->assertForbidden();
+
+        $this->assertDatabaseCount('places', 1);
+        $this->assertEquals($place->getAttributes(), $place->fresh()->getAttributes());
+    }
+
+    public function test_an_image_upload_saves_themes_and_films_in_the_same_request()
+    {
+        Storage::fake('public');
+        $place = Place::factory()->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post('/user/places', $this->validData([
+                'image' => UploadedFile::fake()->image('photo.jpg'),
+                'themes' => ['film'],
+                'films' => ['Amélie'],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $created = Place::latest('id')->first();
+        $this->assertSame(['film'], $created->themes);
+        $this->assertSame(['Amélie'], $created->films);
+        $this->assertNotNull($created->imageUrl());
+
+        // The edit form sends an image as a POST with a spoofed PUT method.
+        $this->post("/user/places/{$place->id}", $this->validData([
+            '_method' => 'PUT',
+            'image' => UploadedFile::fake()->image('photo.png'),
+            'themes' => ['history', 'unusual'],
+            'films' => ['La Haine'],
+        ]))->assertSessionHasNoErrors();
+
+        $place->refresh();
+        $this->assertSame(['history', 'unusual'], $place->themes);
+        $this->assertSame(['La Haine'], $place->films);
+        $this->assertNotNull($place->imageUrl());
+        $this->assertDatabaseCount('media', 2);
+    }
+
+    public function test_updating_metadata_keeps_coordinates_and_itinerary_links()
+    {
+        $place = Place::factory()->create();
+        $itinerary = Itinerary::factory()->for($place->city)->create();
+        $itinerary->syncStops([$place->id]);
+        $links = DB::table('itinerary_place')->get();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put("/user/places/{$place->id}", [
+                ...$place->only(['name', 'description', 'city_id', 'latitude', 'longitude']),
+                'themes' => ['landmark'],
+                'films' => ['Taxi'],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $fresh = $place->fresh();
+        $this->assertSame($place->latitude, $fresh->latitude);
+        $this->assertSame($place->longitude, $fresh->longitude);
+        $this->assertSame(['landmark'], $fresh->themes);
+        $this->assertEquals($links, DB::table('itinerary_place')->get());
+    }
+
+    public function test_public_place_page_shows_theme_labels_and_film_titles()
+    {
+        $place = Place::factory()->create([
+            'themes' => ['history', 'film', 'local_food'],
+            'films' => ['The Dreamers', 'Funny Face'],
+        ]);
+
+        $this->get("/places/{$place->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('places/show')
+                ->where('place.themes', [
+                    ['id' => 'film', 'label' => 'Film & TV'],
+                    ['id' => 'history', 'label' => 'History'],
+                    ['id' => 'local_food', 'label' => 'Local food'],
+                ])
+                ->where('place.films', ['The Dreamers', 'Funny Face'])
+                ->missing('place.latitude')
+                ->missing('place.created_at'));
+    }
+
+    public function test_public_place_page_renders_without_themes_or_films()
+    {
+        $withNull = Place::factory()->create();
+        $withEmpty = Place::factory()->create(['themes' => [], 'films' => []]);
+
+        foreach ([$withNull, $withEmpty] as $place) {
+            $this->get("/places/{$place->id}")
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page
+                    ->where('place.name', $place->name)
+                    ->where('place.themes', [])
+                    ->where('place.films', [])
+                    ->has('itineraries', 0));
+        }
     }
 
     private function validData(array $overrides = []): array

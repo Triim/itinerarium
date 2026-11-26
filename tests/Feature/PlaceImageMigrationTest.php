@@ -119,7 +119,7 @@ class PlaceImageMigrationTest extends TestCase
         $this->assertEquals($foreignKeys, Schema::getForeignKeys('places'));
         $this->assertEquals($rows, $this->placeRows());
         $this->assertNull($place->fresh()->imageUrl());
-        $this->assertSame([$place->id], $itinerary->places()->pluck('places.id')->all());
+        $this->assertSame([$place->id], DB::table('itinerary_place')->where('itinerary_id', $itinerary->id)->pluck('place_id')->all());
         $this->assertDatabaseCount('media', 1);
     }
 
@@ -340,7 +340,11 @@ class PlaceImageMigrationTest extends TestCase
 
     private function runMigration(): void
     {
-        $this->artisan('migrate')->assertSuccessful();
+        // Only this migration: later ones change the places table and the itinerary links too.
+        $this->artisan('migrate', [
+            '--path' => [database_path('migrations/'.self::MIGRATION.'.php')],
+            '--realpath' => true,
+        ])->assertSuccessful();
     }
 
     private function migrationFailure(): string

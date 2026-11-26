@@ -37,6 +37,8 @@ class PlaceController extends Controller
             'place' => [
                 ...$place->only(['id', 'name', 'description']),
                 'image_url' => $place->imageUrl('details'),
+                'themes' => $place->themeLabels(),
+                'films' => $place->films ?? [],
             ],
             'city' => $place->city->only(['id', 'name']),
             'itineraries' => $place->itineraries()
