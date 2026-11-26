@@ -75,6 +75,60 @@ class QueryEfficiencyTest extends TestCase
                     ->where('user', ['id' => $itinerary->user_id, 'name' => $itinerary->user->name])));
     }
 
+    public function test_itinerary_pages_share_only_the_fields_they_display()
+    {
+        $itinerary = Itinerary::factory()->hasAttached(Place::factory()->count(2))->create();
+        $city = ['id' => $itinerary->city_id, 'name' => $itinerary->city->name];
+        $user = ['id' => $itinerary->user_id, 'name' => $itinerary->user->name];
+
+        $this->get('/itineraries')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('itineraries', 1)
+                ->has('itineraries.0', fn (Assert $prop) => $prop
+                    ->where('id', $itinerary->id)
+                    ->where('title', $itinerary->title)
+                    ->where('places_count', 2)
+                    ->where('city', $city)
+                    ->where('user', $user)));
+
+        $this->get("/itineraries/{$itinerary->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('itinerary', fn (Assert $prop) => $prop
+                    ->where('id', $itinerary->id)
+                    ->where('title', $itinerary->title)
+                    ->where('city', $city)
+                    ->where('user', $user)
+                    ->has('places', 2, fn (Assert $place) => $place
+                        ->hasAll(['id', 'name', 'description', 'image_url', 'themes', 'films']))));
+    }
+
+    public function test_itinerary_page_query_count_does_not_grow_with_its_places()
+    {
+        $city = City::factory()->create();
+        $itinerary = Itinerary::factory()->for($city)->create();
+
+        $counts = [];
+        foreach ([1, 5, 21] as $total) {
+            while ($itinerary->places()->count() < $total) {
+                $place = $this->placeWithImage($city);
+                $place->update(['themes' => ['film', 'history'], 'films' => ['Good Bye, Lenin!', 'Run Lola Run']]);
+                $itinerary->places()->attach($place, ['position' => $itinerary->places()->count() + 1]);
+            }
+
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $this->get("/itineraries/{$itinerary->id}")
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page->has('itinerary.places', $total));
+            $counts[$total] = count(DB::getQueryLog());
+            DB::disableQueryLog();
+        }
+
+        $this->assertSame(array_fill_keys([1, 5, 21], $counts[1]), $counts);
+    }
+
     public function test_home_page_query_count_does_not_grow_with_displayed_itineraries()
     {
         $admin = User::factory()->create(['is_admin' => true]);

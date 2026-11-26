@@ -7,7 +7,9 @@ use App\Models\Itinerary;
 use App\Models\Place;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -131,6 +133,106 @@ class PublicPlaceTest extends TestCase
                 ->where('itinerary.places.0.name', 'Sagrada Família')
                 ->where('itinerary.places.1.name', 'Park Güell')
                 ->where('itinerary.places.2.name', 'Casa Batlló'));
+    }
+
+    public function test_guests_can_see_itineraries_with_their_city_author_and_place_count()
+    {
+        $berlin = City::factory()->create(['name' => 'Berlin']);
+        $hamburg = City::factory()->create(['name' => 'Hamburg']);
+        $ada = User::factory()->create(['name' => 'Ada']);
+        $westBerlin = Itinerary::factory()->for($berlin)->for($ada)
+            ->hasAttached(Place::factory()->count(3)->for($berlin))
+            ->create(['title' => 'West Berlin: cinema, Bauhaus and modernism']);
+        $southToEast = Itinerary::factory()->for($berlin)
+            ->create(['title' => 'Berlin south to east: Germania, the Stasi and Good Bye, Lenin!']);
+        $onFoot = Itinerary::factory()->for($hamburg)
+            ->hasAttached(Place::factory()->for($hamburg))
+            ->create(['title' => 'Hamburg on foot in eight hours']);
+
+        $this->get('/itineraries')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('itineraries/index')
+                ->has('itineraries', 3)
+                ->where('itineraries.0.id', $southToEast->id)
+                ->where('itineraries.0.places_count', 0)
+                ->where('itineraries.0.city.name', 'Berlin')
+                ->where('itineraries.0.user.name', $southToEast->user->name)
+                ->where('itineraries.1.id', $onFoot->id)
+                ->where('itineraries.1.places_count', 1)
+                ->where('itineraries.1.city.name', 'Hamburg')
+                ->where('itineraries.2.id', $westBerlin->id)
+                ->where('itineraries.2.title', 'West Berlin: cinema, Bauhaus and modernism')
+                ->where('itineraries.2.places_count', 3)
+                ->where('itineraries.2.city.name', 'Berlin')
+                ->where('itineraries.2.user.name', 'Ada'));
+    }
+
+    public function test_itineraries_page_renders_when_there_are_no_itineraries()
+    {
+        $this->get('/itineraries')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('itineraries/index')
+                ->has('itineraries', 0));
+    }
+
+    public function test_itinerary_page_shares_place_descriptions_themes_films_and_thumbnails()
+    {
+        Storage::fake('public');
+        $paris = City::factory()->create(['name' => 'Paris']);
+        $louvre = Place::factory()->for($paris)->create([
+            'name' => 'Louvre Museum',
+            'description' => 'Former royal palace, now the largest art museum in the world.',
+            'themes' => ['film', 'landmark'],
+            'films' => ['The Dreamers', 'Funny Face', 'The Da Vinci Code'],
+        ]);
+        $louvre->addMedia(UploadedFile::fake()->image('louvre.jpg', 800, 600))->toMediaCollection('images');
+        $bareStop = Place::factory()->for($paris)->create(['name' => 'Bare stop', 'description' => 'Short.']);
+        $itinerary = Itinerary::factory()->for($paris)->create(['title' => 'Paris on film']);
+        $itinerary->syncStops([$louvre->id, $bareStop->id]);
+
+        $thumbnailUrl = $louvre->getFirstMedia('images')->getUrl('thumbnail');
+        $this->assertStringContainsString('/conversions/', $thumbnailUrl);
+
+        $this->get("/itineraries/{$itinerary->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('itineraries/show')
+                ->has('itinerary.places', 2)
+                ->where('itinerary.places.0', [
+                    'id' => $louvre->id,
+                    'name' => 'Louvre Museum',
+                    'description' => 'Former royal palace, now the largest art museum in the world.',
+                    'image_url' => $thumbnailUrl,
+                    'themes' => [['id' => 'landmark', 'label' => 'Landmark'], ['id' => 'film', 'label' => 'Film & TV']],
+                    'films' => ['The Dreamers', 'Funny Face', 'The Da Vinci Code'],
+                ])
+                ->where('itinerary.places.1', [
+                    'id' => $bareStop->id,
+                    'name' => 'Bare stop',
+                    'description' => 'Short.',
+                    'image_url' => null,
+                    'themes' => [],
+                    'films' => [],
+                ]));
+    }
+
+    public function test_itinerary_page_lists_a_long_itinerary_in_stop_order()
+    {
+        $hamburg = City::factory()->create();
+        $places = collect(range(1, 21))->map(fn (int $i) => Place::factory()->for($hamburg)->create(['name' => sprintf('Stop %02d', $i)]));
+        // A fixed permutation that is neither alphabetical nor creation order.
+        $stops = $places->sortBy(fn (Place $place, int $index) => ($index * 8) % 21)->values();
+        $itinerary = Itinerary::factory()->for($hamburg)->create();
+        $itinerary->syncStops($stops->pluck('id')->all());
+
+        $this->get("/itineraries/{$itinerary->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('itineraries/show')
+                ->has('itinerary.places', 21)
+                ->where('itinerary.places', fn ($shown) => $shown->pluck('id')->all() === $stops->pluck('id')->all()));
     }
 
     public function test_itinerary_page_renders_when_the_itinerary_has_no_places()
