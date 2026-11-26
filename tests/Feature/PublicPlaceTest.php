@@ -114,6 +114,25 @@ class PublicPlaceTest extends TestCase
                 ->where('itinerary.places.1.id', $sagradaFamilia->id));
     }
 
+    public function test_itinerary_page_shows_places_in_stop_order()
+    {
+        $barcelona = City::factory()->create();
+        $sagradaFamilia = Place::factory()->for($barcelona)->create(['name' => 'Sagrada Família']);
+        $casaBatllo = Place::factory()->for($barcelona)->create(['name' => 'Casa Batlló']);
+        $parkGuell = Place::factory()->for($barcelona)->create(['name' => 'Park Güell']);
+        $itinerary = Itinerary::factory()->for($barcelona)->create();
+        $itinerary->syncStops([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
+
+        $this->get("/itineraries/{$itinerary->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('itineraries/show')
+                ->has('itinerary.places', 3)
+                ->where('itinerary.places.0.name', 'Sagrada Família')
+                ->where('itinerary.places.1.name', 'Park Güell')
+                ->where('itinerary.places.2.name', 'Casa Batlló'));
+    }
+
     public function test_itinerary_page_renders_when_the_itinerary_has_no_places()
     {
         $itinerary = Itinerary::factory()->create();

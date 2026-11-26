@@ -38,7 +38,7 @@ class ItineraryController extends Controller
 
         $itinerary = $request->user()->itineraries()->create(Arr::except($validated, 'place_ids'));
 
-        $itinerary->places()->sync($validated['place_ids'] ?? []);
+        $itinerary->syncStops($validated['place_ids'] ?? []);
 
         // sync() fires no model events, and the saved event ran before it changed places_count.
         Itinerary::forgetWelcomeCache();
@@ -56,7 +56,6 @@ class ItineraryController extends Controller
                 // A place can be moved to another city after it was selected.
                 'place_ids' => $itinerary->places()
                     ->where('places.city_id', $itinerary->city_id)
-                    ->orderBy('places.name')
                     ->pluck('places.id')
                     ->unique()
                     ->values(),
@@ -73,7 +72,7 @@ class ItineraryController extends Controller
 
         $itinerary->update(Arr::except($validated, 'place_ids'));
 
-        $itinerary->places()->sync($validated['place_ids'] ?? []);
+        $itinerary->syncStops($validated['place_ids'] ?? []);
 
         // sync() fires no model events, and the saved event ran before it changed places_count.
         Itinerary::forgetWelcomeCache();

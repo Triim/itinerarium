@@ -23,9 +23,8 @@ class ItineraryController extends Controller
             'itinerary' => $itinerary->load([
                 'city:id,name',
                 'user:id,name',
-                'places' => fn ($query) => $query
-                    ->select(['places.id', 'places.name'])
-                    ->orderBy('places.name'),
+                // The relation returns places in stop order.
+                'places' => fn ($query) => $query->select(['places.id', 'places.name']),
             ]),
         ]);
     }

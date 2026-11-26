@@ -69,7 +69,23 @@ class Itinerary extends Model
 
     public function places(): BelongsToMany
     {
-        return $this->belongsToMany(Place::class);
+        // Links attached without a position (default 0) fall back to alphabetical order.
+        return $this->belongsToMany(Place::class)
+            ->withPivot('position')
+            ->orderByPivot('position')
+            ->orderBy('places.name')
+            ->orderBy('places.id');
+    }
+
+    /**
+     * Sync the places as stops in the given order, numbered from 1.
+     */
+    public function syncStops(array $placeIds): void
+    {
+        $this->places()->sync(collect($placeIds)
+            ->values()
+            ->mapWithKeys(fn ($id, int $index) => [(int) $id => ['position' => $index + 1]])
+            ->all());
     }
 
     public function canManage(User $user): bool

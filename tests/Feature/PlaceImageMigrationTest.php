@@ -320,7 +320,11 @@ class PlaceImageMigrationTest extends TestCase
         $this->runMigration();
         $files = $this->storedFiles();
 
-        $this->artisan('migrate:rollback', ['--step' => 1])->assertSuccessful();
+        // Later migrations run in the same batch; roll back only this one.
+        $this->artisan('migrate:rollback', [
+            '--path' => [database_path('migrations/'.self::MIGRATION.'.php')],
+            '--realpath' => true,
+        ])->assertSuccessful();
 
         $this->assertTrue(Schema::hasColumn('places', 'image_path'));
         $this->assertSame([null], DB::table('places')->pluck('image_path')->all());

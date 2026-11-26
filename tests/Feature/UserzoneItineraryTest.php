@@ -715,6 +715,253 @@ class UserzoneItineraryTest extends TestCase
         $this->assertFalse(Route::has('userzone.itineraries.show'));
     }
 
+    public function test_creating_saves_the_selected_order_as_stops()
+    {
+        $city = City::factory()->create();
+        [$a, $b, $c] = $this->placesNamed($city, ['Alpha', 'Bravo', 'Charlie']);
+
+        $this->actingAs(User::factory()->create())
+            ->post('/user/itineraries', $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$c->id, $a->id, (string) $b->id],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertStops([$c->id, $a->id, $b->id], Itinerary::sole());
+    }
+
+    public function test_edit_page_returns_the_places_in_saved_order()
+    {
+        $city = City::factory()->create();
+        [$a, $b, $c] = $this->placesNamed($city, ['Alpha', 'Bravo', 'Charlie']);
+        $itinerary = Itinerary::factory()->for($city)->create();
+        $itinerary->syncStops([$b->id, $c->id, $a->id]);
+
+        $this->actingAs($itinerary->user)
+            ->get("/user/itineraries/{$itinerary->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('itinerary.place_ids', [$b->id, $c->id, $a->id]));
+    }
+
+    public function test_updating_persists_a_new_order()
+    {
+        $city = City::factory()->create();
+        [$a, $b, $c] = $this->placesNamed($city, ['Alpha', 'Bravo', 'Charlie']);
+        $itinerary = Itinerary::factory()->for($city)->create();
+        $itinerary->syncStops([$a->id, $b->id, $c->id]);
+
+        $this->actingAs($itinerary->user)
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$c->id, $b->id, $a->id],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertStops([$c->id, $b->id, $a->id], $itinerary);
+    }
+
+    public function test_adding_and_removing_places_renumbers_the_stops()
+    {
+        $city = City::factory()->create();
+        [$a, $b, $c, $d] = $this->placesNamed($city, ['Alpha', 'Bravo', 'Charlie', 'Delta']);
+        $itinerary = Itinerary::factory()->for($city)->create();
+        $itinerary->syncStops([$a->id, $b->id, $c->id]);
+
+        $this->actingAs($itinerary->user)
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$c->id, $d->id, $a->id],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertStops([$c->id, $d->id, $a->id], $itinerary);
+    }
+
+    public function test_changing_the_city_replaces_the_stops_with_places_from_the_new_city()
+    {
+        $itinerary = Itinerary::factory()->create();
+        $old = Place::factory()->for($itinerary->city)->create();
+        $itinerary->syncStops([$old->id]);
+        $city = City::factory()->create();
+        [$a, $b] = $this->placesNamed($city, ['Alpha', 'Bravo']);
+
+        $this->actingAs($itinerary->user)
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$b->id, $a->id],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertStops([$b->id, $a->id], $itinerary);
+        $this->assertSame(0, $itinerary->places()->where('places.city_id', '!=', $city->id)->count());
+
+        $this->put("/user/itineraries/{$itinerary->id}", $this->validData([
+            'city_id' => $city->id,
+            'place_ids' => [$a->id, $old->id],
+        ]))->assertSessionHasErrors(['place_ids.1']);
+
+        $this->assertStops([$b->id, $a->id], $itinerary);
+    }
+
+    public function test_duplicate_places_are_rejected_when_reordering()
+    {
+        $city = City::factory()->create();
+        [$a, $b] = $this->placesNamed($city, ['Alpha', 'Bravo']);
+        $itinerary = Itinerary::factory()->for($city)->create();
+        $itinerary->syncStops([$a->id, $b->id]);
+
+        $this->actingAs($itinerary->user)
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$b->id, $a->id, $b->id],
+            ]))
+            ->assertSessionHasErrors(['place_ids.0' => 'Each place can only be selected once.']);
+
+        $this->assertStops([$a->id, $b->id], $itinerary);
+    }
+
+    public function test_other_users_cannot_reorder_an_itinerary()
+    {
+        $city = City::factory()->create();
+        [$a, $b] = $this->placesNamed($city, ['Alpha', 'Bravo']);
+        $itinerary = Itinerary::factory()->for($city)->create();
+        $itinerary->syncStops([$a->id, $b->id]);
+
+        $this->actingAs(User::factory()->create())
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$b->id, $a->id],
+            ]))
+            ->assertForbidden();
+
+        $this->assertStops([$a->id, $b->id], $itinerary);
+    }
+
+    public function test_administrators_can_reorder_another_users_itinerary()
+    {
+        $city = City::factory()->create();
+        [$a, $b] = $this->placesNamed($city, ['Alpha', 'Bravo']);
+        $itinerary = Itinerary::factory()->for($city)->create();
+        $itinerary->syncStops([$a->id, $b->id]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData([
+                'city_id' => $city->id,
+                'place_ids' => [$b->id, $a->id],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertStops([$b->id, $a->id], $itinerary);
+        $this->assertSame($itinerary->user_id, $itinerary->fresh()->user_id);
+    }
+
+    public function test_welcome_place_count_follows_reordering_adding_and_removing()
+    {
+        $city = City::factory()->create();
+        [$a, $b, $c] = $this->placesNamed($city, ['Alpha', 'Bravo', 'Charlie']);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/user/itineraries', $this->validData([
+            'city_id' => $city->id,
+            'place_ids' => [$b->id, $a->id],
+        ]));
+        $itinerary = Itinerary::sole();
+        $this->assertSame(2, $this->welcomePlacesCount());
+
+        $update = fn (array $placeIds) => $this->actingAs($user)
+            ->put("/user/itineraries/{$itinerary->id}", $this->validData(['city_id' => $city->id, 'place_ids' => $placeIds]))
+            ->assertSessionHasNoErrors();
+
+        $update([$a->id, $b->id]);
+        $this->assertSame(2, $this->welcomePlacesCount());
+
+        $update([$c->id, $a->id, $b->id]);
+        $this->assertSame(3, $this->welcomePlacesCount());
+
+        $update([$c->id]);
+        $this->assertSame(1, $this->welcomePlacesCount());
+    }
+
+    public function test_the_position_migration_keeps_existing_links_and_numbers_them_alphabetically()
+    {
+        $migration = '2026_11_26_000001_add_position_to_itinerary_place_table';
+        $database = tempnam(sys_get_temp_dir(), 'itinerarium');
+        config(['database.connections.legacy' => [...config('database.connections.sqlite'), 'url' => null, 'database' => $database]]);
+        $this->beforeApplicationDestroyed(function () use ($database) {
+            DB::purge('legacy');
+            @unlink($database);
+        });
+        $migrations = glob(database_path('migrations/*.php'));
+        $migrate = fn (callable $filter) => $this->artisan('migrate', [
+            '--database' => 'legacy',
+            '--path' => array_values(array_filter($migrations, fn (string $path) => $filter(basename($path, '.php')))),
+            '--realpath' => true,
+        ])->assertSuccessful();
+
+        $migrate(fn (string $name) => $name < $migration);
+        $db = DB::connection('legacy');
+        $this->assertFalse($db->getSchemaBuilder()->hasColumn('itinerary_place', 'position'));
+
+        $now = now();
+        $userId = $db->table('users')->insertGetId(['name' => 'Ada', 'email' => 'ada@example.com', 'password' => 'x', 'created_at' => $now, 'updated_at' => $now]);
+        $cityId = $db->table('cities')->insertGetId(['name' => 'Barcelona', 'user_id' => $userId, 'created_at' => $now, 'updated_at' => $now]);
+        $place = fn (string $name) => $db->table('places')->insertGetId([
+            'name' => $name, 'description' => '', 'latitude' => 41.4, 'longitude' => 2.17, 'city_id' => $cityId, 'created_at' => $now, 'updated_at' => $now,
+        ]);
+        $itinerary = fn (string $title) => $db->table('itineraries')->insertGetId(['title' => $title, 'user_id' => $userId, 'city_id' => $cityId, 'created_at' => $now, 'updated_at' => $now]);
+        $sagrada = $place('Sagrada Família');
+        $parkFirst = $place('Park Güell');
+        $casa = $place('Casa Batlló');
+        $parkSecond = $place('Park Güell');
+        $weekend = $itinerary('Weekend');
+        $onFoot = $itinerary('On foot');
+        $empty = $itinerary('Empty');
+        $links = [
+            [$weekend, $sagrada], [$weekend, $parkSecond], [$weekend, $casa], [$weekend, $parkFirst],
+            [$onFoot, $sagrada], [$onFoot, $casa],
+        ];
+        $db->table('itinerary_place')->insert(array_map(fn ($link) => ['itinerary_id' => $link[0], 'place_id' => $link[1]], $links));
+
+        $migrate(fn (string $name) => $name === $migration);
+
+        $rows = $db->table('itinerary_place')->orderBy('itinerary_id')->orderBy('position')->get()
+            ->map(fn ($row) => [$row->itinerary_id, $row->place_id, $row->position])->all();
+        $this->assertSame([
+            [$weekend, $casa, 1], [$weekend, $parkFirst, 2], [$weekend, $parkSecond, 3], [$weekend, $sagrada, 4],
+            [$onFoot, $casa, 1], [$onFoot, $sagrada, 2],
+        ], $rows);
+        $this->assertSame(3, $db->table('itineraries')->count());
+        $this->assertSame(4, $db->table('places')->count());
+        $this->assertSame(0, $db->table('itinerary_place')->where('itinerary_id', $empty)->count());
+    }
+
+    private function placesNamed(City $city, array $names): array
+    {
+        return array_map(fn (string $name) => Place::factory()->for($city)->create(['name' => $name]), $names);
+    }
+
+    private function assertStops(array $expected, Itinerary $itinerary): void
+    {
+        $this->assertSame($expected, $itinerary->places()->pluck('places.id')->all());
+        $this->assertSame(
+            range(1, count($expected)),
+            DB::table('itinerary_place')->where('itinerary_id', $itinerary->id)->orderBy('position')->pluck('position')->map(fn ($position) => (int) $position)->all(),
+        );
+    }
+
+    private function welcomePlacesCount(): int
+    {
+        $this->app['auth']->forgetGuards();
+
+        $count = null;
+        $this->get('/')->assertOk()->assertInertia(function (Assert $page) use (&$count) {
+            $count = $page->toArray()['props']['itineraries'][0]['places_count'];
+        });
+
+        return $count;
+    }
+
     private function assertPlaces(array $expected, Itinerary $itinerary): void
     {
         $this->assertEqualsCanonicalizing($expected, $itinerary->places()->pluck('places.id')->all());
