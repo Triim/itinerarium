@@ -5,6 +5,7 @@ type City = {
     id: number;
     name: string;
     itineraries_count: number;
+    places_count: number;
 };
 
 type Props = {
@@ -14,25 +15,41 @@ type Props = {
 export default function Index({ cities }: Props) {
     return (
         <SiteLayout title="Cities">
-            <h1 className="text-3xl font-semibold">Cities</h1>
+            <header className="border-b border-stone-200 pb-6">
+                <p className="text-sm font-medium tracking-widest text-stone-500 uppercase">Where to go</p>
+                <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Cities</h1>
+                <p className="mt-3 max-w-2xl leading-relaxed text-stone-600">Pick a city to see its itineraries and explore its places by theme.</p>
+            </header>
 
             {cities.length > 0 ? (
-                <ul className="mt-8 divide-y divide-stone-200 border-y border-stone-200">
-                    {cities.map((city) => (
-                        <li key={city.id} className="py-6">
-                            <h2 className="text-xl font-medium">
-                                <Link href={route('cities.show', city.id)} className="underline">
-                                    {city.name}
+                <>
+                    <p className="mt-6 text-sm text-stone-500">
+                        {cities.length} {cities.length === 1 ? 'city' : 'cities'}
+                    </p>
+                    <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {cities.map((city) => (
+                            <li key={city.id}>
+                                <Link
+                                    href={route('cities.show', city.id)}
+                                    className="group flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:p-6"
+                                >
+                                    <h2 className="text-xl font-semibold text-balance break-words">{city.name}</h2>
+                                    <p className="mt-2 text-sm text-stone-600">
+                                        {city.itineraries_count} {city.itineraries_count === 1 ? 'itinerary' : 'itineraries'} · {city.places_count}{' '}
+                                        {city.places_count === 1 ? 'place' : 'places'}
+                                    </p>
+                                    <span className="mt-auto pt-5 text-sm font-medium text-stone-900 underline-offset-4 group-hover:underline">
+                                        View city <span aria-hidden="true">&rarr;</span>
+                                    </span>
                                 </Link>
-                            </h2>
-                            <p className="mt-3 text-sm text-stone-500">
-                                {city.itineraries_count} {city.itineraries_count === 1 ? 'itinerary' : 'itineraries'}
-                            </p>
-                        </li>
-                    ))}
-                </ul>
+                            </li>
+                        ))}
+                    </ul>
+                </>
             ) : (
-                <p className="mt-8 text-stone-600">No cities yet.</p>
+                <div className="mt-8 rounded-xl border border-dashed border-stone-300 p-6 text-stone-600">
+                    <p>No cities yet.</p>
+                </div>
             )}
         </SiteLayout>
     );

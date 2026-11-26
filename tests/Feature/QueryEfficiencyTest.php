@@ -38,6 +38,7 @@ class QueryEfficiencyTest extends TestCase
             '/cities',
             "/cities/{$city->id}",
             '/places',
+            "/places?city={$city->id}",
             "/places/{$place->id}",
             '/user/itineraries',
             '/user/cities',
@@ -102,6 +103,65 @@ class QueryEfficiencyTest extends TestCase
                     ->where('user', $user)
                     ->has('places', 2, fn (Assert $place) => $place
                         ->hasAll(['id', 'name', 'description', 'image_url', 'themes', 'films']))));
+    }
+
+    public function test_city_and_place_lists_share_only_the_fields_they_display()
+    {
+        $city = City::factory()->create();
+        $place = $this->placeWithImage($city);
+        $place->update(['themes' => ['film', 'history'], 'films' => ['Good Bye, Lenin!']]);
+        $itinerary = Itinerary::factory()->for($city)->hasAttached($place)->create();
+
+        $this->get('/cities')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('cities.0', fn (Assert $prop) => $prop
+                    ->where('id', $city->id)
+                    ->where('name', $city->name)
+                    ->where('itineraries_count', 1)
+                    ->where('places_count', 1)));
+
+        $this->get("/cities/{$city->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('city', fn (Assert $prop) => $prop->hasAll(['id', 'name', 'itineraries_count', 'places_count']))
+                ->has('itineraries.0', fn (Assert $prop) => $prop
+                    ->hasAll(['id', 'title', 'places_count'])
+                    ->where('user', ['id' => $itinerary->user_id, 'name' => $itinerary->user->name])));
+
+        // No coordinates, films, descriptions, media paths or user records in the directory.
+        $this->get('/places')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('cities.0', fn (Assert $prop) => $prop
+                    ->hasAll(['id', 'name'])
+                    ->has('places.0', fn (Assert $prop) => $prop
+                        ->where('id', $place->id)
+                        ->where('name', $place->name)
+                        ->where('itineraries_count', 1)
+                        ->where('image_url', $place->imageUrl('thumbnail'))
+                        ->where('themes', ['film', 'history']))));
+    }
+
+    public function test_places_list_query_count_does_not_grow_with_places_themes_or_cities()
+    {
+        $counts = [];
+        foreach ([1, 10, 30] as $total) {
+            while (Place::count() < $total) {
+                $place = $this->placeWithImage(City::factory()->create());
+                $place->update(['themes' => ['film', 'architecture', 'history']]);
+            }
+
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $this->get('/places')
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page->has('cities', $total));
+            $counts[$total] = count(DB::getQueryLog());
+            DB::disableQueryLog();
+        }
+
+        $this->assertSame(array_fill_keys([1, 10, 30], $counts[1]), $counts);
     }
 
     public function test_itinerary_page_query_count_does_not_grow_with_its_places()

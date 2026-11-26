@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\Itinerary;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -12,7 +13,7 @@ class CityController extends Controller
     {
         return Inertia::render('cities/index', [
             'cities' => City::select(['id', 'name'])
-                ->withCount('itineraries')
+                ->withCount(['itineraries', 'places'])
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -20,12 +21,20 @@ class CityController extends Controller
 
     public function show(City $city): Response
     {
+        $city->loadCount(['itineraries', 'places']);
+
         return Inertia::render('cities/show', [
-            'city' => $city->only(['id', 'name']),
+            'city' => $city->only(['id', 'name', 'itineraries_count', 'places_count']),
             'itineraries' => $city->itineraries()
+                ->select(['id', 'title', 'user_id'])
                 ->with('user:id,name')
+                ->withCount('places')
                 ->orderBy('title')
-                ->get(['id', 'title', 'user_id']),
+                ->get()
+                ->map(fn (Itinerary $itinerary) => [
+                    ...$itinerary->only(['id', 'title', 'places_count']),
+                    'user' => $itinerary->user->only(['id', 'name']),
+                ]),
         ]);
     }
 }

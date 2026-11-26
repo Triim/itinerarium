@@ -52,6 +52,131 @@ class PublicPlaceTest extends TestCase
                 ->has('cities', 0));
     }
 
+    public function test_places_list_shares_theme_ids_thumbnails_and_the_theme_vocabulary()
+    {
+        Storage::fake('public');
+        $berlin = City::factory()->create(['name' => 'Berlin']);
+        // Stored out of vocabulary order, with a duplicate and an unknown id.
+        $tempelhof = Place::factory()->for($berlin)->create([
+            'name' => 'Tempelhof Field',
+            'themes' => ['unusual', 'history', 'film', 'history', 'retired'],
+            'films' => ['The Bourne Supremacy'],
+        ]);
+        $tempelhof->addMedia(UploadedFile::fake()->image('tempelhof.jpg', 800, 600))->toMediaCollection('images');
+        $bare = Place::factory()->for($berlin)->create(['name' => 'Bare spot']);
+
+        $this->get('/places')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('places/index')
+                ->where('themes', [
+                    ['id' => 'landmark', 'label' => 'Landmark'],
+                    ['id' => 'film', 'label' => 'Film & TV'],
+                    ['id' => 'architecture', 'label' => 'Architecture'],
+                    ['id' => 'history', 'label' => 'History'],
+                    ['id' => 'unusual', 'label' => 'Unusual places'],
+                    ['id' => 'local_food', 'label' => 'Local food'],
+                    ['id' => 'experience', 'label' => 'Experiences'],
+                ])
+                ->where('selected_city', null)
+                ->where('cities.0.places.0', [
+                    'id' => $bare->id,
+                    'name' => 'Bare spot',
+                    'itineraries_count' => 0,
+                    'image_url' => null,
+                    'themes' => [],
+                ])
+                ->where('cities.0.places.1', [
+                    'id' => $tempelhof->id,
+                    'name' => 'Tempelhof Field',
+                    'itineraries_count' => 0,
+                    'image_url' => $tempelhof->getFirstMedia('images')->getUrl('thumbnail'),
+                    'themes' => ['film', 'history', 'unusual'],
+                ]));
+    }
+
+    public function test_the_theme_vocabulary_matches_the_place_model()
+    {
+        $this->get('/places')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('themes', fn ($themes) => $themes->pluck('label', 'id')->all() === Place::THEMES));
+    }
+
+    public function test_places_list_can_preselect_a_city_from_the_query_string()
+    {
+        $berlin = City::factory()->create(['name' => 'Berlin']);
+        $paris = City::factory()->create(['name' => 'Paris']);
+        Place::factory()->for($berlin)->create();
+        Place::factory()->for($paris)->create();
+
+        $this->get("/places?city={$paris->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('places/index')
+                ->where('selected_city', $paris->id)
+                // Every city stays available, so the visitor can switch without reloading.
+                ->has('cities', 2));
+    }
+
+    public function test_invalid_city_query_values_fall_back_to_all_cities()
+    {
+        $berlin = City::factory()->create();
+        Place::factory()->for($berlin)->create();
+        $empty = City::factory()->create();
+
+        foreach (["{$berlin->id}abc", 'berlin', '', '999', (string) $empty->id, '-1', '1.5'] as $value) {
+            $this->get('/places?city='.urlencode($value))
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page->where('selected_city', null)->has('cities', 1));
+        }
+
+        $this->get("/places?city[]={$berlin->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('selected_city', null));
+    }
+
+    public function test_places_list_is_public()
+    {
+        Place::factory()->create();
+
+        $this->assertGuest();
+        $this->get('/places')->assertOk();
+        $this->get('/cities')->assertOk();
+    }
+
+    public function test_place_page_shows_its_themes_films_and_image()
+    {
+        Storage::fake('public');
+        $paris = City::factory()->create(['name' => 'Paris']);
+        $louvre = Place::factory()->for($paris)->create([
+            'name' => 'Louvre Museum',
+            'themes' => ['film', 'landmark', 'architecture'],
+            'films' => ['The Dreamers', 'Funny Face', 'The Da Vinci Code'],
+        ]);
+        $louvre->addMedia(UploadedFile::fake()->image('louvre.jpg', 800, 600))->toMediaCollection('images');
+        $bare = Place::factory()->for($paris)->create();
+
+        $this->get("/places/{$louvre->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('places/show')
+                ->where('place.image_url', $louvre->getFirstMedia('images')->getUrl('details'))
+                ->where('place.themes', [
+                    ['id' => 'landmark', 'label' => 'Landmark'],
+                    ['id' => 'film', 'label' => 'Film & TV'],
+                    ['id' => 'architecture', 'label' => 'Architecture'],
+                ])
+                ->where('place.films', ['The Dreamers', 'Funny Face', 'The Da Vinci Code']));
+
+        $this->get("/places/{$bare->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('place.image_url', null)
+                ->where('place.themes', [])
+                ->where('place.films', []));
+    }
+
     public function test_guests_can_see_a_place_with_only_its_own_itineraries()
     {
         $barcelona = City::factory()->create(['name' => 'Barcelona']);
@@ -250,7 +375,7 @@ class PublicPlaceTest extends TestCase
     {
         $place = Place::factory()->create();
         $itinerary = Itinerary::factory()->hasAttached($place)->create();
-        $urls = ['/places', "/places/{$place->id}", "/itineraries/{$itinerary->id}"];
+        $urls = ['/places', "/places?city={$place->city_id}", "/places/{$place->id}", "/itineraries/{$itinerary->id}"];
 
         $before = array_map($this->countQueries(...), $urls);
 
