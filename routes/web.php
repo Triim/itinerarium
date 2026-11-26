@@ -6,6 +6,7 @@ use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\Userzone\CityController as UserzoneCityController;
 use App\Http\Controllers\Userzone\ItineraryController as UserzoneItineraryController;
+use App\Http\Controllers\Userzone\ItineraryPublicationController;
 use App\Http\Controllers\Userzone\PlaceController as UserzonePlaceController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\IsAdmin;
@@ -33,8 +34,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('user')->name('userzone.')->group(function () {
         Route::resource('itineraries', UserzoneItineraryController::class);
+        Route::post('itineraries/{itinerary}/submit', [ItineraryPublicationController::class, 'submit'])
+            ->name('itineraries.submit');
 
         Route::middleware(IsAdmin::class)->group(function () {
+            Route::post('itineraries/{itinerary}/approve', [ItineraryPublicationController::class, 'approve'])
+                ->name('itineraries.approve');
             Route::resource('places', UserzonePlaceController::class)->except('show');
             Route::resource('cities', UserzoneCityController::class)->except('show');
         });

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Itinerary;
 use App\Models\Place;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -93,6 +94,8 @@ class PlaceImageMigrationTest extends TestCase
         $place = $this->legacyPlace();
 
         $this->runMigration();
+        // The public pages need the later columns too, such as the itinerary status.
+        $this->artisan('migrate')->assertSuccessful();
 
         $media = Media::sole();
 
@@ -107,8 +110,9 @@ class PlaceImageMigrationTest extends TestCase
     {
         $this->legacyPlace();
         $place = Place::factory()->create();
-        $itinerary = Itinerary::factory()->create();
-        $itinerary->places()->attach($place);
+        // Inserted directly: the legacy schema has no itinerary status column yet.
+        $itineraryId = DB::table('itineraries')->insertGetId([...Arr::except(Itinerary::factory()->raw(), 'status'), 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('itinerary_place')->insert(['itinerary_id' => $itineraryId, 'place_id' => $place->id]);
         $columns = Schema::getColumns('places');
         $foreignKeys = Schema::getForeignKeys('places');
         $rows = $this->placeRows();
@@ -119,7 +123,7 @@ class PlaceImageMigrationTest extends TestCase
         $this->assertEquals($foreignKeys, Schema::getForeignKeys('places'));
         $this->assertEquals($rows, $this->placeRows());
         $this->assertNull($place->fresh()->imageUrl());
-        $this->assertSame([$place->id], DB::table('itinerary_place')->where('itinerary_id', $itinerary->id)->pluck('place_id')->all());
+        $this->assertSame([$place->id], DB::table('itinerary_place')->where('itinerary_id', $itineraryId)->pluck('place_id')->all());
         $this->assertDatabaseCount('media', 1);
     }
 

@@ -624,11 +624,12 @@ class UserzoneItineraryTest extends TestCase
         $this->assertDatabaseCount('itineraries', 0);
     }
 
-    public function test_public_pages_show_managed_itineraries()
+    public function test_public_pages_show_managed_itineraries_once_approved()
     {
         $place = Place::factory()->create(['name' => 'Park Güell']);
+        $owner = User::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($owner)
             ->post('/user/itineraries', $this->validData([
                 'title' => 'Gaudí',
                 'city_id' => $place->city_id,
@@ -636,6 +637,10 @@ class UserzoneItineraryTest extends TestCase
             ]));
 
         $itinerary = Itinerary::sole();
+        $this->post(route('userzone.itineraries.submit', $itinerary))->assertSessionHasNoErrors();
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('userzone.itineraries.approve', $itinerary))
+            ->assertSessionHasNoErrors();
         $this->post('/logout');
         $this->assertGuest();
 
@@ -918,6 +923,8 @@ class UserzoneItineraryTest extends TestCase
             'place_ids' => [$b->id, $a->id],
         ]));
         $itinerary = Itinerary::sole();
+        // Only published itineraries reach Welcome; editing a published one keeps it published.
+        $itinerary->update(['status' => Itinerary::PUBLISHED]);
         $this->assertSame(2, $this->welcomePlacesCount());
 
         $update = fn (array $placeIds) => $this->actingAs($user)

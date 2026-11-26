@@ -18,6 +18,18 @@ class ItineraryFactory extends Factory
             'title' => fake()->sentence(),
             'user_id' => User::factory(),
             'city_id' => City::factory(),
+            // Factory itineraries stand for existing public content; draft() and pending() model the workflow.
+            'status' => Itinerary::PUBLISHED,
         ];
+    }
+
+    public function draft(): static
+    {
+        return $this->state(['status' => Itinerary::DRAFT]);
+    }
+
+    public function pending(): static
+    {
+        return $this->state(['status' => Itinerary::PENDING]);
     }
 }

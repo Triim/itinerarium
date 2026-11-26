@@ -43,11 +43,12 @@ class RealTravelSeeder extends Seeder
         }
 
         foreach ($this->readJson('itineraries.json')['itineraries'] as $row) {
+            // Prepared routes are public content; the status is only set when the itinerary is created.
             $itinerary = Itinerary::firstOrCreate([
                 'title' => $row['title'],
                 'city_id' => $cities[$row['city']]->id,
                 'user_id' => $author->id,
-            ]);
+            ], ['status' => Itinerary::PUBLISHED]);
 
             $itinerary->syncStops(array_map(fn (string $key) => $placeIds[$key], $row['stops']));
         }

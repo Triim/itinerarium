@@ -74,7 +74,7 @@ class WelcomeCacheTest extends TestCase
         $this->assertSame([], $this->cards());
     }
 
-    public function test_creating_an_itinerary_refreshes_the_cache()
+    public function test_creating_a_draft_keeps_it_off_the_cached_list()
     {
         $author = User::factory()->create();
         $city = City::factory()->create();
@@ -89,6 +89,33 @@ class WelcomeCacheTest extends TestCase
             ])
             ->assertRedirect(route('userzone.itineraries.index'));
 
+        $this->assertSame(Itinerary::DRAFT, Itinerary::sole()->status);
+        $this->assertSame([], $this->cards());
+    }
+
+    public function test_approving_an_itinerary_refreshes_the_cache()
+    {
+        $author = User::factory()->create();
+        $city = City::factory()->create();
+        $places = Place::factory()->count(2)->for($city)->create();
+
+        $this->actingAs($author)
+            ->post(route('userzone.itineraries.store'), [
+                'title' => 'Brand new itinerary',
+                'city_id' => $city->id,
+                'place_ids' => $places->pluck('id')->all(),
+            ]);
+        $itinerary = Itinerary::sole();
+        $this->actingAs($author)->post(route('userzone.itineraries.submit', $itinerary));
+        // The empty list is now cached, and the pending itinerary is still not on it.
+        $this->assertSame([], $this->cards());
+        $this->assertSame([], Cache::get(Itinerary::WELCOME_CACHE_KEY));
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('userzone.itineraries.approve', $itinerary))
+            ->assertRedirect(route('userzone.itineraries.index'));
+
+        // Well within the fresh window, so only invalidation can explain the new card.
         $cards = $this->cards();
         $this->assertCount(1, $cards);
         $this->assertSame('Brand new itinerary', $cards[0]['title']);
@@ -175,9 +202,14 @@ class WelcomeCacheTest extends TestCase
             ])
             ->assertRedirect();
 
+        // A draft stays off the list even when it is rebuilt during saving.
+        $this->assertSame([], $this->cards());
+
+        $itinerary = Itinerary::sole();
+        $itinerary->submitForReview();
+        $itinerary->approve();
         $this->assertSame(2, $this->cards()[0]['places_count']);
 
-        $itinerary = Itinerary::first();
         $this->actingAs($author)
             ->put(route('userzone.itineraries.update', $itinerary), [
                 'title' => $itinerary->title,
