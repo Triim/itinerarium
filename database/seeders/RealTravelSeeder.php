@@ -14,14 +14,18 @@ use Illuminate\Support\Arr;
  *
  * Running it again adds nothing new: cities, places and itineraries are matched
  * by name or title, places that already have an image keep it, and the stops
- * are synced to the bundled order.
+ * are synced to the bundled order. The photographs and their credits are listed
+ * in images.json; `php artisan real-travel:sync-images` updates an existing
+ * installation whose places already have older bundled images.
  */
 class RealTravelSeeder extends Seeder
 {
     public function run(): void
     {
         $author = User::where('email', 'test@example.com')->firstOrFail();
-        $data = $this->readJson('places.json');
+        $data = RealTravelImages::readJson('places.json');
+        $images = new RealTravelImages;
+        $bundled = $images->images();
 
         $cities = [];
         foreach ($data['cities'] as $city) {
@@ -35,14 +39,14 @@ class RealTravelSeeder extends Seeder
                 Arr::only($row, ['description', 'latitude', 'longitude', 'themes', 'films']),
             );
 
-            if ($row['image'] !== null && ! $place->hasMedia('images')) {
-                $this->attachImage($place, $row['image']);
+            if (isset($bundled[$row['key']]) && ! $place->hasMedia('images')) {
+                $images->attach($place, $bundled[$row['key']]);
             }
 
             $placeIds[$row['key']] = $place->id;
         }
 
-        foreach ($this->readJson('itineraries.json')['itineraries'] as $row) {
+        foreach (RealTravelImages::readJson('itineraries.json')['itineraries'] as $row) {
             // Prepared routes are public content; the status is only set when the itinerary is created.
             $itinerary = Itinerary::firstOrCreate([
                 'title' => $row['title'],
@@ -52,25 +56,5 @@ class RealTravelSeeder extends Seeder
 
             $itinerary->syncStops(array_map(fn (string $key) => $placeIds[$key], $row['stops']));
         }
-    }
-
-    private function readJson(string $file): array
-    {
-        return json_decode(file_get_contents(database_path("data/real-travel/{$file}")), true, flags: JSON_THROW_ON_ERROR);
-    }
-
-    /**
-     * The images are bundled in one tar archive, read through PHP's built-in phar:// stream.
-     */
-    private function attachImage(Place $place, string $image): void
-    {
-        $stream = fopen('phar://'.database_path("data/real-travel/images.tar/{$image}"), 'rb');
-
-        $place->addMediaFromStream($stream)
-            ->usingName(pathinfo($image, PATHINFO_FILENAME))
-            ->usingFileName(basename($image))
-            ->toMediaCollection('images');
-
-        fclose($stream);
     }
 }

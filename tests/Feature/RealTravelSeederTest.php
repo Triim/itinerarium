@@ -7,8 +7,10 @@ use App\Models\Itinerary;
 use App\Models\Place;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\RealTravelImages;
 use Database\Seeders\RealTravelSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -122,7 +124,7 @@ class RealTravelSeederTest extends TestCase
         $this->assertSame(['The Dreamers', 'Funny Face', 'The Da Vinci Code'], $louvre->films);
         $this->assertSame(['landmark', 'film', 'architecture', 'experience'], $louvre->themes);
         $this->assertCount(1, $louvre->getMedia('images'));
-        $this->assertSame('louvre-the-dreamers.jpg', $louvre->getFirstMedia('images')->file_name);
+        $this->assertSame('it-080-louvre.jpg', $louvre->getFirstMedia('images')->file_name);
     }
 
     public function test_source_categories_are_mapped_to_the_existing_themes()
@@ -196,14 +198,17 @@ class RealTravelSeederTest extends TestCase
 
     public function test_the_bundled_images_are_attached_to_the_right_places_with_conversions()
     {
-        $this->assertSame(30, Media::where('collection_name', 'images')->count());
-        $this->assertSame(30, Media::distinct()->count('model_id'));
+        $this->assertSame(97, Media::where('collection_name', 'images')->count());
+        $this->assertSame(97, Media::distinct()->count('model_id'));
 
         $expected = [
-            ['Paris', 'Café des Deux Moulins', 'cafe-des-deux-moulins.jpg'],
-            ['Paris', 'Père Lachaise Cemetery', 'pere-lachaise.png'],
-            ['Brussels', 'Grand-Place', 'grand-place.jpg'],
-            ['Bruges', 'Groeningemuseum', 'groeningemuseum.jpg'],
+            ['Paris', 'Café des Deux Moulins', 'it-085-cafe-des-deux-moulins.jpg'],
+            ['Paris', 'Père Lachaise Cemetery', 'it-098-cimetiere-du-pere-lachaise.jpg'],
+            ['Brussels', 'Grand-Place', 'it-111-grand-place-grote-markt.jpg'],
+            ['Bruges', 'Groeningemuseum', 'it-119-groeningemuseum.jpg'],
+            ['Hamburg', 'Elbphilharmonie', 'it-065-elbphilharmonie.jpg'],
+            ['Berlin', 'Tempelhofer Feld', 'it-004-tempelhofer-feld.jpg'],
+            ['Madrid', 'Temple of Debod', 'it-036-templo-de-debod.jpg'],
         ];
         foreach ($expected as [$city, $name, $file]) {
             $media = $this->place($city, $name)->getFirstMedia('images');
@@ -216,7 +221,29 @@ class RealTravelSeederTest extends TestCase
             }
         }
 
-        $this->assertNull($this->place('Hamburg', 'Elbphilharmonie')->getFirstMedia('images'));
+        // No verified photograph: the Place stays without an image rather than keeping an old one.
+        foreach ([['Paris', 'Residence Rose Garden'], ['Paris', "L'Écoute sculpture"], ['Bruges', "'Let it go' stop"], ['Brussels', 'Waffle breakfast stop'], ['Berlin', 'LEGO Store Berlin']] as [$city, $name]) {
+            $this->assertNull($this->place($city, $name)->getFirstMedia('images'), $name);
+        }
+        $this->assertSame(0, Media::whereIn('file_name', array_column((new RealTravelImages)->retired(), 'file_name'))->count());
+    }
+
+    public function test_every_seeded_image_is_the_manifest_photo_of_its_place_with_its_credit()
+    {
+        $images = (new RealTravelImages)->images();
+        $names = array_column(RealTravelImages::readJson('places.json')['places'], 'name', 'key');
+
+        $media = Media::with('model')->get();
+        $this->assertCount(count($images), $media);
+        foreach ($media as $item) {
+            $key = array_search($item->model->name, $names, true);
+            $image = $images[$key];
+
+            $this->assertSame(basename($image['file']), $item->file_name, $key);
+            $this->assertSame(['file' => $image['file'], 'sha256' => $image['sha256']], $item->getCustomProperty('seed_image'));
+            $this->assertSame(Arr::only($image, RealTravelImages::CREDIT), $item->getCustomProperty('credit'));
+            $this->assertSame($image['sha256'], hash('sha256', Storage::disk('public')->get($item->getPathRelativeToRoot())));
+        }
     }
 
     public function test_running_the_real_travel_seeder_again_adds_nothing()
@@ -270,7 +297,7 @@ class RealTravelSeederTest extends TestCase
                 ->component('places/show')
                 ->where('place.films', ['The Dreamers', 'Funny Face', 'The Da Vinci Code'])
                 ->has('place.themes', 4)
-                ->where('place.image_url', fn (string $url) => str_contains($url, 'louvre-the-dreamers'))
+                ->where('place.image_url', fn (string $url) => str_contains($url, 'it-080-louvre'))
                 ->has('itineraries', 1));
 
         $paris = $this->itinerary('Paris on film');

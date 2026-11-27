@@ -38,8 +38,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-mercado-de-san-miguel",
@@ -53,8 +52,7 @@
                 "unusual",
                 "local_food"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-palacio-real-almudena",
@@ -68,8 +66,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-plaza-de-oriente",
@@ -82,8 +79,7 @@
                 "landmark",
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-plaza-de-espana",
@@ -96,8 +92,7 @@
                 "landmark",
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-templo-de-debod",
@@ -111,8 +106,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-gran-via-callao",
@@ -129,8 +123,7 @@
             "films": [
                 "The Day of the Beast",
                 "Open Your Eyes"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "madrid-puerta-del-sol",
@@ -146,8 +139,7 @@
             ],
             "films": [
                 "May God Save Us"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "madrid-circulo-de-bellas-artes",
@@ -163,8 +155,7 @@
             ],
             "films": [
                 "Women on the Verge of a Nervous Breakdown"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "madrid-plaza-de-cibeles",
@@ -178,8 +169,7 @@
                 "architecture",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-puerta-de-alcala",
@@ -193,8 +183,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-retiro-estanque-grande",
@@ -207,8 +196,7 @@
                 "landmark",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-palacio-de-cristal",
@@ -222,8 +210,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-angel-caido",
@@ -239,8 +226,7 @@
             ],
             "films": [
                 "The Day of the Beast"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "madrid-museo-del-prado",
@@ -253,8 +239,7 @@
                 "landmark",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-museo-reina-sofia",
@@ -270,8 +255,7 @@
             ],
             "films": [
                 "The Limits of Control"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "madrid-atocha-station",
@@ -284,8 +268,7 @@
                 "architecture",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-museo-cerralbo",
@@ -299,8 +282,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-san-antonio-de-los-alemanes",
@@ -314,8 +296,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-casa-de-las-siete-chimeneas",
@@ -328,8 +309,7 @@
                 "history",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-mirador-alfonso-xii",
@@ -341,8 +321,7 @@
             "themes": [
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "madrid-jardin-del-principe-de-anglona",
@@ -356,8 +335,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-bauhaus-archiv-temporary",
@@ -370,8 +348,7 @@
                 "architecture",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-bahnhof-zoo",
@@ -386,8 +363,7 @@
             ],
             "films": [
                 "Christiane F. (1981)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-kaiser-wilhelm-gedaechtniskirche",
@@ -403,8 +379,7 @@
             ],
             "films": [
                 "Wings of Desire (1987)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-lego-store",
@@ -416,8 +391,7 @@
             "themes": [
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-shell-haus",
@@ -429,8 +403,7 @@
             "themes": [
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-bendlerblock",
@@ -442,8 +415,7 @@
             "themes": [
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-neue-nationalgalerie",
@@ -456,8 +428,7 @@
                 "architecture",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-staatsbibliothek",
@@ -472,8 +443,7 @@
             ],
             "films": [
                 "Wings of Desire (1987)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-holocaust-memorial",
@@ -486,8 +456,7 @@
                 "landmark",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-hansa-studios",
@@ -500,8 +469,7 @@
                 "history",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-topography-of-terror",
@@ -513,8 +481,7 @@
             "themes": [
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-victoria-spaeti",
@@ -529,8 +496,7 @@
             ],
             "films": [
                 "Victoria (2015)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-anhalter-bahnhof",
@@ -543,8 +509,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-platz-der-luftbruecke",
@@ -559,8 +524,7 @@
             ],
             "films": [
                 "Possession (1981)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-tempelhofer-feld",
@@ -574,8 +538,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-schwerbelastungskoerper",
@@ -588,8 +551,7 @@
                 "history",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-pallasbunker-pallasseum",
@@ -603,8 +565,7 @@
                 "history",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-stasi-headquarters",
@@ -619,8 +580,7 @@
             ],
             "films": [
                 "The Lives of Others"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-frankfurter-tor",
@@ -636,8 +596,7 @@
             ],
             "films": [
                 "The Lives of Others"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-cafe-sibylle",
@@ -650,8 +609,7 @@
                 "history",
                 "local_food"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-strausberger-platz",
@@ -667,8 +625,7 @@
             ],
             "films": [
                 "Good Bye, Lenin! (2003)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-kino-international-cafe-moskau",
@@ -681,8 +638,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-karl-marx-allee-24-flying-lenin",
@@ -696,8 +652,7 @@
             ],
             "films": [
                 "Good Bye, Lenin! (2003)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-berolinastrasse-21-kerner-home",
@@ -711,8 +666,7 @@
             ],
             "films": [
                 "Good Bye, Lenin! (2003)"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-haus-des-lehrers",
@@ -726,8 +680,7 @@
                 "history",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-hackesche-hoefe",
@@ -740,8 +693,7 @@
                 "architecture",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "berlin-claerchens-ballhaus",
@@ -757,8 +709,7 @@
             ],
             "films": [
                 "Inglourious Basterds"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "berlin-berlin-wall-memorial",
@@ -771,8 +722,7 @@
                 "landmark",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-hauptbahnhof",
@@ -784,8 +734,7 @@
             "themes": [
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-rathaus",
@@ -798,8 +747,7 @@
                 "landmark",
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-nikolaifleet",
@@ -812,8 +760,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-deichstrasse",
@@ -826,8 +773,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-chilehaus",
@@ -840,8 +786,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-speicherstadt",
@@ -855,8 +800,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-magellan-terrassen",
@@ -869,8 +813,7 @@
                 "architecture",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-elbphilharmonie",
@@ -883,8 +826,7 @@
                 "landmark",
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-traditionsschiffhafen",
@@ -897,8 +839,7 @@
                 "history",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-landungsbruecken",
@@ -912,8 +853,7 @@
                 "local_food",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-alter-elbtunnel",
@@ -927,8 +867,7 @@
                 "history",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-st-michaelis",
@@ -941,8 +880,7 @@
                 "landmark",
                 "architecture"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-zum-goldenen-handschuh",
@@ -958,8 +896,7 @@
             ],
             "films": [
                 "The Golden Glove"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "hamburg-grosse-freiheit",
@@ -972,8 +909,7 @@
                 "history",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-beatles-platz",
@@ -985,8 +921,7 @@
             "themes": [
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-feldstrassenbunker",
@@ -1000,8 +935,7 @@
                 "history",
                 "unusual"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-karolinenviertel",
@@ -1013,8 +947,7 @@
             "themes": [
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-schanzenviertel",
@@ -1027,8 +960,7 @@
                 "local_food",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-dockland",
@@ -1041,8 +973,7 @@
                 "architecture",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-grosse-elbstrasse",
@@ -1055,8 +986,7 @@
                 "local_food",
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "hamburg-fischmarkt",
@@ -1069,8 +999,7 @@
                 "history",
                 "local_food"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "paris-louvre",
@@ -1089,8 +1018,7 @@
                 "The Dreamers",
                 "Funny Face",
                 "The Da Vinci Code"
-            ],
-            "image": "paris/louvre-the-dreamers.jpg"
+            ]
         },
         {
             "key": "paris-pont-de-bir-hakeim",
@@ -1105,8 +1033,7 @@
             ],
             "films": [
                 "Last Tango in Paris"
-            ],
-            "image": "paris/pont-de-bir-hakeim.jpg"
+            ]
         },
         {
             "key": "paris-saint-etienne-du-mont",
@@ -1122,8 +1049,7 @@
             ],
             "films": [
                 "Midnight in Paris"
-            ],
-            "image": "paris/saint-etienne-du-mont.jpg"
+            ]
         },
         {
             "key": "paris-square-louis-xvi",
@@ -1139,8 +1065,7 @@
             ],
             "films": [
                 "The Conformist"
-            ],
-            "image": "paris/square-louis-xvi.jpg"
+            ]
         },
         {
             "key": "paris-moulin-rouge",
@@ -1156,8 +1081,7 @@
             ],
             "films": [
                 "Moulin Rouge!"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "paris-cafe-des-deux-moulins",
@@ -1172,8 +1096,7 @@
             ],
             "films": [
                 "Amélie"
-            ],
-            "image": "paris/cafe-des-deux-moulins.jpg"
+            ]
         },
         {
             "key": "paris-rue-foyatier",
@@ -1189,8 +1112,7 @@
             ],
             "films": [
                 "John Wick"
-            ],
-            "image": "paris/rue-foyatier.jpg"
+            ]
         },
         {
             "key": "paris-pont-neuf",
@@ -1206,8 +1128,7 @@
             ],
             "films": [
                 "The Lovers on the Bridge"
-            ],
-            "image": "paris/pont-neuf.jpg"
+            ]
         },
         {
             "key": "paris-shakespeare-and-company",
@@ -1223,8 +1144,7 @@
             ],
             "films": [
                 "Before Sunset"
-            ],
-            "image": "paris/shakespeare-and-company.jpg"
+            ]
         },
         {
             "key": "paris-place-de-la-concorde",
@@ -1240,8 +1160,7 @@
             ],
             "films": [
                 "The Devil Wears Prada"
-            ],
-            "image": "paris/place-de-la-concorde.jpg"
+            ]
         },
         {
             "key": "paris-caveau-de-la-huchette",
@@ -1257,8 +1176,7 @@
             ],
             "films": [
                 "La La Land"
-            ],
-            "image": "paris/caveau-de-la-huchette.jpg"
+            ]
         },
         {
             "key": "paris-aurouze",
@@ -1273,8 +1191,7 @@
             ],
             "films": [
                 "Ratatouille"
-            ],
-            "image": "paris/aurouze.jpg"
+            ]
         },
         {
             "key": "paris-cafe-de-flore",
@@ -1290,8 +1207,7 @@
             ],
             "films": [
                 "Emily in Paris"
-            ],
-            "image": "paris/cafe-de-flore.jpg"
+            ]
         },
         {
             "key": "paris-tuileries-metro",
@@ -1306,8 +1222,7 @@
             ],
             "films": [
                 "Paris, je t'aime"
-            ],
-            "image": "paris/tuileries-metro.png"
+            ]
         },
         {
             "key": "paris-passerelle-senghor",
@@ -1322,8 +1237,7 @@
             ],
             "films": [
                 "The Intouchables"
-            ],
-            "image": "paris/passerelle-senghor.jpg"
+            ]
         },
         {
             "key": "paris-lecoute-statue",
@@ -1339,8 +1253,7 @@
             ],
             "films": [
                 "La Haine"
-            ],
-            "image": "paris/lecoute-statue.jpg"
+            ]
         },
         {
             "key": "paris-pont-alexandre-iii",
@@ -1356,8 +1269,7 @@
             ],
             "films": [
                 "Angel-A"
-            ],
-            "image": "paris/pont-alexandre-iii.jpg"
+            ]
         },
         {
             "key": "paris-pere-lachaise",
@@ -1373,8 +1285,7 @@
             ],
             "films": [
                 "Paris, je t'aime"
-            ],
-            "image": "paris/pere-lachaise.png"
+            ]
         },
         {
             "key": "paris-palais-royal",
@@ -1391,8 +1302,7 @@
             ],
             "films": [
                 "Mission: Impossible"
-            ],
-            "image": "paris/palais-royal.jpg"
+            ]
         },
         {
             "key": "paris-36-quai-des-orfevres",
@@ -1407,8 +1317,7 @@
             ],
             "films": [
                 "36 Quai des Orfèvres"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "paris-notre-dame",
@@ -1425,8 +1334,7 @@
             ],
             "films": [
                 "The Hunchback of Notre Dame"
-            ],
-            "image": "paris/notre-dame.jpg"
+            ]
         },
         {
             "key": "paris-arc-de-triomphe",
@@ -1442,8 +1350,7 @@
             ],
             "films": [
                 "Taxi"
-            ],
-            "image": "paris/arc-de-triomphe.jpg"
+            ]
         },
         {
             "key": "paris-residence-rose-garden",
@@ -1457,8 +1364,7 @@
             ],
             "films": [
                 "In the House"
-            ],
-            "image": "paris/residence-rose-garden.jpg"
+            ]
         },
         {
             "key": "paris-temple-de-la-sibylle",
@@ -1474,8 +1380,7 @@
             ],
             "films": [
                 "Amour"
-            ],
-            "image": "paris/temple-de-la-sibylle.png"
+            ]
         },
         {
             "key": "brussels-waffle-breakfast",
@@ -1487,8 +1392,7 @@
             "themes": [
                 "local_food"
             ],
-            "films": [],
-            "image": "brussels/waffle-breakfast.jpg"
+            "films": []
         },
         {
             "key": "brussels-zinneke-pis",
@@ -1501,8 +1405,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": "brussels/zinneke-pis.jpg"
+            "films": []
         },
         {
             "key": "brussels-jeanneke-pis",
@@ -1515,8 +1418,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": "brussels/jeanneke-pis.jpg"
+            "films": []
         },
         {
             "key": "brussels-manneken-pis",
@@ -1530,8 +1432,7 @@
                 "unusual",
                 "experience"
             ],
-            "films": [],
-            "image": "brussels/manneken-pis.jpg"
+            "films": []
         },
         {
             "key": "brussels-mont-des-arts",
@@ -1543,8 +1444,7 @@
             "themes": [
                 "experience"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "brussels-galeries-royales-saint-hubert",
@@ -1557,8 +1457,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "brussels-grand-place",
@@ -1572,8 +1471,7 @@
                 "architecture",
                 "history"
             ],
-            "films": [],
-            "image": "brussels/grand-place.jpg"
+            "films": []
         },
         {
             "key": "bruges-breakfast-stop",
@@ -1585,8 +1483,7 @@
             "themes": [
                 "local_food"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "bruges-lunch-stop",
@@ -1598,8 +1495,7 @@
             "themes": [
                 "local_food"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "bruges-dinner-stop",
@@ -1611,8 +1507,7 @@
             "themes": [
                 "local_food"
             ],
-            "films": [],
-            "image": null
+            "films": []
         },
         {
             "key": "bruges-let-it-go-stop",
@@ -1624,8 +1519,7 @@
             "themes": [
                 "unusual"
             ],
-            "films": [],
-            "image": "bruges/let-it-go-stop.jpg"
+            "films": []
         },
         {
             "key": "bruges-belfry",
@@ -1642,8 +1536,7 @@
             ],
             "films": [
                 "In Bruges"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "bruges-basilica-of-the-holy-blood",
@@ -1659,8 +1552,7 @@
             ],
             "films": [
                 "In Bruges"
-            ],
-            "image": "bruges/basilica-of-the-holy-blood.jpg"
+            ]
         },
         {
             "key": "bruges-canal-boat-ride",
@@ -1676,8 +1568,7 @@
             ],
             "films": [
                 "In Bruges"
-            ],
-            "image": null
+            ]
         },
         {
             "key": "bruges-groeningemuseum",
@@ -1692,8 +1583,7 @@
             ],
             "films": [
                 "In Bruges"
-            ],
-            "image": "bruges/groeningemuseum.jpg"
+            ]
         },
         {
             "key": "bruges-wait-for-the-call-stop",
@@ -1708,8 +1598,7 @@
             ],
             "films": [
                 "In Bruges"
-            ],
-            "image": null
+            ]
         }
     ]
 }
