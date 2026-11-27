@@ -44,7 +44,7 @@ class WelcomeTest extends TestCase
                 ->where('itineraries', fn ($itineraries) => collect($itineraries)->pluck('id')->all() === [$newest->id, $sameTimeHigh->id, $sameTimeLow->id]));
     }
 
-    public function test_welcome_cards_contain_exactly_the_title_slug_city_author_and_place_count()
+    public function test_welcome_cards_contain_exactly_the_title_slug_city_author_place_count_and_cover()
     {
         $author = User::factory()->create(['name' => 'Ada Author']);
         $barcelona = City::factory()->create(['name' => 'Barcelona']);
@@ -61,7 +61,9 @@ class WelcomeTest extends TestCase
                     ->where('slug', $itinerary->slug)
                     ->where('places_count', 3)
                     ->where('city', ['id' => $barcelona->id, 'name' => 'Barcelona'])
-                    ->where('user', ['id' => $author->id, 'name' => 'Ada Author'])));
+                    ->where('user', ['id' => $author->id, 'name' => 'Ada Author'])
+                    // None of the places has a photo, so the card shows the placeholder.
+                    ->where('cover', null)));
     }
 
     public function test_welcome_page_does_not_expose_private_author_fields()

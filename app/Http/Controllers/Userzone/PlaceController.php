@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Userzone;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
+use App\Models\Itinerary;
 use App\Models\Place;
 use Closure;
 use Illuminate\Http\RedirectResponse;
@@ -88,6 +89,10 @@ class PlaceController extends Controller
                 $this->addImage($place, $validated['image']);
             }
         });
+
+        // Its name and photo may be an itinerary cover on Welcome. Cleared after the commit,
+        // so a visit during the update cannot cache the old photo.
+        Itinerary::forgetWelcomeCache();
 
         return redirect()->route('userzone.places.index');
     }

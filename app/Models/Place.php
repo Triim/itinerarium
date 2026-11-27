@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Arr;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -100,6 +101,13 @@ class Place extends Model implements HasMedia
             ->fit(Fit::Max, 600, 300)
             ->keepOriginalImageFormat()
             ->nonQueued();
+
+        // City and itinerary covers: wide enough for the page header, far smaller than the original.
+        $this->addMediaConversion('cover')
+            ->performOnCollections('images')
+            ->fit(Fit::Max, 1200, 800)
+            ->keepOriginalImageFormat()
+            ->nonQueued();
     }
 
     public function imageUrl(?string $conversion = null): ?string
@@ -109,5 +117,32 @@ class Place extends Model implements HasMedia
         return $conversion === null
             ? $image?->getUrl()
             : $image?->getAvailableUrl([$conversion]);
+    }
+
+    /**
+     * The credit of a bundled photograph; uploaded images have none.
+     */
+    public function imageCredit(): ?array
+    {
+        $credit = $this->getFirstMedia('images')?->getCustomProperty('credit');
+
+        return is_array($credit)
+            ? Arr::only($credit, ['title', 'author', 'source_url', 'license', 'license_url', 'modifications'])
+            : null;
+    }
+
+    /**
+     * This place's photo as a city or itinerary cover, or null without a photo.
+     * Media generated before the cover conversion existed fall back to the smaller details image.
+     */
+    public function coverImage(): ?array
+    {
+        $image = $this->getFirstMedia('images');
+
+        return $image === null ? null : [
+            'url' => $image->getAvailableUrl(['cover', 'details']),
+            'credit' => $this->imageCredit(),
+            'place' => $this->only(['id', 'name']),
+        ];
     }
 }

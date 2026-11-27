@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\City;
 use App\Models\Place;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -42,16 +41,11 @@ class PlaceController extends Controller
 
     public function show(Place $place): Response
     {
-        // Bundled photographs carry their credit; uploaded images have none.
-        $credit = $place->getFirstMedia('images')?->getCustomProperty('credit');
-
         return Inertia::render('places/show', [
             'place' => [
                 ...$place->only(['id', 'name', 'description']),
                 'image_url' => $place->imageUrl('details'),
-                'image_credit' => is_array($credit)
-                    ? Arr::only($credit, ['title', 'author', 'source_url', 'license', 'license_url', 'modifications'])
-                    : null,
+                'image_credit' => $place->imageCredit(),
                 'themes' => $place->themeLabels(),
                 'films' => $place->films ?? [],
             ],

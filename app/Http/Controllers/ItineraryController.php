@@ -16,7 +16,7 @@ class ItineraryController extends Controller
         return Inertia::render('itineraries/index', [
             'itineraries' => Itinerary::select(['id', 'title', 'slug', 'city_id', 'user_id'])
                 ->published()
-                ->with(['city:id,name', 'user:id,name'])
+                ->with(['city:id,name', 'user:id,name', ...Itinerary::COVER_RELATIONS])
                 ->withCount('places')
                 ->orderBy('title')
                 ->get()
@@ -24,6 +24,7 @@ class ItineraryController extends Controller
                     ...$itinerary->only(['id', 'title', 'slug', 'places_count']),
                     'city' => $itinerary->city->only(['id', 'name']),
                     'user' => $itinerary->user->only(['id', 'name']),
+                    'cover' => $itinerary->coverImage(),
                 ]),
         ]);
     }
@@ -46,6 +47,7 @@ class ItineraryController extends Controller
             'places' => fn ($query) => $query
                 ->select(['places.id', 'places.name', 'places.description', 'places.themes', 'places.films'])
                 ->with('media'),
+            ...Itinerary::COVER_RELATIONS,
         ]);
 
         return Inertia::render('itineraries/show', [
@@ -53,6 +55,7 @@ class ItineraryController extends Controller
                 ...$itinerary->only(['id', 'title']),
                 'city' => $itinerary->city->only(['id', 'name']),
                 'user' => $itinerary->user->only(['id', 'name']),
+                'cover' => $itinerary->coverImage(),
                 'places' => $itinerary->places->map(fn (Place $place) => [
                     ...$place->only(['id', 'name', 'description']),
                     'image_url' => $place->imageUrl('thumbnail'),

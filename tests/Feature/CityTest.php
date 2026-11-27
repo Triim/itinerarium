@@ -31,8 +31,8 @@ class CityTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('cities/index', false)
                 ->has('cities', 3)
-                ->where('cities.0', ['id' => $berlin->id, 'name' => 'Berlin', 'itineraries_count' => 0, 'places_count' => 3])
-                ->where('cities.1', ['id' => $paris->id, 'name' => 'Paris', 'itineraries_count' => 1, 'places_count' => 1])
+                ->where('cities.0', ['id' => $berlin->id, 'name' => 'Berlin', 'itineraries_count' => 0, 'places_count' => 3, 'cover' => null])
+                ->where('cities.1', ['id' => $paris->id, 'name' => 'Paris', 'itineraries_count' => 1, 'places_count' => 1, 'cover' => null])
                 ->where('cities.2.name', 'Zurich')
                 ->where('cities.2.itineraries_count', 0)
                 ->where('cities.2.places_count', 0));
@@ -54,7 +54,7 @@ class CityTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('cities/show', false)
-                ->where('city', ['id' => $berlin->id, 'name' => 'Berlin', 'itineraries_count' => 2, 'places_count' => 3])
+                ->where('city', ['id' => $berlin->id, 'name' => 'Berlin', 'itineraries_count' => 2, 'places_count' => 3, 'cover' => null])
                 ->has('itineraries', 2)
                 ->where('itineraries.0', [
                     'id' => $empty->id,
@@ -62,6 +62,7 @@ class CityTest extends TestCase
                     'slug' => $empty->slug,
                     'places_count' => 0,
                     'user' => ['id' => $empty->user_id, 'name' => $empty->user->name],
+                    'cover' => null,
                 ])
                 ->where('itineraries.1', [
                     'id' => $westBerlin->id,
@@ -69,6 +70,7 @@ class CityTest extends TestCase
                     'slug' => $westBerlin->slug,
                     'places_count' => 3,
                     'user' => ['id' => $ada->id, 'name' => 'Ada'],
+                    'cover' => null,
                 ]));
     }
 
@@ -80,7 +82,7 @@ class CityTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('cities/show', false)
-                ->where('city', ['id' => $city->id, 'name' => 'Zurich', 'itineraries_count' => 0, 'places_count' => 0])
+                ->where('city', ['id' => $city->id, 'name' => 'Zurich', 'itineraries_count' => 0, 'places_count' => 0, 'cover' => null])
                 ->has('itineraries', 0));
     }
 

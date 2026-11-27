@@ -26,6 +26,9 @@ class Itinerary extends Model
 
     public const PUBLISHED = 'published';
 
+    /** Eager loaded by every list of itinerary cards, so coverImage() runs no queries per card. */
+    public const COVER_RELATIONS = ['coverPlace', 'city.coverPlace'];
+
     protected $fillable = ['title', 'user_id', 'city_id', 'status'];
 
     /** Matches the database default, so a new itinerary is a draft before it is saved too. */
@@ -80,7 +83,7 @@ class Itinerary extends Model
     {
         return Cache::flexible(self::WELCOME_CACHE_KEY, self::WELCOME_CACHE_TTL, fn () => static::select(['id', 'title', 'slug', 'city_id', 'user_id'])
             ->published()
-            ->with(['city:id,name', 'user:id,name'])
+            ->with(['city:id,name', 'user:id,name', ...self::COVER_RELATIONS])
             ->withCount('places')
             ->latest()
             ->orderByDesc('id')
@@ -93,6 +96,7 @@ class Itinerary extends Model
                 'places_count' => $itinerary->places_count,
                 'city' => $itinerary->city->only(['id', 'name']),
                 'user' => $itinerary->user->only(['id', 'name']),
+                'cover' => $itinerary->coverImage(),
             ])
             ->all());
     }
@@ -123,6 +127,23 @@ class Itinerary extends Model
             ->orderByPivot('position')
             ->orderBy('places.name')
             ->orderBy('places.id');
+    }
+
+    /**
+     * The first stop with a photo, in stop order. Limited, so it can be eager loaded for a list.
+     */
+    public function coverPlace(): BelongsToMany
+    {
+        return $this->places()->has('media')->with('media')->limit(1);
+    }
+
+    /**
+     * The photo of the first photographed stop, otherwise the city's cover, otherwise null.
+     * Lists eager load coverPlace and city.coverPlace, so this runs no queries for them.
+     */
+    public function coverImage(): ?array
+    {
+        return $this->coverPlace->first()?->coverImage() ?? $this->city->coverImage();
     }
 
     /**
