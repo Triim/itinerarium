@@ -1,30 +1,29 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Building2, Folder, LayoutGrid, MapPin, Route } from 'lucide-react';
+import { Building2, Home, LayoutGrid, MapPin, Route } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const manageNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         url: '/dashboard',
         icon: LayoutGrid,
     },
     {
-        title: 'Places',
-        url: '/user/places',
-        icon: MapPin,
-    },
-    {
-        title: 'Itineraries',
+        title: 'My Itineraries',
         url: '/user/itineraries',
         icon: Route,
     },
     {
-        title: 'Cities',
+        title: 'Manage Places',
+        url: '/user/places',
+        icon: MapPin,
+    },
+    {
+        title: 'Manage Cities',
         url: '/user/cities',
         icon: Building2,
     },
@@ -32,22 +31,32 @@ const mainNavItems: NavItem[] = [
 
 const adminOnlyUrls = ['/user/places', '/user/cities'];
 
-const footerNavItems: NavItem[] = [
+const exploreNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Home',
+        url: '/',
+        icon: Home,
     },
     {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
+        title: 'Itineraries',
+        url: '/itineraries',
+        icon: Route,
+    },
+    {
+        title: 'Cities',
+        url: '/cities',
+        icon: Building2,
+    },
+    {
+        title: 'Places',
+        url: '/places',
+        icon: MapPin,
     },
 ];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const visibleNavItems = mainNavItems.filter((item) => auth.user.is_admin || !adminOnlyUrls.includes(item.url));
+    const visibleManageNavItems = manageNavItems.filter((item) => auth.user.is_admin || !adminOnlyUrls.includes(item.url));
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -55,7 +64,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href="/" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -64,11 +73,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={visibleNavItems} />
+                <NavMain label="Manage" items={visibleManageNavItems} />
+                <NavMain label="Explore" items={exploreNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
