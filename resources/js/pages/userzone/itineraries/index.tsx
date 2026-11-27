@@ -94,7 +94,7 @@ export default function Index({ itineraries }: Props) {
                                             Submit for review
                                         </Button>
                                     )}
-                                    {itinerary.status === 'pending' && Boolean(auth.user.is_admin) && (
+                                    {itinerary.status === 'pending' && auth.user.is_admin && (
                                         <Button
                                             type="button"
                                             size="sm"

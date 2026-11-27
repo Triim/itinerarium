@@ -313,7 +313,7 @@ class WelcomeCacheTest extends TestCase
         $this->travel(120)->seconds();
         $itinerary->update(['title' => 'Edited']);
 
-        $this->assertNull(Cache::get('illuminate:cache:flexible:created:'.self::KEY));
+        $this->assertNull(Cache::get(self::KEY));
         $this->assertSame('Edited', $this->cards()[0]['title']);
     }
 

@@ -98,13 +98,11 @@ class Itinerary extends Model
     }
 
     /**
-     * Cache::flexible() also stores when the value was created. Forgetting that
-     * timestamp too makes any refresh already deferred for the old value skip.
+     * Without the cached value, the next Welcome visit rebuilds the list at once.
      */
     public static function forgetWelcomeCache(): void
     {
         Cache::forget(self::WELCOME_CACHE_KEY);
-        Cache::forget('illuminate:cache:flexible:created:'.self::WELCOME_CACHE_KEY);
     }
 
     public function user(): BelongsTo

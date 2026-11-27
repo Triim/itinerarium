@@ -69,9 +69,7 @@ class ItineraryController extends Controller
                 // A place can be moved to another city after it was selected.
                 'place_ids' => $itinerary->places()
                     ->where('places.city_id', $itinerary->city_id)
-                    ->pluck('places.id')
-                    ->unique()
-                    ->values(),
+                    ->pluck('places.id'),
             ],
             ...$this->options(),
         ]);
@@ -105,7 +103,7 @@ class ItineraryController extends Controller
     {
         abort_unless($itinerary->canManage($request->user()), 403);
 
-        $itinerary->places()->detach();
+        // The database cascade removes its stops.
         $itinerary->delete();
 
         return redirect()->route('userzone.itineraries.index');

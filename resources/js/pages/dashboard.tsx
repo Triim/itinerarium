@@ -108,7 +108,7 @@ export default function Dashboard() {
                     <ShortcutList items={shortcuts} />
                 </section>
 
-                {auth.user.is_admin === true && (
+                {auth.user.is_admin && (
                     <section aria-labelledby="dashboard-admin" className="flex flex-col gap-3">
                         <h2 id="dashboard-admin" className="font-semibold">
                             Administration
