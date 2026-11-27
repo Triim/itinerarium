@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "triim/itinerarium",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Itinerarium: city travel itineraries built with Laravel, Inertia and React.",
     "keywords": [
         "laravel",
-        "framework"
+        "inertia",
+        "react",
+        "travel"
     ],
     "license": "MIT",
     "require": {

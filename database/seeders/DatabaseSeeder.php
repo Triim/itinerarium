@@ -6,7 +6,6 @@ use App\Models\City;
 use App\Models\Itinerary;
 use App\Models\Place;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,8 +18,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -84,9 +81,10 @@ class DatabaseSeeder extends Seeder
         $barcelonaOnFoot = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: Barcelona on Foot', 'status' => Itinerary::PUBLISHED]);
         $bangkokFirstDay = Itinerary::factory()->for($user)->for($bangkok)->create(['title' => 'Sample: First Day in Bangkok', 'status' => Itinerary::PUBLISHED]);
 
-        $barcelonaWeekend->places()->attach([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
-        $barcelonaOnFoot->places()->attach([$casaBatllo->id, $barcelonaCathedral->id]);
-        $bangkokFirstDay->places()->attach([$grandPalace->id, $watPho->id, $watArun->id]);
+        // The stops are numbered in this order, like the ones saved from the itinerary form.
+        $barcelonaWeekend->syncStops([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
+        $barcelonaOnFoot->syncStops([$casaBatllo->id, $barcelonaCathedral->id]);
+        $bangkokFirstDay->syncStops([$grandPalace->id, $watPho->id, $watArun->id]);
 
         // Real routes come after the samples, so they are the newest itineraries on the welcome page.
         $this->call(RealTravelSeeder::class);

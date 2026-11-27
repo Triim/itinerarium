@@ -152,7 +152,7 @@ npm run format:check      # Prettier check (npm run format rewrites files instea
 npm run build             # production frontend build
 ```
 
-The tests use an in-memory SQLite database (configured in `phpunit.xml`), so they never touch `database/database.sqlite`. Some page tests need the Vite manifest, so run `npm run build` before `php artisan test` on a fresh clone. The full suite takes a few minutes.
+The tests use an in-memory SQLite database (configured in `phpunit.xml`), so they never touch `database/database.sqlite`. Some page tests need the Vite manifest, so run `npm run build` before `php artisan test` on a fresh clone. The full suite takes about a minute.
 
 TypeScript type checking (`npx tsc --noEmit`) passes, but is not yet part of the CI workflow.
 
