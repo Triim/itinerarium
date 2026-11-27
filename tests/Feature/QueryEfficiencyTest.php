@@ -34,7 +34,7 @@ class QueryEfficiencyTest extends TestCase
         $urls = [
             '/',
             '/itineraries',
-            "/itineraries/{$itinerary->id}",
+            route('itineraries.show', $itinerary),
             '/cities',
             "/cities/{$city->id}",
             '/places',
@@ -71,6 +71,7 @@ class QueryEfficiencyTest extends TestCase
                 ->has('itineraries.0', fn (Assert $prop) => $prop
                     ->where('id', $itinerary->id)
                     ->where('title', $itinerary->title)
+                    ->where('slug', $itinerary->slug)
                     ->where('places_count', 2)
                     ->where('city', ['id' => $itinerary->city_id, 'name' => $itinerary->city->name])
                     ->where('user', ['id' => $itinerary->user_id, 'name' => $itinerary->user->name])));
@@ -89,11 +90,12 @@ class QueryEfficiencyTest extends TestCase
                 ->has('itineraries.0', fn (Assert $prop) => $prop
                     ->where('id', $itinerary->id)
                     ->where('title', $itinerary->title)
+                    ->where('slug', $itinerary->slug)
                     ->where('places_count', 2)
                     ->where('city', $city)
                     ->where('user', $user)));
 
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('itinerary', fn (Assert $prop) => $prop
@@ -126,7 +128,7 @@ class QueryEfficiencyTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->has('city', fn (Assert $prop) => $prop->hasAll(['id', 'name', 'itineraries_count', 'places_count']))
                 ->has('itineraries.0', fn (Assert $prop) => $prop
-                    ->hasAll(['id', 'title', 'places_count'])
+                    ->hasAll(['id', 'title', 'slug', 'places_count'])
                     ->where('user', ['id' => $itinerary->user_id, 'name' => $itinerary->user->name])));
 
         // No coordinates, films, descriptions, media paths or user records in the directory.
@@ -179,7 +181,7 @@ class QueryEfficiencyTest extends TestCase
 
             DB::flushQueryLog();
             DB::enableQueryLog();
-            $this->get("/itineraries/{$itinerary->id}")
+            $this->get(route('itineraries.show', $itinerary))
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page->has('itinerary.places', $total));
             $counts[$total] = count(DB::getQueryLog());

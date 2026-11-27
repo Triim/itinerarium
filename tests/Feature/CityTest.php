@@ -73,12 +73,14 @@ class CityTest extends TestCase
                 ->where('itineraries.0', [
                     'id' => $empty->id,
                     'title' => 'East Berlin',
+                    'slug' => $empty->slug,
                     'places_count' => 0,
                     'user' => ['id' => $empty->user_id, 'name' => $empty->user->name],
                 ])
                 ->where('itineraries.1', [
                     'id' => $westBerlin->id,
                     'title' => 'West Berlin',
+                    'slug' => $westBerlin->slug,
                     'places_count' => 3,
                     'user' => ['id' => $ada->id, 'name' => 'Ada'],
                 ]));

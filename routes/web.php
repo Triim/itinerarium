@@ -16,7 +16,7 @@ Route::get('/', WelcomeController::class)->name('home');
 
 Route::get('itineraries', [ItineraryController::class, 'index'])
     ->name('itineraries.index');
-Route::get('itineraries/{itinerary}', [ItineraryController::class, 'show'])
+Route::get('itineraries/{itinerary:slug}', [ItineraryController::class, 'show'])
     ->name('itineraries.show');
 
 Route::get('cities', [CityController::class, 'index'])

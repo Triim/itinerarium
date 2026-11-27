@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class Itinerary extends Model
 {
@@ -32,8 +33,36 @@ class Itinerary extends Model
 
     protected static function booted(): void
     {
+        // The slug needs the id, so it is set right after the insert. It is never
+        // regenerated, so editing the title keeps shared links working.
+        static::created(function (self $itinerary) {
+            $itinerary->slug ??= static::slugFor($itinerary->title, $itinerary->id);
+            $itinerary->saveQuietly();
+        });
         static::saved(fn () => static::forgetWelcomeCache());
         static::deleted(fn () => static::forgetWelcomeCache());
+    }
+
+    /**
+     * A readable, unique slug: the title plus the id suffix, e.g. a-weekend-in-madrid-17.
+     */
+    public static function slugFor(string $title, int $id): string
+    {
+        return (Str::slug(Str::limit($title, 80, '')) ?: 'itinerary').'-'.$id;
+    }
+
+    /**
+     * The public route binds {itinerary:slug}. An old numeric link (/itineraries/17) still
+     * resolves by id there, and the controller redirects it to the slug URL. Bindings
+     * without a field (the Userzone routes) are unchanged.
+     */
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        if ($field === 'slug' && ctype_digit((string) $value)) {
+            return static::find($value);
+        }
+
+        return parent::resolveRouteBinding($value, $field);
     }
 
     /**
@@ -49,7 +78,7 @@ class Itinerary extends Model
      */
     public static function recentForWelcome(): array
     {
-        return Cache::flexible(self::WELCOME_CACHE_KEY, self::WELCOME_CACHE_TTL, fn () => static::select(['id', 'title', 'city_id', 'user_id'])
+        return Cache::flexible(self::WELCOME_CACHE_KEY, self::WELCOME_CACHE_TTL, fn () => static::select(['id', 'title', 'slug', 'city_id', 'user_id'])
             ->published()
             ->with(['city:id,name', 'user:id,name'])
             ->withCount('places')
@@ -60,6 +89,7 @@ class Itinerary extends Model
             ->map(fn (self $itinerary) => [
                 'id' => $itinerary->id,
                 'title' => $itinerary->title,
+                'slug' => $itinerary->slug,
                 'places_count' => $itinerary->places_count,
                 'city' => $itinerary->city->only(['id', 'name']),
                 'user' => $itinerary->user->only(['id', 'name']),

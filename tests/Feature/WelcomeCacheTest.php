@@ -321,7 +321,7 @@ class WelcomeCacheTest extends TestCase
         $cached = Cache::get(self::KEY);
 
         $this->assertIsArray($cached);
-        $this->assertSame(['id', 'title', 'places_count', 'city', 'user'], array_keys($cached[0]));
+        $this->assertSame(['id', 'title', 'slug', 'places_count', 'city', 'user'], array_keys($cached[0]));
         $this->assertSame(['id' => $author->id, 'name' => 'Ada Author'], $cached[0]['user']);
         $this->assertSame(['id' => $itinerary->city_id, 'name' => $itinerary->city->name], $cached[0]['city']);
         $this->assertStringNotContainsString('ada.private@example.com', serialize($cached));

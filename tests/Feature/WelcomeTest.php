@@ -97,6 +97,7 @@ class WelcomeTest extends TestCase
                 ->has('itineraries.0', fn (Assert $card) => $card
                     ->where('id', $itinerary->id)
                     ->where('title', 'Barcelona on Foot')
+                    ->where('slug', $itinerary->slug)
                     ->where('places_count', 3)
                     ->where('city', ['id' => $barcelona->id, 'name' => 'Barcelona'])
                     ->where('user', ['id' => $author->id, 'name' => 'Ada Author'])));
@@ -121,17 +122,17 @@ class WelcomeTest extends TestCase
     {
         Itinerary::factory()->count(3)->create();
 
-        $ids = [];
+        $cards = [];
         $this->get('/')
             ->assertOk()
-            ->assertInertia(function (Assert $page) use (&$ids) {
-                $ids = collect($page->toArray()['props']['itineraries'])->pluck('id')->all();
+            ->assertInertia(function (Assert $page) use (&$cards) {
+                $cards = collect($page->toArray()['props']['itineraries'])->pluck('slug', 'id')->all();
             });
 
-        $this->assertCount(3, $ids);
+        $this->assertCount(3, $cards);
 
-        foreach ($ids as $id) {
-            $this->get(route('itineraries.show', $id))
+        foreach ($cards as $id => $slug) {
+            $this->get(route('itineraries.show', $slug))
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
                     ->component('itineraries/show')

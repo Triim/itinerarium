@@ -27,13 +27,13 @@ class CityController extends Controller
             'city' => $city->only(['id', 'name', 'itineraries_count', 'places_count']),
             'itineraries' => $city->itineraries()
                 ->published()
-                ->select(['id', 'title', 'user_id'])
+                ->select(['id', 'title', 'slug', 'user_id'])
                 ->with('user:id,name')
                 ->withCount('places')
                 ->orderBy('title')
                 ->get()
                 ->map(fn (Itinerary $itinerary) => [
-                    ...$itinerary->only(['id', 'title', 'places_count']),
+                    ...$itinerary->only(['id', 'title', 'slug', 'places_count']),
                     'user' => $itinerary->user->only(['id', 'name']),
                 ]),
         ]);
