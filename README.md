@@ -18,7 +18,7 @@ Registered users create their own Itineraries, choose and order the stops, and s
 
 ## Requirements
 
-- **PHP 8.4.1 or later.** The locked dependencies require it, even though `composer.json` still says `^8.2`.
+- **PHP 8.4.1 or later**, as required in `composer.json` and by the locked dependencies.
 - PHP extensions: `ctype`, `dom`, `exif`, `fileinfo`, `gd`, `iconv`, `mbstring`, `pdo_sqlite`, `sqlite3`, `xml`, `zip`. Run `php -m` to check which are installed. `gd` is used to resize the photographs.
 - **Composer 2**
 - **Node.js 22** with npm. CI uses this version.
@@ -55,13 +55,13 @@ php artisan storage:link
 
 ### Set the application URL
 
-`.env.example` sets `APP_URL=http://itinerarium.test`. That address only works if your computer is set up to serve it, for example with Laravel Herd or Valet. When you use the built-in PHP server instead, edit `.env`:
+`.env.example` sets `APP_URL=http://itinerarium.test`, the address Laravel Herd or Valet serves. When you use the built-in PHP server instead, you can set it to match:
 
 ```dotenv
 APP_URL=http://127.0.0.1:8000
 ```
 
-Photograph URLs are built from `APP_URL`. If it does not match the address in your browser, pages still load but the images will not.
+Pages and photographs work at either address, because photograph URLs are relative (`/storage/...`). `APP_URL` is used for links generated outside a browser request, such as in console commands.
 
 ### Run the application
 
@@ -86,10 +86,10 @@ To use compiled assets instead of the Vite development server, run `npm run buil
 
 The seeder creates two accounts. Both use the password `password`.
 
-| Role          | Email              | Password   |
-| ------------- | ------------------ | ---------- |
-| Administrator | `admin@admin.com`  | `password` |
-| Regular user  | `test@example.com` | `password` |
+| Role          | Email               | Password   |
+| ------------- | ------------------- | ---------- |
+| Administrator | `admin@example.com` | `password` |
+| Regular user  | `test@example.com`  | `password` |
 
 These credentials are for local demonstration only and must not be used on a public server. Visitors can also create a regular account at `/register`.
 
@@ -154,7 +154,7 @@ npm run build             # production frontend build
 
 The tests use an in-memory SQLite database (configured in `phpunit.xml`), so they never touch `database/database.sqlite`. Some page tests need the Vite manifest, so run `npm run build` before `php artisan test` on a fresh clone. The full suite takes a few minutes.
 
-TypeScript type checking (`npx tsc --noEmit`) currently reports three known errors in the authentication pages and is not part of the checks above.
+TypeScript type checking (`npx tsc --noEmit`) passes, but is not yet part of the CI workflow.
 
 The same lint, formatting, build and test steps run on GitHub Actions for every push and pull request to `main`. Results are on the repository's [Actions page](https://github.com/Triim/itinerarium/actions). The workflow is in `.github/workflows/tests.yml`.
 
