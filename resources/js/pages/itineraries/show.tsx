@@ -1,7 +1,9 @@
 import { type Cover, CoverHero } from '@/components/cover-image';
 import SiteLayout from '@/layouts/site-layout';
-import { Link } from '@inertiajs/react';
-import { Clapperboard, ImageOff } from 'lucide-react';
+import { type SharedData } from '@/types';
+import { Link, router, usePage } from '@inertiajs/react';
+import { Bookmark, BookmarkCheck, Clapperboard, ImageOff } from 'lucide-react';
+import { useState } from 'react';
 
 type Place = {
     id: number;
@@ -23,9 +25,84 @@ type Itinerary = {
 
 type Props = {
     itinerary: Itinerary;
+    saved: boolean;
 };
 
-export default function Show({ itinerary }: Props) {
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900';
+
+// The server checks every save; this only decides what to offer. Authors cannot save their own itinerary.
+function SaveControl({ itinerary, saved }: Props) {
+    const { auth } = usePage<SharedData>().props;
+    const [processing, setProcessing] = useState(false);
+    const [message, setMessage] = useState('');
+
+    if (!auth.user) {
+        return (
+            <p className="mt-4 text-sm text-stone-600">
+                <Link href={route('login')} className={`font-medium text-stone-900 underline underline-offset-4 ${focusRing}`}>
+                    Log in
+                </Link>{' '}
+                to save this itinerary.
+            </p>
+        );
+    }
+
+    if (auth.user.id === itinerary.user.id) {
+        return null;
+    }
+
+    const toggle = () => {
+        const options = {
+            preserveScroll: true,
+            onStart: () => setProcessing(true),
+            onFinish: () => setProcessing(false),
+            onSuccess: () => setMessage(saved ? 'Removed from your saved itineraries.' : 'Saved to your itineraries.'),
+        };
+
+        if (saved) {
+            router.delete(route('userzone.saved-itineraries.destroy', itinerary.id), options);
+        } else {
+            router.post(route('userzone.saved-itineraries.store', itinerary.id), {}, options);
+        }
+    };
+
+    const Icon = saved ? BookmarkCheck : Bookmark;
+
+    return (
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <button
+                type="button"
+                onClick={toggle}
+                disabled={processing}
+                aria-pressed={saved}
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-wait disabled:opacity-60 ${focusRing} ${
+                    saved
+                        ? 'border-stone-900 bg-stone-900 text-white hover:bg-stone-700'
+                        : 'border-stone-300 bg-white text-stone-900 hover:border-stone-900'
+                }`}
+            >
+                <Icon aria-hidden="true" className="size-4" />
+                {saved ? 'Saved' : 'Save itinerary'}
+            </button>
+            <p role="status" className="text-sm text-stone-600">
+                {message}
+                {message && saved && (
+                    <>
+                        {' '}
+                        <Link
+                            href={route('userzone.saved-itineraries.index')}
+                            className={`underline underline-offset-4 hover:text-stone-900 ${focusRing}`}
+                        >
+                            View saved itineraries
+                        </Link>
+                    </>
+                )}
+            </p>
+        </div>
+    );
+}
+
+export default function Show({ itinerary, saved }: Props) {
     const count = itinerary.places.length;
 
     return (
@@ -52,6 +129,7 @@ export default function Show({ itinerary }: Props) {
                 <p className="mt-4 text-sm break-words text-stone-600">
                     By <span className="font-medium text-stone-900">{itinerary.user.name}</span> · {count} {count === 1 ? 'stop' : 'stops'}
                 </p>
+                <SaveControl itinerary={itinerary} saved={saved} />
             </header>
 
             <section aria-labelledby="itinerary-places" className="mt-8">

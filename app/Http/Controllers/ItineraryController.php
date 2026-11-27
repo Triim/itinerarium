@@ -63,6 +63,8 @@ class ItineraryController extends Controller
                     'films' => $place->films ?? [],
                 ]),
             ],
+            // Whether the signed-in user saved it; always false for guests.
+            'saved' => (bool) $request->user()?->savedItineraries()->whereKey($itinerary->id)->exists(),
         ]);
     }
 }

@@ -45,6 +45,9 @@ export default function SiteHeader() {
                             <Link href={route('userzone.itineraries.index')} className={navLink}>
                                 My Itineraries
                             </Link>
+                            <Link href={route('userzone.saved-itineraries.index')} className={navLink}>
+                                Saved
+                            </Link>
                         </>
                     ) : (
                         <>

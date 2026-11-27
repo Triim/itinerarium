@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Home, LayoutGrid, MapPin, Route } from 'lucide-react';
+import { Bookmark, Building2, Home, LayoutGrid, MapPin, Route } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const manageNavItems: NavItem[] = [
@@ -16,6 +16,11 @@ const manageNavItems: NavItem[] = [
         title: 'My Itineraries',
         url: '/user/itineraries',
         icon: Route,
+    },
+    {
+        title: 'Saved Itineraries',
+        url: '/user/saved-itineraries',
+        icon: Bookmark,
     },
     {
         title: 'Manage Places',

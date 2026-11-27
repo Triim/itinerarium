@@ -8,6 +8,7 @@ use App\Http\Controllers\Userzone\CityController as UserzoneCityController;
 use App\Http\Controllers\Userzone\ItineraryController as UserzoneItineraryController;
 use App\Http\Controllers\Userzone\ItineraryPublicationController;
 use App\Http\Controllers\Userzone\PlaceController as UserzonePlaceController;
+use App\Http\Controllers\Userzone\SavedItineraryController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('itineraries', UserzoneItineraryController::class);
         Route::post('itineraries/{itinerary}/submit', [ItineraryPublicationController::class, 'submit'])
             ->name('itineraries.submit');
+
+        // Saved itineraries are other authors' published ones, kept apart from the user's own above.
+        Route::get('saved-itineraries', [SavedItineraryController::class, 'index'])
+            ->name('saved-itineraries.index');
+        Route::post('saved-itineraries/{itinerary}', [SavedItineraryController::class, 'store'])
+            ->name('saved-itineraries.store');
+        Route::delete('saved-itineraries/{itinerary}', [SavedItineraryController::class, 'destroy'])
+            ->name('saved-itineraries.destroy');
 
         Route::middleware(IsAdmin::class)->group(function () {
             Route::post('itineraries/{itinerary}/approve', [ItineraryPublicationController::class, 'approve'])
