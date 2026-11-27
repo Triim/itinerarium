@@ -130,6 +130,15 @@ class Itinerary extends Model
     }
 
     /**
+     * Users who saved this itinerary. Each user counts once (unique pivot), which makes it
+     * the basis for popularity. The author is user(), not part of this relationship.
+     */
+    public function savedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    /**
      * The first stop with a photo, in stop order. Limited, so it can be eager loaded for a list.
      */
     public function coverPlace(): BelongsToMany

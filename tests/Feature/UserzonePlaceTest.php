@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Spatie\MediaLibrary\MediaCollections\Filesystem;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tests\TestCase;
@@ -453,6 +454,7 @@ class UserzonePlaceTest extends TestCase
     }
 
     #[DataProvider('imagesWithinLimits')]
+    #[RunInSeparateProcess]
     public function test_images_within_the_size_limits_are_accepted(string $filename, int $width, int $height, ?int $kilobytes = null)
     {
         $image = UploadedFile::fake()->image($filename, $width, $height);
