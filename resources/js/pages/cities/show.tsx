@@ -1,3 +1,4 @@
+import { type Cover, CoverHero } from '@/components/cover-image';
 import ItineraryCard from '@/components/itinerary-card';
 import SiteLayout from '@/layouts/site-layout';
 import { Link } from '@inertiajs/react';
@@ -7,6 +8,7 @@ type City = {
     name: string;
     itineraries_count: number;
     places_count: number;
+    cover: Cover;
 };
 
 type Itinerary = {
@@ -15,6 +17,7 @@ type Itinerary = {
     slug: string;
     places_count: number;
     user: { id: number; name: string };
+    cover: Cover;
 };
 
 type Props = {
@@ -32,7 +35,9 @@ export default function Show({ city, itineraries }: Props) {
                 <span aria-hidden="true">&larr;</span> Back to cities
             </Link>
 
-            <header className="mt-8 border-b border-stone-200 pb-8">
+            {city.cover && <CoverHero cover={city.cover} />}
+
+            <header className={`${city.cover ? 'mt-6' : 'mt-8'} border-b border-stone-200 pb-8`}>
                 <p className="text-sm font-medium tracking-widest text-stone-500 uppercase">City</p>
                 <h1 className="mt-2 text-3xl font-semibold text-balance break-words sm:text-4xl">{city.name}</h1>
                 <p className="mt-4 text-sm text-stone-600">

@@ -1,3 +1,4 @@
+import { type Cover } from '@/components/cover-image';
 import ItineraryCard from '@/components/itinerary-card';
 import SiteLayout from '@/layouts/site-layout';
 import { type SharedData } from '@/types';
@@ -10,6 +11,7 @@ type WelcomeItinerary = {
     places_count: number;
     city: { name: string };
     user: { name: string };
+    cover: Cover;
 };
 
 type WelcomeProps = SharedData & {

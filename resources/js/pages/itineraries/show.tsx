@@ -1,3 +1,4 @@
+import { type Cover, CoverHero } from '@/components/cover-image';
 import SiteLayout from '@/layouts/site-layout';
 import { Link } from '@inertiajs/react';
 import { Clapperboard, ImageOff } from 'lucide-react';
@@ -17,6 +18,7 @@ type Itinerary = {
     city: { id: number; name: string };
     user: { id: number; name: string };
     places: Place[];
+    cover: Cover;
 };
 
 type Props = {
@@ -35,7 +37,9 @@ export default function Show({ itinerary }: Props) {
                 <span aria-hidden="true">&larr;</span> Back to itineraries
             </Link>
 
-            <header className="mt-8 border-b border-stone-200 pb-8">
+            {itinerary.cover && <CoverHero cover={itinerary.cover} />}
+
+            <header className={`${itinerary.cover ? 'mt-6' : 'mt-8'} border-b border-stone-200 pb-8`}>
                 <p className="text-sm font-medium tracking-widest break-words text-stone-500 uppercase">
                     <Link
                         href={route('cities.show', itinerary.city.id)}

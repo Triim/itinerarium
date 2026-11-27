@@ -1,3 +1,4 @@
+import { type Cover } from '@/components/cover-image';
 import ItineraryCard from '@/components/itinerary-card';
 import SiteLayout from '@/layouts/site-layout';
 
@@ -8,6 +9,7 @@ type Itinerary = {
     places_count: number;
     city: { id: number; name: string };
     user: { id: number; name: string };
+    cover: Cover;
 };
 
 type Props = {

@@ -1,3 +1,4 @@
+import CoverImage, { type Cover } from '@/components/cover-image';
 import SiteLayout from '@/layouts/site-layout';
 import { Link } from '@inertiajs/react';
 
@@ -6,6 +7,7 @@ type City = {
     name: string;
     itineraries_count: number;
     places_count: number;
+    cover: Cover;
 };
 
 type Props = {
@@ -31,16 +33,19 @@ export default function Index({ cities }: Props) {
                             <li key={city.id}>
                                 <Link
                                     href={route('cities.show', city.id)}
-                                    className="group flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:p-6"
+                                    className="group flex h-full flex-col overflow-hidden rounded-xl border border-stone-200 bg-white transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
                                 >
-                                    <h2 className="text-xl font-semibold text-balance break-words">{city.name}</h2>
-                                    <p className="mt-2 text-sm text-stone-600">
-                                        {city.itineraries_count} {city.itineraries_count === 1 ? 'itinerary' : 'itineraries'} · {city.places_count}{' '}
-                                        {city.places_count === 1 ? 'place' : 'places'}
-                                    </p>
-                                    <span className="mt-auto pt-5 text-sm font-medium text-stone-900 underline-offset-4 group-hover:underline">
-                                        View city <span aria-hidden="true">&rarr;</span>
-                                    </span>
+                                    <CoverImage cover={city.cover} className="aspect-[3/2]" lazy shortCredit />
+                                    <div className="flex flex-1 flex-col p-5">
+                                        <h2 className="text-xl font-semibold text-balance break-words">{city.name}</h2>
+                                        <p className="mt-1.5 text-sm text-stone-600">
+                                            {city.itineraries_count} {city.itineraries_count === 1 ? 'itinerary' : 'itineraries'} ·{' '}
+                                            {city.places_count} {city.places_count === 1 ? 'place' : 'places'}
+                                        </p>
+                                        <span className="mt-auto pt-4 text-sm font-medium text-stone-900 underline-offset-4 group-hover:underline">
+                                            View city <span aria-hidden="true">&rarr;</span>
+                                        </span>
+                                    </div>
                                 </Link>
                             </li>
                         ))}
