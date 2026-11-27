@@ -40,7 +40,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            // Relative, so Place photographs load at whatever address serves the app,
+            // whether or not APP_URL matches it (Herd, php artisan serve, ...).
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
