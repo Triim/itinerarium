@@ -1,11 +1,10 @@
-import { siteMenu } from '@/config/site-menu';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import type { ReactNode } from 'react';
-
-type Props = {
-    actions?: ReactNode;
-};
+const siteMenu = [
+    { label: 'Itineraries', routeName: 'itineraries.index' },
+    { label: 'Cities', routeName: 'cities.index' },
+    { label: 'Places', routeName: 'places.index' },
+];
 
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900';
 const navLink = `underline-offset-4 hover:underline ${focusRing}`;
@@ -15,7 +14,7 @@ function isActiveRoute(routeName: string): boolean {
     return route().current(routeName.replace(/\.index$/, '.*'));
 }
 
-export default function SiteHeader({ actions }: Props) {
+export default function SiteHeader() {
     const { auth, name } = usePage<SharedData>().props;
 
     return (
@@ -40,7 +39,6 @@ export default function SiteHeader({ actions }: Props) {
                             </Link>
                         );
                     })}
-                    {actions}
                     {auth.user ? (
                         <>
                             <span className="min-w-0 break-words text-stone-500">{auth.user.name}</span>

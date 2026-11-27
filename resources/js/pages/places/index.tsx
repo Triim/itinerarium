@@ -68,24 +68,22 @@ export default function Index({ cities, themes, selected_city }: Props) {
             {cities.length > 0 ? (
                 <>
                     <div className="mt-6 space-y-4">
-                        <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
-                            <label htmlFor="city-filter" className="flex w-full flex-col gap-1.5 text-sm font-medium text-stone-700 sm:w-64">
-                                City
-                                <select
-                                    id="city-filter"
-                                    value={selected_city ?? ''}
-                                    onChange={(event) => selectCity(event.target.value === '' ? null : Number(event.target.value))}
-                                    className={`w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-base font-normal text-stone-900 sm:text-sm ${focusRing}`}
-                                >
-                                    <option value="">All cities</option>
-                                    {cities.map((city) => (
-                                        <option key={city.id} value={city.id}>
-                                            {city.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        </div>
+                        <label htmlFor="city-filter" className="flex w-full flex-col gap-1.5 text-sm font-medium text-stone-700 sm:w-64">
+                            City
+                            <select
+                                id="city-filter"
+                                value={selected_city ?? ''}
+                                onChange={(event) => selectCity(event.target.value === '' ? null : Number(event.target.value))}
+                                className={`w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-base font-normal text-stone-900 sm:text-sm ${focusRing}`}
+                            >
+                                <option value="">All cities</option>
+                                {cities.map((city) => (
+                                    <option key={city.id} value={city.id}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
 
                         <fieldset>
                             <legend className="text-sm font-medium text-stone-700">Theme</legend>

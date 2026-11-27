@@ -6,15 +6,14 @@ import type { ReactNode } from 'react';
 type Props = {
     children: ReactNode;
     title: string;
-    actions?: ReactNode;
 };
 
-export default function SiteLayout({ children, title, actions }: Props) {
+export default function SiteLayout({ children, title }: Props) {
     return (
         <>
             <Head title={title} />
             <div className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
-                <SiteHeader actions={actions} />
+                <SiteHeader />
 
                 <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">{children}</main>
 

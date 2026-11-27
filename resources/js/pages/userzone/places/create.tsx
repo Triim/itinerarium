@@ -1,4 +1,4 @@
-import PlaceForm, { type City, type ThemeOption } from '@/components/place-form';
+import PlaceForm, { type City, type PlaceFormData, type ThemeOption } from '@/components/place-form';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -22,15 +22,15 @@ type Props = {
 };
 
 export default function Create({ cities, theme_options }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<PlaceFormData>({
         name: '',
         description: '',
         city_id: '',
         latitude: '',
         longitude: '',
-        themes: [] as string[],
-        films: [] as string[],
-        image: null as File | null,
+        themes: [],
+        films: [],
+        image: null,
     });
 
     const submit: FormEventHandler = (e) => {

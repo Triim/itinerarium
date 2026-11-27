@@ -1,4 +1,4 @@
-import PlaceForm, { type City, type ThemeOption } from '@/components/place-form';
+import PlaceForm, { type City, type PlaceFormData, type ThemeOption } from '@/components/place-form';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -35,7 +35,7 @@ export default function Edit({ place, cities, image_url, theme_options }: Props)
         },
     ];
 
-    const { data, setData, post, put, transform, processing, errors } = useForm({
+    const { data, setData, post, transform, processing, errors } = useForm<PlaceFormData>({
         name: place.name,
         description: place.description,
         city_id: String(place.city_id),
@@ -43,23 +43,16 @@ export default function Edit({ place, cities, image_url, theme_options }: Props)
         longitude: String(place.longitude),
         themes: place.themes,
         films: place.films,
-        image: null as File | null,
+        image: null,
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        const url = route('userzone.places.update', place.id);
-
-        // PHP does not read files from a multipart PUT request, so an image is
-        // sent as a POST request with a spoofed method.
-        transform((data) => (data.image ? { ...data, _method: 'PUT' } : data));
-
-        if (data.image) {
-            post(url);
-        } else {
-            put(url);
-        }
+        // PHP does not read files from a multipart PUT request, so the form is
+        // sent as a POST request with a spoofed PUT method.
+        transform((data) => ({ ...data, _method: 'PUT' }));
+        post(route('userzone.places.update', place.id));
     };
 
     return (
