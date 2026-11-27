@@ -50,14 +50,12 @@ export default function Edit({ itinerary, cities, places }: Props) {
                 <h1 className="text-xl font-semibold">Edit Itinerary</h1>
 
                 <ItineraryForm data={data} setData={setData} errors={errors} cities={cities} places={places} onSubmit={submit}>
-                    <div className="flex gap-4">
-                        <Button type="submit" disabled={processing}>
-                            Save Itinerary
-                        </Button>
-                        <Button variant="outline" asChild>
-                            <Link href={route('userzone.itineraries.index')}>Cancel</Link>
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Saving…' : 'Save Itinerary'}
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={route('userzone.itineraries.index')}>Cancel</Link>
+                    </Button>
                 </ItineraryForm>
             </div>
         </AppLayout>
