@@ -1,5 +1,5 @@
+import ItineraryCard from '@/components/itinerary-card';
 import SiteLayout from '@/layouts/site-layout';
-import { Link } from '@inertiajs/react';
 
 type Itinerary = {
     id: number;
@@ -30,25 +30,10 @@ export default function Index({ itineraries }: Props) {
                     <p className="mt-6 text-sm text-stone-500">
                         {itineraries.length} {itineraries.length === 1 ? 'itinerary' : 'itineraries'}
                     </p>
-                    <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {itineraries.map((itinerary) => (
                             <li key={itinerary.id}>
-                                <Link
-                                    href={route('itineraries.show', itinerary.slug)}
-                                    className="group flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:p-6"
-                                >
-                                    <p className="text-xs font-medium tracking-widest break-words text-stone-500 uppercase">{itinerary.city.name}</p>
-                                    <h2 className="mt-2 text-xl font-semibold text-balance break-words">{itinerary.title}</h2>
-                                    <p className="mt-3 text-sm break-words text-stone-500">By {itinerary.user.name}</p>
-                                    <div className="mt-auto flex items-center justify-between gap-4 pt-5 text-sm">
-                                        <span className="text-stone-600">
-                                            {itinerary.places_count} {itinerary.places_count === 1 ? 'place' : 'places'}
-                                        </span>
-                                        <span className="font-medium text-stone-900 underline-offset-4 group-hover:underline">
-                                            View itinerary <span aria-hidden="true">&rarr;</span>
-                                        </span>
-                                    </div>
-                                </Link>
+                                <ItineraryCard itinerary={itinerary} />
                             </li>
                         ))}
                     </ul>

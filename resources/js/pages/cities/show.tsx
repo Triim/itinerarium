@@ -1,3 +1,4 @@
+import ItineraryCard from '@/components/itinerary-card';
 import SiteLayout from '@/layouts/site-layout';
 import { Link } from '@inertiajs/react';
 
@@ -62,21 +63,7 @@ export default function Show({ city, itineraries }: Props) {
                     <ul className="mt-4 grid gap-4 sm:grid-cols-2">
                         {itineraries.map((itinerary) => (
                             <li key={itinerary.id}>
-                                <Link
-                                    href={route('itineraries.show', itinerary.slug)}
-                                    className="group flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:p-6"
-                                >
-                                    <h3 className="text-lg font-semibold text-balance break-words">{itinerary.title}</h3>
-                                    <p className="mt-3 text-sm break-words text-stone-500">By {itinerary.user.name}</p>
-                                    <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-5 text-sm">
-                                        <span className="text-stone-600">
-                                            {itinerary.places_count} {itinerary.places_count === 1 ? 'place' : 'places'}
-                                        </span>
-                                        <span className="font-medium text-stone-900 underline-offset-4 group-hover:underline">
-                                            View itinerary <span aria-hidden="true">&rarr;</span>
-                                        </span>
-                                    </div>
-                                </Link>
+                                <ItineraryCard itinerary={itinerary} headingLevel="h3" />
                             </li>
                         ))}
                     </ul>

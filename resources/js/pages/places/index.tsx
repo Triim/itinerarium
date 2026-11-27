@@ -1,5 +1,6 @@
 import SiteLayout from '@/layouts/site-layout';
 import { Link, router, useRemember } from '@inertiajs/react';
+import { ImageOff } from 'lucide-react';
 
 type Theme = {
     id: string;
@@ -108,7 +109,7 @@ export default function Index({ cities, themes, selected_city }: Props) {
                                                     : 'border-stone-300 bg-white text-stone-700 hover:border-stone-500'
                                             }`}
                                         >
-                                            {option.label} <span className={active ? 'text-stone-300' : 'text-stone-400'}>{total}</span>
+                                            {option.label} <span className={active ? 'text-stone-300' : 'text-stone-500'}>{total}</span>
                                         </button>
                                     );
                                 })}
@@ -148,7 +149,7 @@ export default function Index({ cities, themes, selected_city }: Props) {
                                 </div>
                                 <ul className="mt-3 divide-y divide-stone-200 border-y border-stone-200">
                                     {city.places.map((place) => (
-                                        <li key={place.id} className="flex gap-4 py-4">
+                                        <li key={place.id} className="flex items-start gap-4 py-4">
                                             <div className="min-w-0 flex-1">
                                                 <h3 className="font-semibold break-words">
                                                     <Link
@@ -178,13 +179,20 @@ export default function Index({ cities, themes, selected_city }: Props) {
                                                         : `In ${place.itineraries_count} ${place.itineraries_count === 1 ? 'itinerary' : 'itineraries'}`}
                                                 </p>
                                             </div>
-                                            {place.image_url && (
+                                            {place.image_url ? (
                                                 <img
                                                     src={place.image_url}
                                                     alt={`Photo of ${place.name}`}
                                                     loading="lazy"
-                                                    className="size-16 shrink-0 rounded-lg object-cover sm:size-20"
+                                                    className="aspect-[4/3] w-20 shrink-0 rounded-lg bg-stone-100 object-cover sm:w-28"
                                                 />
+                                            ) : (
+                                                <div
+                                                    aria-hidden="true"
+                                                    className="flex aspect-[4/3] w-20 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-stone-400 sm:w-28"
+                                                >
+                                                    <ImageOff className="size-5" />
+                                                </div>
                                             )}
                                         </li>
                                     ))}

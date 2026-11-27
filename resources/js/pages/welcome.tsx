@@ -1,3 +1,4 @@
+import ItineraryCard from '@/components/itinerary-card';
 import SiteLayout from '@/layouts/site-layout';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -24,8 +25,8 @@ export default function Welcome() {
                 <p className="text-sm font-medium tracking-widest text-stone-500 uppercase">City itineraries</p>
                 <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Find a route for your next trip</h1>
                 <p className="mt-4 leading-relaxed text-stone-600">
-                    Discover itineraries for different cities. Each itinerary brings together a set of places to visit in one city,
-                    shared by a member of the community.
+                    Discover itineraries for different cities. Each itinerary brings together a set of places to visit in one city, shared by a member
+                    of the community.
                 </p>
                 <Link
                     href={route('itineraries.index')}
@@ -44,17 +45,7 @@ export default function Welcome() {
                     <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {itineraries.map((itinerary) => (
                             <li key={itinerary.id}>
-                                <Link
-                                    href={route('itineraries.show', itinerary.slug)}
-                                    className="flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
-                                >
-                                    <p className="text-sm break-words text-stone-500">{itinerary.city.name}</p>
-                                    <h3 className="mt-1 text-lg font-semibold break-words">{itinerary.title}</h3>
-                                    <p className="mt-auto pt-4 text-sm break-words text-stone-500">
-                                        By {itinerary.user.name} · {itinerary.places_count}{' '}
-                                        {itinerary.places_count === 1 ? 'place' : 'places'}
-                                    </p>
-                                </Link>
+                                <ItineraryCard itinerary={itinerary} headingLevel="h3" />
                             </li>
                         ))}
                     </ul>

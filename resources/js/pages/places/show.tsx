@@ -60,8 +60,9 @@ export default function Show({ place, city, itineraries }: Props) {
                 </p>
                 <h1 className="mt-2 text-3xl font-semibold text-balance break-words sm:text-4xl">{place.name}</h1>
                 {place.image_url && (
-                    <figure className="mt-6">
-                        <img src={place.image_url} alt={`Photo of ${place.name}`} className="max-h-96 max-w-full rounded-lg" />
+                    // w-fit keeps the credit as wide as the photo, which is shown at its natural size.
+                    <figure className="mt-6 w-fit max-w-full">
+                        <img src={place.image_url} alt={`Photo of ${place.name}`} className="max-h-96 max-w-full rounded-lg bg-stone-100" />
                         {place.image_credit && <PhotoCredit credit={place.image_credit} />}
                     </figure>
                 )}
@@ -118,11 +119,13 @@ export default function Show({ place, city, itineraries }: Props) {
     );
 }
 
-const creditLink = 'underline underline-offset-2 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900';
+const creditLink =
+    'underline underline-offset-2 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900';
 
 function PhotoCredit({ credit }: { credit: ImageCredit }) {
     return (
-        <figcaption className="mt-2 text-xs break-words text-stone-500">
+        // w-0 min-w-full: the caption wraps to the photo's width instead of widening the figure.
+        <figcaption className="mt-2 w-0 min-w-full text-xs leading-relaxed break-words text-stone-500">
             Photo:{' '}
             <a href={credit.source_url} className={creditLink}>
                 {credit.title}
