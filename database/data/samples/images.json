@@ -1,0 +1,38 @@
+{
+    "about": "Photographs of the factory-made sample places, attached by DatabaseSeeder. Every file comes from Wikimedia Commons (\"Own work\" by the named author); credit, source and licence are copied to the media custom properties and shown wherever the photo appears.",
+    "images": [
+        {
+            "place": "Sagrada Família",
+            "file": "sagrada-familia.jpg",
+            "title": "Sagrada Familia Barcelona 2.jpg",
+            "author": "kallerna",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Sagrada_Familia_Barcelona_2.jpg",
+            "license": "CC BY-SA 4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "attribution": "“Sagrada Familia Barcelona 2.jpg” by kallerna, Wikimedia Commons, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). Resized (longest side at most 1600 px) and re-encoded as JPEG; not cropped.",
+            "modifications": "Resized (longest side at most 1600 px) and re-encoded as JPEG; not cropped."
+        },
+        {
+            "place": "Casa Batlló",
+            "file": "casa-batllo.jpg",
+            "title": "Casa Batlló 01.jpg",
+            "author": "Bernard Gagnon",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Casa_Batll%C3%B3_01.jpg",
+            "license": "CC BY-SA 3.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+            "attribution": "“Casa Batlló 01.jpg” by Bernard Gagnon, Wikimedia Commons, CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/). Resized (longest side at most 1600 px) and re-encoded as JPEG; not cropped.",
+            "modifications": "Resized (longest side at most 1600 px) and re-encoded as JPEG; not cropped."
+        },
+        {
+            "place": "Grand Palace",
+            "file": "grand-palace.jpg",
+            "title": "Gran Palacio, Bangkok, Tailandia, 2013-08-22, DD 60.jpg",
+            "author": "Diego Delso",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Gran_Palacio,_Bangkok,_Tailandia,_2013-08-22,_DD_60.jpg",
+            "license": "CC BY-SA 3.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+            "attribution": "“Gran Palacio, Bangkok, Tailandia, 2013-08-22, DD 60.jpg” by Diego Delso, Wikimedia Commons, CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/). Resized (longest side at most 1600 px) and re-encoded as JPEG; not cropped.",
+            "modifications": "Resized (longest side at most 1600 px) and re-encoded as JPEG; not cropped."
+        }
+    ]
+}

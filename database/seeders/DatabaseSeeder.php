@@ -7,6 +7,7 @@ use App\Models\Itinerary;
 use App\Models\Place;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 
 class DatabaseSeeder extends Seeder
 {
@@ -77,6 +78,9 @@ class DatabaseSeeder extends Seeder
             'longitude' => 100.488919,
         ]);
 
+        // Real photographs for the first stop of each sample itinerary, so every sample has a cover.
+        $this->attachSamplePhotos(['Sagrada Família' => $sagradaFamilia, 'Casa Batlló' => $casaBatllo, 'Grand Palace' => $grandPalace]);
+
         $barcelonaWeekend = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: A Weekend in Barcelona', 'status' => Itinerary::PUBLISHED]);
         $barcelonaOnFoot = Itinerary::factory()->for($user)->for($barcelona)->create(['title' => 'Sample: Barcelona on Foot', 'status' => Itinerary::PUBLISHED]);
         $bangkokFirstDay = Itinerary::factory()->for($user)->for($bangkok)->create(['title' => 'Sample: First Day in Bangkok', 'status' => Itinerary::PUBLISHED]);
@@ -88,5 +92,23 @@ class DatabaseSeeder extends Seeder
 
         // Real routes come after the samples, so they are the newest itineraries on the welcome page.
         $this->call(RealTravelSeeder::class);
+    }
+
+    /**
+     * The photographs listed in database/data/samples/images.json, with the credit the public pages show.
+     *
+     * @param  array<string, Place>  $places  keyed by Place name
+     */
+    private function attachSamplePhotos(array $places): void
+    {
+        $manifest = json_decode(file_get_contents(database_path('data/samples/images.json')), true, flags: JSON_THROW_ON_ERROR);
+
+        foreach ($manifest['images'] as $image) {
+            $places[$image['place']]
+                ->addMedia(database_path("data/samples/{$image['file']}"))
+                ->preservingOriginal()
+                ->withCustomProperties(['credit' => Arr::only($image, RealTravelImages::CREDIT)])
+                ->toMediaCollection('images');
+        }
     }
 }

@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 /**
  * The complete DatabaseSeeder: the administrator, the factory-made samples and the real travel data.
- * Seeding attaches and converts 97 photographs, so each test seeds once and checks one area.
+ * Seeding attaches and converts 100 photographs, so each test seeds once and checks one area.
  */
 class DatabaseSeederTest extends TestCase
 {
@@ -143,7 +143,9 @@ class DatabaseSeederTest extends TestCase
         $names = array_column(RealTravelImages::readJson('places.json')['places'], 'name', 'key');
         $disk = Storage::disk('public');
 
-        $media = Media::with('model')->get();
+        // The 3 sample photographs are checked below; the rest are the bundled real travel photographs.
+        $samples = ['Sagrada Família', 'Casa Batlló', 'Grand Palace'];
+        $media = Media::with('model')->get()->reject(fn (Media $item) => in_array($item->model->name, $samples, true));
         $this->assertCount(97, $images);
         $this->assertCount(97, $media);
         $this->assertSame(97, $media->pluck('model_id')->unique()->count());
@@ -155,10 +157,17 @@ class DatabaseSeederTest extends TestCase
             $this->assertSame(Arr::only($image, ['file', 'sha256']), $item->getCustomProperty('seed_image'));
             $this->assertSame(Arr::only($image, RealTravelImages::CREDIT), $item->getCustomProperty('credit'));
             $this->assertSame($image['sha256'], hash('sha256', $disk->get($item->getPathRelativeToRoot())));
-            foreach (['thumbnail', 'details'] as $conversion) {
+            foreach (['thumbnail', 'details', 'cover'] as $conversion) {
                 $this->assertTrue($item->hasGeneratedConversion($conversion), "{$item->file_name} {$conversion}");
                 $disk->assertExists($item->getPathRelativeToRoot($conversion));
             }
+        }
+
+        $sampleImages = array_column(json_decode(file_get_contents(database_path('data/samples/images.json')), true)['images'], null, 'place');
+        foreach ($samples as $name) {
+            $item = Place::where('name', $name)->sole()->getFirstMedia('images');
+            $this->assertSame(Arr::only($sampleImages[$name], RealTravelImages::CREDIT), $item->getCustomProperty('credit'));
+            $this->assertTrue($item->hasGeneratedConversion('cover'), $name);
         }
 
         // Without a verified photograph a place has no image, rather than an image from the retired bundle.
@@ -248,7 +257,43 @@ class DatabaseSeederTest extends TestCase
                 ->where('itinerary.places.0.name', 'Louvre Museum'));
 
         $this->get(route('places.index'))->assertOk();
-        $this->get(route('itineraries.index'))->assertOk();
+    }
+
+    public function test_every_city_and_itinerary_has_a_photo_cover_from_one_of_its_places()
+    {
+        // Cities: the first photographed landmark by name, otherwise the first photographed place.
+        $this->assertSame([
+            'Bangkok' => 'Grand Palace',
+            'Barcelona' => 'Casa Batlló',
+            'Berlin' => 'Berlin Wall Memorial (Bernauer Straße)',
+            'Bruges' => 'Belfry of Bruges',
+            'Brussels' => 'Grand-Place',
+            'Hamburg' => 'Elbphilharmonie',
+            'Madrid' => 'Gran Vía and Callao',
+            'Paris' => 'Arc de Triomphe',
+        ], $this->coverPlaces(route('cities.index'), 'cities', 'name'));
+
+        // Itineraries: the first stop with a photo, in stop order.
+        $this->assertSame([
+            'Berlin south to east: Germania, the Stasi and Good Bye, Lenin!' => 'Pallasbunker and Pallasseum',
+            'Bruges, after In Bruges' => 'Belfry of Bruges',
+            'Brussels: a waffle, three statues and three views' => 'Zinneke Pis',
+            'Hamburg on foot in eight hours' => 'Hamburg Central Station',
+            'Madrid in a day: Habsburg squares, Egyptian temple and Almodóvar rooftops' => 'Plaza Mayor',
+            'Paris on film' => 'Louvre Museum',
+            'Sample: A Weekend in Barcelona' => 'Sagrada Família',
+            'Sample: Barcelona on Foot' => 'Casa Batlló',
+            'Sample: First Day in Bangkok' => 'Grand Palace',
+            'West Berlin: cinema, Bauhaus and modernism' => 'Bahnhof Zoologischer Garten',
+        ], $this->coverPlaces(route('itineraries.index'), 'itineraries', 'title'));
+    }
+
+    /** The name of the place each card's cover shows, keyed by the card's name or title. */
+    private function coverPlaces(string $url, string $prop, string $key): array
+    {
+        $cards = $this->get($url)->assertOk()->viewData('page')['props'][$prop];
+
+        return collect($cards)->mapWithKeys(fn (array $card) => [$card[$key] => $card['cover']['place']['name']])->all();
     }
 
     private function itinerary(string $title): Itinerary
