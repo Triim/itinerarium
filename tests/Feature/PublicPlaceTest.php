@@ -228,7 +228,7 @@ class PublicPlaceTest extends TestCase
         $itinerary = Itinerary::factory()->for($barcelona)->create();
         $itinerary->places()->attach([$sagradaFamilia->id, $casaBatllo->id]);
 
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/show')
@@ -250,7 +250,7 @@ class PublicPlaceTest extends TestCase
         $itinerary = Itinerary::factory()->for($barcelona)->create();
         $itinerary->syncStops([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
 
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/show')
@@ -320,7 +320,7 @@ class PublicPlaceTest extends TestCase
         $thumbnailUrl = $louvre->getFirstMedia('images')->getUrl('thumbnail');
         $this->assertStringContainsString('/conversions/', $thumbnailUrl);
 
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/show')
@@ -352,7 +352,7 @@ class PublicPlaceTest extends TestCase
         $itinerary = Itinerary::factory()->for($hamburg)->create();
         $itinerary->syncStops($stops->pluck('id')->all());
 
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/show')
@@ -364,7 +364,7 @@ class PublicPlaceTest extends TestCase
     {
         $itinerary = Itinerary::factory()->create();
 
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/show')
@@ -375,7 +375,7 @@ class PublicPlaceTest extends TestCase
     {
         $place = Place::factory()->create();
         $itinerary = Itinerary::factory()->hasAttached($place)->create();
-        $urls = ['/places', "/places?city={$place->city_id}", "/places/{$place->id}", "/itineraries/{$itinerary->id}"];
+        $urls = ['/places', "/places?city={$place->city_id}", "/places/{$place->id}", route('itineraries.show', $itinerary)];
 
         $before = array_map($this->countQueries(...), $urls);
 

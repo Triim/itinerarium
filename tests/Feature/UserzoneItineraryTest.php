@@ -649,7 +649,7 @@ class UserzoneItineraryTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/index')
                 ->where('itineraries.0.title', 'Gaudí'));
-        $this->get("/itineraries/{$itinerary->id}")
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('itineraries/show')
@@ -675,7 +675,7 @@ class UserzoneItineraryTest extends TestCase
                     ->where('itineraries', fn ($shown) => $shown->pluck('title')->sort()->values()->all() === ['Gaudí', 'Temples']));
 
             foreach ($itineraries as $itinerary) {
-                $this->get("/itineraries/{$itinerary->id}")
+                $this->get(route('itineraries.show', $itinerary))
                     ->assertOk()
                     ->assertInertia(fn (Assert $page) => $page
                         ->component('itineraries/show')
