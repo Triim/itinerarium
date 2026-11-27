@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         // The password is set here rather than left to the factory default, so the login is visible in the seeder.
         User::factory()->admin()->create([
             'name' => 'Admin',
-            'email' => 'admin@admin.com',
+            'email' => 'admin@example.com',
             'password' => 'password',
         ]);
 

@@ -95,7 +95,7 @@ class AdminUserTest extends TestCase
 
         $admin = User::where('is_admin', true)->sole();
         $this->assertSame('Admin', $admin->name);
-        $this->assertSame('admin@admin.com', $admin->email);
+        $this->assertSame('admin@example.com', $admin->email);
         $this->assertTrue(Hash::check('password', $admin->password));
 
         // 3 sample and 7 real itineraries, 2 sample and 6 real cities, 7 sample and 111 real places.
@@ -114,9 +114,9 @@ class AdminUserTest extends TestCase
         Storage::fake('public');
         $this->seed(DatabaseSeeder::class);
 
-        $this->post('/login', ['email' => 'admin@admin.com', 'password' => 'password'])
+        $this->post('/login', ['email' => 'admin@example.com', 'password' => 'password'])
             ->assertRedirect(route('dashboard', absolute: false));
-        $this->assertAuthenticatedAs($admin = User::where('email', 'admin@admin.com')->sole());
+        $this->assertAuthenticatedAs($admin = User::where('email', 'admin@example.com')->sole());
 
         $itinerary = Itinerary::where('title', 'Hamburg on foot in eight hours')->sole();
         $this->assertNotSame($admin->id, $itinerary->user_id);

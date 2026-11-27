@@ -140,9 +140,9 @@ class LecturerRequirementsTest extends TestCase
         Storage::fake('public');
         $this->seed(DatabaseSeeder::class);
 
-        $this->post('/login', ['email' => 'admin@admin.com', 'password' => 'password'])
+        $this->post('/login', ['email' => 'admin@example.com', 'password' => 'password'])
             ->assertRedirect(route('dashboard', absolute: false));
-        $admin = User::where('email', 'admin@admin.com')->sole();
+        $admin = User::where('email', 'admin@example.com')->sole();
         $this->assertAuthenticatedAs($admin);
         $this->assertTrue($admin->is_admin);
 
