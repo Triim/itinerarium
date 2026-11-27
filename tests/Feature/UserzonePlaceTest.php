@@ -691,6 +691,7 @@ class UserzonePlaceTest extends TestCase
             "{$media->id}/{$media->file_name}",
             "{$media->id}/conversions/{$name}-thumbnail.{$extension}",
             "{$media->id}/conversions/{$name}-details.{$extension}",
+            "{$media->id}/conversions/{$name}-cover.{$extension}",
         ];
     }
 

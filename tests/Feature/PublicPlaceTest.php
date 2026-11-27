@@ -216,6 +216,7 @@ class PublicPlaceTest extends TestCase
                     'places_count' => 3,
                     'city' => ['id' => $berlin->id, 'name' => 'Berlin'],
                     'user' => ['id' => $ada->id, 'name' => 'Ada'],
+                    'cover' => null,
                 ]));
     }
 
