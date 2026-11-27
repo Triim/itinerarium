@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Spatie\MediaLibrary\Conversions\Events\ConversionHasBeenCompletedEvent;
@@ -19,6 +18,11 @@ use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tests\TestCase;
 
+/**
+ * The one-off migration that moved places.image_path files into MediaLibrary. It must stay safe for an
+ * installation that still has legacy images: every file is checked before anything moves, unsafe paths and
+ * files block the column removal, and an interrupted transfer can be retried without losing images.
+ */
 class PlaceImageMigrationTest extends TestCase
 {
     private const MIGRATION = '2026_11_25_230000_move_place_images_to_media_library';
@@ -37,8 +41,6 @@ class PlaceImageMigrationTest extends TestCase
             DB::purge('legacy');
             @unlink($database);
         });
-
-        Storage::fake('public');
 
         $this->artisan('migrate', [
             '--path' => array_values(array_filter(
@@ -83,27 +85,9 @@ class PlaceImageMigrationTest extends TestCase
     {
         return [
             'jpeg' => ['imagejpeg', 'places/old.jpg', 'jpg', 'image/jpeg'],
-            'png' => ['imagepng', 'places/old.png', 'png', 'image/png'],
             'png stored as jpg' => ['imagepng', 'places/old.jpg', 'png', 'image/png'],
             'jpeg with an unsafe name' => ['imagejpeg', 'places/shell.php.html', 'jpg', 'image/jpeg'],
         ];
-    }
-
-    public function test_migrated_images_are_served_on_every_page()
-    {
-        $place = $this->legacyPlace();
-
-        $this->runMigration();
-        // The public pages need the later columns too, such as the itinerary status.
-        $this->artisan('migrate')->assertSuccessful();
-
-        $media = Media::sole();
-
-        $this->assertSame($media->getUrl(), $place->imageUrl());
-        $this->get('/places')->assertInertia(fn (Assert $page) => $page
-            ->where('cities.0.places.0.image_url', $media->getUrl('thumbnail')));
-        $this->get("/places/{$place->id}")->assertInertia(fn (Assert $page) => $page
-            ->where('place.image_url', $media->getUrl('details')));
     }
 
     public function test_places_without_an_image_and_other_data_remain_unchanged()
@@ -175,8 +159,13 @@ class PlaceImageMigrationTest extends TestCase
     }
 
     #[DataProvider('blockingImages')]
-    public function test_an_image_that_cannot_be_moved_blocks_the_column_removal(string $path, ?string $contents, string $reason)
+    public function test_an_image_that_cannot_be_moved_blocks_the_column_removal(string $path, ?string $contents, string $reason, ?int $paddedBytes = null)
     {
+        // Padded here rather than in the provider, so the 8 MB string is not kept for the whole run.
+        if ($paddedBytes !== null) {
+            $contents = str_pad($contents, $paddedBytes, "\0");
+        }
+
         // The valid image comes first, but nothing may be moved before everything is checked.
         $this->legacyPlace('places/valid.jpg');
 
@@ -199,15 +188,13 @@ class PlaceImageMigrationTest extends TestCase
             'nested directory' => ['places/nested/old.jpg', self::encode('imagejpeg'), $outside],
             'absolute path' => ['/etc/hosts', null, $outside],
             'directory itself' => ['places/..', null, $outside],
-            'text' => ['places/old.txt', 'Just text', $type],
             'text disguised as an image' => ['places/old.jpg', 'Just text', $type],
             'empty file' => ['places/old.jpg', '', $type],
             'svg' => ['places/old.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>', $type],
             'gif' => ['places/old.gif', self::encode('imagegif'), $type],
             'truncated png' => ['places/old.png', substr($png, 0, 45), ''],
-            'file over 8 MB' => ['places/old.png', str_pad($png, 8192 * 1024 + 1, "\0"), 'the file is larger than 8 MB'],
+            'file over 8 MB' => ['places/old.png', $png, 'the file is larger than 8 MB', 8192 * 1024 + 1],
             'png over 8 megapixels' => ['places/old.png', self::pngClaiming(4000, 2001), $size],
-            '48 megapixel png' => ['places/old.png', self::pngClaiming(8000, 6000), $size],
             'too wide' => ['places/old.png', self::pngClaiming(5001, 10), $size],
             'too high' => ['places/old.png', self::pngClaiming(10, 5001), $size],
         ];

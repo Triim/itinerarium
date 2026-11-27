@@ -16,6 +16,10 @@ use RecursiveIteratorIterator;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tests\TestCase;
 
+/**
+ * The bundled photo manifest and archive, and `php artisan real-travel:sync-images`, which replaces only
+ * images that came from a bundle and never an uploaded one. Seeding the photos is covered by DatabaseSeederTest.
+ */
 class RealTravelImagesTest extends TestCase
 {
     use RefreshDatabase;
@@ -30,7 +34,6 @@ class RealTravelImagesTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
         $this->bundle = new RealTravelImages;
         $this->author = User::factory()->create(['email' => 'test@example.com']);
     }
@@ -117,7 +120,7 @@ class RealTravelImagesTest extends TestCase
         $this->assertSame([], array_intersect($retired, array_map('basename', $files)));
     }
 
-    public function test_the_dry_run_lists_the_changes_without_making_them()
+    public function test_neither_a_dry_run_nor_a_declined_confirmation_changes_anything()
     {
         $louvre = $this->place('Paris', 'Louvre Museum');
         $old = $this->addRetiredImage($louvre, 'paris-louvre');
@@ -126,8 +129,13 @@ class RealTravelImagesTest extends TestCase
             ->expectsOutputToContain('replace')
             ->expectsOutputToContain('1 to change')
             ->assertSuccessful();
+        $this->artisan('real-travel:sync-images')
+            ->expectsConfirmation('Apply these changes?', 'no')
+            ->expectsOutputToContain('Nothing was changed.')
+            ->assertSuccessful();
 
         $this->assertSame([$old->id], $louvre->fresh()->getMedia('images')->pluck('id')->all());
+        Storage::disk('public')->assertExists($old->getPathRelativeToRoot());
     }
 
     public function test_it_replaces_or_removes_bundled_images_and_keeps_uploads()
@@ -194,19 +202,6 @@ class RealTravelImagesTest extends TestCase
             ->assertSuccessful();
 
         $this->assertModelExists($media);
-    }
-
-    public function test_nothing_changes_when_the_confirmation_is_declined()
-    {
-        $louvre = $this->place('Paris', 'Louvre Museum');
-        $old = $this->addRetiredImage($louvre, 'paris-louvre');
-
-        $this->artisan('real-travel:sync-images')
-            ->expectsConfirmation('Apply these changes?', 'no')
-            ->expectsOutputToContain('Nothing was changed.')
-            ->assertSuccessful();
-
-        $this->assertModelExists($old);
     }
 
     public function test_it_fails_without_the_real_travel_author()

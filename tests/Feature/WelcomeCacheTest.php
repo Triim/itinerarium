@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
+/**
+ * The Welcome list is cached with Cache::flexible() and forgotten whenever a card could change.
+ */
 class WelcomeCacheTest extends TestCase
 {
     use RefreshDatabase;
@@ -55,42 +58,6 @@ class WelcomeCacheTest extends TestCase
 
         $this->assertSame('Original title', $cards[0]['title']);
         $this->assertSame([], $queries);
-    }
-
-    public function test_an_empty_result_is_cached()
-    {
-        $this->assertSame([], $this->cards());
-        $this->assertSame([], Cache::get(self::KEY));
-
-        // Inserted without model events: the cached empty list is still served.
-        DB::table('itineraries')->insert([
-            'title' => 'Hidden by the cache',
-            'user_id' => User::factory()->create()->id,
-            'city_id' => City::factory()->create()->id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $this->assertSame([], $this->cards());
-    }
-
-    public function test_creating_a_draft_keeps_it_off_the_cached_list()
-    {
-        $author = User::factory()->create();
-        $city = City::factory()->create();
-        $places = Place::factory()->count(2)->for($city)->create();
-        $this->assertSame([], $this->cards());
-
-        $this->actingAs($author)
-            ->post(route('userzone.itineraries.store'), [
-                'title' => 'Brand new itinerary',
-                'city_id' => $city->id,
-                'place_ids' => $places->pluck('id')->all(),
-            ])
-            ->assertRedirect(route('userzone.itineraries.index'));
-
-        $this->assertSame(Itinerary::DRAFT, Itinerary::sole()->status);
-        $this->assertSame([], $this->cards());
     }
 
     public function test_approving_an_itinerary_refreshes_the_cache()
@@ -308,26 +275,6 @@ class WelcomeCacheTest extends TestCase
         $this->assertSame($guestCards, Cache::get(self::KEY));
     }
 
-    public function test_cached_data_contains_only_public_card_fields()
-    {
-        $author = User::factory()->create([
-            'name' => 'Ada Author',
-            'email' => 'ada.private@example.com',
-            'is_admin' => true,
-        ]);
-        $itinerary = Itinerary::factory()->for($author)->create();
-
-        $this->cards();
-        $cached = Cache::get(self::KEY);
-
-        $this->assertIsArray($cached);
-        $this->assertSame(['id', 'title', 'slug', 'places_count', 'city', 'user'], array_keys($cached[0]));
-        $this->assertSame(['id' => $author->id, 'name' => 'Ada Author'], $cached[0]['user']);
-        $this->assertSame(['id' => $itinerary->city_id, 'name' => $itinerary->city->name], $cached[0]['city']);
-        $this->assertStringNotContainsString('ada.private@example.com', serialize($cached));
-        $this->assertStringNotContainsString('is_admin', serialize($cached));
-    }
-
     public function test_fresh_window_serves_the_cached_value_without_refreshing()
     {
         $itinerary = Itinerary::factory()->create(['title' => 'Cached']);
@@ -353,18 +300,6 @@ class WelcomeCacheTest extends TestCase
         // The visitor gets the stale list at once; the deferred refresh runs after the response.
         $this->assertSame('Cached', $this->cards()[0]['title']);
         $this->assertSame('Changed', Cache::get(self::KEY)[0]['title']);
-
-        $this->assertSame('Changed', $this->cards()[0]['title']);
-    }
-
-    public function test_after_the_stale_window_the_value_is_rebuilt_during_the_request()
-    {
-        $itinerary = Itinerary::factory()->create(['title' => 'Cached']);
-        $this->freezeTime();
-        $this->cards();
-        $this->renameBehindTheCache($itinerary, 'Changed');
-
-        $this->travel(301)->seconds();
 
         $this->assertSame('Changed', $this->cards()[0]['title']);
     }

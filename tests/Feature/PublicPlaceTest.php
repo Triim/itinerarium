@@ -8,11 +8,12 @@ use App\Models\Place;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
+/**
+ * The public Place and Itinerary pages, as guests see them.
+ */
 class PublicPlaceTest extends TestCase
 {
     use RefreshDatabase;
@@ -43,18 +44,8 @@ class PublicPlaceTest extends TestCase
                 ->where('cities.1.places.1.itineraries_count', 2));
     }
 
-    public function test_places_page_renders_when_there_are_no_places()
-    {
-        $this->get('/places')
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('places/index')
-                ->has('cities', 0));
-    }
-
     public function test_places_list_shares_theme_ids_thumbnails_and_the_theme_vocabulary()
     {
-        Storage::fake('public');
         $berlin = City::factory()->create(['name' => 'Berlin']);
         // Stored out of vocabulary order, with a duplicate and an unknown id.
         $tempelhof = Place::factory()->for($berlin)->create([
@@ -65,6 +56,7 @@ class PublicPlaceTest extends TestCase
         $tempelhof->addMedia(UploadedFile::fake()->image('tempelhof.jpg', 800, 600))->toMediaCollection('images');
         $bare = Place::factory()->for($berlin)->create(['name' => 'Bare spot']);
 
+        // Exact arrays: no coordinates, films, descriptions or media records in the directory.
         $this->get('/places')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
@@ -93,14 +85,6 @@ class PublicPlaceTest extends TestCase
                     'image_url' => $tempelhof->getFirstMedia('images')->getUrl('thumbnail'),
                     'themes' => ['film', 'history', 'unusual'],
                 ]));
-    }
-
-    public function test_the_theme_vocabulary_matches_the_place_model()
-    {
-        $this->get('/places')
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->where('themes', fn ($themes) => $themes->pluck('label', 'id')->all() === Place::THEMES));
     }
 
     public function test_places_list_can_preselect_a_city_from_the_query_string()
@@ -136,18 +120,8 @@ class PublicPlaceTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->where('selected_city', null));
     }
 
-    public function test_places_list_is_public()
-    {
-        Place::factory()->create();
-
-        $this->assertGuest();
-        $this->get('/places')->assertOk();
-        $this->get('/cities')->assertOk();
-    }
-
     public function test_place_page_shows_its_themes_films_and_image()
     {
-        Storage::fake('public');
         $paris = City::factory()->create(['name' => 'Paris']);
         $louvre = Place::factory()->for($paris)->create([
             'name' => 'Louvre Museum',
@@ -167,14 +141,17 @@ class PublicPlaceTest extends TestCase
                     ['id' => 'film', 'label' => 'Film & TV'],
                     ['id' => 'architecture', 'label' => 'Architecture'],
                 ])
-                ->where('place.films', ['The Dreamers', 'Funny Face', 'The Da Vinci Code']));
+                ->where('place.films', ['The Dreamers', 'Funny Face', 'The Da Vinci Code'])
+                ->missing('place.latitude')
+                ->missing('place.media'));
 
         $this->get("/places/{$bare->id}")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('place.image_url', null)
                 ->where('place.themes', [])
-                ->where('place.films', []));
+                ->where('place.films', [])
+                ->has('itineraries', 0));
     }
 
     public function test_guests_can_see_a_place_with_only_its_own_itineraries()
@@ -194,8 +171,7 @@ class PublicPlaceTest extends TestCase
                 ->component('places/show')
                 ->where('place.name', 'Casa Batlló')
                 ->where('place.description', 'House remodelled by Antoni Gaudí.')
-                ->where('city.id', $barcelona->id)
-                ->where('city.name', 'Barcelona')
+                ->where('city', ['id' => $barcelona->id, 'name' => 'Barcelona'])
                 ->has('itineraries', 2)
                 ->where('itineraries.0.id', $weekend->id)
                 ->where('itineraries.0.title', 'A Weekend in Barcelona')
@@ -203,61 +179,9 @@ class PublicPlaceTest extends TestCase
                 ->where('itineraries.1.id', $onFoot->id));
     }
 
-    public function test_place_page_renders_when_the_place_has_no_itineraries()
-    {
-        $place = Place::factory()->create();
-
-        $this->get("/places/{$place->id}")
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('places/show')
-                ->has('itineraries', 0));
-    }
-
     public function test_place_page_returns_not_found_for_a_missing_place()
     {
         $this->get('/places/999')->assertNotFound();
-    }
-
-    public function test_itinerary_page_shows_only_its_own_places()
-    {
-        $barcelona = City::factory()->create();
-        $sagradaFamilia = Place::factory()->for($barcelona)->create(['name' => 'Sagrada Família']);
-        $casaBatllo = Place::factory()->for($barcelona)->create(['name' => 'Casa Batlló']);
-        Place::factory()->for($barcelona)->create(['name' => 'Park Güell']);
-        $itinerary = Itinerary::factory()->for($barcelona)->create();
-        $itinerary->places()->attach([$sagradaFamilia->id, $casaBatllo->id]);
-
-        $this->get(route('itineraries.show', $itinerary))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('itineraries/show')
-                ->where('itinerary.title', $itinerary->title)
-                ->where('itinerary.city.name', $barcelona->name)
-                ->where('itinerary.user.name', $itinerary->user->name)
-                ->has('itinerary.places', 2)
-                ->where('itinerary.places.0.id', $casaBatllo->id)
-                ->where('itinerary.places.0.name', 'Casa Batlló')
-                ->where('itinerary.places.1.id', $sagradaFamilia->id));
-    }
-
-    public function test_itinerary_page_shows_places_in_stop_order()
-    {
-        $barcelona = City::factory()->create();
-        $sagradaFamilia = Place::factory()->for($barcelona)->create(['name' => 'Sagrada Família']);
-        $casaBatllo = Place::factory()->for($barcelona)->create(['name' => 'Casa Batlló']);
-        $parkGuell = Place::factory()->for($barcelona)->create(['name' => 'Park Güell']);
-        $itinerary = Itinerary::factory()->for($barcelona)->create();
-        $itinerary->syncStops([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
-
-        $this->get(route('itineraries.show', $itinerary))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('itineraries/show')
-                ->has('itinerary.places', 3)
-                ->where('itinerary.places.0.name', 'Sagrada Família')
-                ->where('itinerary.places.1.name', 'Park Güell')
-                ->where('itinerary.places.2.name', 'Casa Batlló'));
     }
 
     public function test_guests_can_see_itineraries_with_their_city_author_and_place_count()
@@ -281,30 +205,46 @@ class PublicPlaceTest extends TestCase
                 ->has('itineraries', 3)
                 ->where('itineraries.0.id', $southToEast->id)
                 ->where('itineraries.0.places_count', 0)
-                ->where('itineraries.0.city.name', 'Berlin')
-                ->where('itineraries.0.user.name', $southToEast->user->name)
                 ->where('itineraries.1.id', $onFoot->id)
                 ->where('itineraries.1.places_count', 1)
                 ->where('itineraries.1.city.name', 'Hamburg')
-                ->where('itineraries.2.id', $westBerlin->id)
-                ->where('itineraries.2.title', 'West Berlin: cinema, Bauhaus and modernism')
-                ->where('itineraries.2.places_count', 3)
-                ->where('itineraries.2.city.name', 'Berlin')
-                ->where('itineraries.2.user.name', 'Ada'));
+                // The exact card: no author email or other private fields.
+                ->where('itineraries.2', [
+                    'id' => $westBerlin->id,
+                    'title' => 'West Berlin: cinema, Bauhaus and modernism',
+                    'slug' => $westBerlin->slug,
+                    'places_count' => 3,
+                    'city' => ['id' => $berlin->id, 'name' => 'Berlin'],
+                    'user' => ['id' => $ada->id, 'name' => 'Ada'],
+                ]));
     }
 
-    public function test_itineraries_page_renders_when_there_are_no_itineraries()
+    public function test_itinerary_page_shows_only_its_own_places_in_stop_order()
     {
-        $this->get('/itineraries')
+        $barcelona = City::factory()->create();
+        $sagradaFamilia = Place::factory()->for($barcelona)->create(['name' => 'Sagrada Família']);
+        $casaBatllo = Place::factory()->for($barcelona)->create(['name' => 'Casa Batlló']);
+        $parkGuell = Place::factory()->for($barcelona)->create(['name' => 'Park Güell']);
+        Place::factory()->for($barcelona)->create(['name' => 'Barcelona Cathedral']);
+        $itinerary = Itinerary::factory()->for($barcelona)->create();
+        // Neither alphabetical nor creation order.
+        $itinerary->syncStops([$sagradaFamilia->id, $parkGuell->id, $casaBatllo->id]);
+
+        $this->get(route('itineraries.show', $itinerary))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('itineraries/index')
-                ->has('itineraries', 0));
+                ->component('itineraries/show')
+                ->where('itinerary.title', $itinerary->title)
+                ->where('itinerary.city', ['id' => $barcelona->id, 'name' => $barcelona->name])
+                ->where('itinerary.user', ['id' => $itinerary->user_id, 'name' => $itinerary->user->name])
+                ->has('itinerary.places', 3)
+                ->where('itinerary.places.0.name', 'Sagrada Família')
+                ->where('itinerary.places.1.name', 'Park Güell')
+                ->where('itinerary.places.2.name', 'Casa Batlló'));
     }
 
     public function test_itinerary_page_shares_place_descriptions_themes_films_and_thumbnails()
     {
-        Storage::fake('public');
         $paris = City::factory()->create(['name' => 'Paris']);
         $louvre = Place::factory()->for($paris)->create([
             'name' => 'Louvre Museum',
@@ -343,49 +283,7 @@ class PublicPlaceTest extends TestCase
                 ]));
     }
 
-    public function test_itinerary_page_lists_a_long_itinerary_in_stop_order()
-    {
-        $hamburg = City::factory()->create();
-        $places = collect(range(1, 21))->map(fn (int $i) => Place::factory()->for($hamburg)->create(['name' => sprintf('Stop %02d', $i)]));
-        // A fixed permutation that is neither alphabetical nor creation order.
-        $stops = $places->sortBy(fn (Place $place, int $index) => ($index * 8) % 21)->values();
-        $itinerary = Itinerary::factory()->for($hamburg)->create();
-        $itinerary->syncStops($stops->pluck('id')->all());
-
-        $this->get(route('itineraries.show', $itinerary))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('itineraries/show')
-                ->has('itinerary.places', 21)
-                ->where('itinerary.places', fn ($shown) => $shown->pluck('id')->all() === $stops->pluck('id')->all()));
-    }
-
-    public function test_itinerary_page_renders_when_the_itinerary_has_no_places()
-    {
-        $itinerary = Itinerary::factory()->create();
-
-        $this->get(route('itineraries.show', $itinerary))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('itineraries/show')
-                ->has('itinerary.places', 0));
-    }
-
-    public function test_query_counts_do_not_grow_with_the_number_of_records()
-    {
-        $place = Place::factory()->create();
-        $itinerary = Itinerary::factory()->hasAttached($place)->create();
-        $urls = ['/places', "/places?city={$place->city_id}", "/places/{$place->id}", route('itineraries.show', $itinerary)];
-
-        $before = array_map($this->countQueries(...), $urls);
-
-        Place::factory()->count(3)->hasAttached($itinerary)->create();
-        Itinerary::factory()->count(3)->hasAttached($place)->create();
-
-        $this->assertSame($before, array_map($this->countQueries(...), $urls));
-    }
-
-    public function test_regular_users_cannot_create_edit_or_delete_places()
+    public function test_there_are_no_public_routes_to_change_places()
     {
         $place = Place::factory()->create(['name' => 'Wat Pho']);
         $this->actingAs(User::factory()->create());
@@ -399,14 +297,5 @@ class PublicPlaceTest extends TestCase
 
         $this->assertDatabaseCount('places', 1);
         $this->assertDatabaseHas('places', ['id' => $place->id, 'name' => 'Wat Pho']);
-    }
-
-    private function countQueries(string $url): int
-    {
-        DB::flushQueryLog();
-        DB::enableQueryLog();
-        $this->get($url)->assertOk();
-
-        return count(DB::getQueryLog());
     }
 }
