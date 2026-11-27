@@ -257,10 +257,8 @@ class DatabaseSeederTest extends TestCase
                 ->where('itinerary.places.0.name', 'Louvre Museum'));
 
         $this->get(route('places.index'))->assertOk();
-    }
 
-    public function test_every_city_and_itinerary_has_a_photo_cover_from_one_of_its_places()
-    {
+        // Every city and itinerary has a photo cover from one of its places.
         // Cities: the first photographed landmark by name, otherwise the first photographed place.
         $this->assertSame([
             'Bangkok' => 'Grand Palace',

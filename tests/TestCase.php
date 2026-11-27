@@ -19,4 +19,13 @@ abstract class TestCase extends BaseTestCase
         // or see files left by an earlier test.
         Storage::fake('public');
     }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        // The image tests leave cyclic garbage behind (decoded images, media models). Collected
+        // after every test, it cannot pile up until a large upload runs out of the 128 MB limit.
+        gc_collect_cycles();
+    }
 }
