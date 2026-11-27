@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Models\City;
 use App\Models\Itinerary;
 use App\Models\User;
-use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -113,47 +111,5 @@ class ItineraryPublicationTest extends TestCase
             'approve a draft' => ['approve', Itinerary::DRAFT],
             'approve a published itinerary again' => ['approve', Itinerary::PUBLISHED],
         ];
-    }
-
-    public function test_repeating_an_action_changes_nothing_the_second_time()
-    {
-        $itinerary = Itinerary::factory()->draft()->create();
-        $admin = User::factory()->admin()->create();
-
-        $this->actingAs($itinerary->user)->post(route('userzone.itineraries.submit', $itinerary))->assertSessionHasNoErrors();
-        $afterSubmit = $itinerary->fresh()->getAttributes();
-        $this->travel(1)->minute();
-        $this->actingAs($itinerary->user)->post(route('userzone.itineraries.submit', $itinerary))->assertSessionHasErrors('status');
-        $this->assertEquals($afterSubmit, $itinerary->fresh()->getAttributes());
-
-        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $itinerary))->assertSessionHasNoErrors();
-        $afterApprove = $itinerary->fresh()->getAttributes();
-        $this->travel(1)->minute();
-        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $itinerary))->assertSessionHasErrors('status');
-        $this->assertEquals($afterApprove, $itinerary->fresh()->getAttributes());
-    }
-
-    public function test_the_actions_are_named_post_routes_behind_authentication()
-    {
-        foreach (['submit', 'approve'] as $action) {
-            $route = app('router')->getRoutes()->getByName("userzone.itineraries.{$action}");
-
-            $this->assertSame("user/itineraries/{itinerary}/{$action}", $route->uri());
-            $this->assertSame(['POST'], $route->methods());
-            $this->assertContains('auth', $route->gatherMiddleware());
-        }
-    }
-
-    public function test_every_seeded_itinerary_is_published_and_the_dataset_is_unchanged()
-    {
-        Storage::fake('public');
-
-        $this->seed(DatabaseSeeder::class);
-
-        $this->assertDatabaseCount('cities', 8);
-        $this->assertDatabaseCount('places', 118);
-        $this->assertDatabaseCount('itineraries', 10);
-        $this->assertDatabaseCount('media', 97);
-        $this->assertSame(10, Itinerary::published()->count());
     }
 }

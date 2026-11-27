@@ -23,7 +23,7 @@ class ItineraryPublishedNotificationTest extends TestCase
         Notification::fake();
     }
 
-    public function test_approving_a_pending_itinerary_emails_its_author()
+    public function test_approving_a_pending_itinerary_emails_only_its_author()
     {
         $itinerary = Itinerary::factory()->pending()->create();
         $admin = User::factory()->admin()->create();
@@ -53,66 +53,42 @@ class ItineraryPublishedNotificationTest extends TestCase
                 && str_contains($text, 'Three days in Lisbon')
                 && str_contains($text, $itinerary->city->name)
                 && str_contains($text, 'now public')
-                && $mail->actionUrl === route('itineraries.show', $itinerary);
+                && $mail->actionUrl === url("/itineraries/three-days-in-lisbon-{$itinerary->id}");
         });
     }
 
-    public function test_a_repeated_approval_sends_no_second_email()
+    public function test_rejected_approvals_send_nothing()
     {
-        $itinerary = Itinerary::factory()->pending()->create();
+        $draft = Itinerary::factory()->draft()->create();
+        $pending = Itinerary::factory()->pending()->create();
         $admin = User::factory()->admin()->create();
 
-        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $itinerary))->assertSessionHasNoErrors();
-        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $itinerary))->assertSessionHasErrors('status');
-
-        Notification::assertSentToTimes($itinerary->user, ItineraryPublished::class, 1);
-    }
-
-    public function test_approving_a_draft_sends_nothing()
-    {
-        $itinerary = Itinerary::factory()->draft()->create();
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->post(route('userzone.itineraries.approve', $itinerary))
-            ->assertSessionHasErrors('status');
-
-        Notification::assertNothingSent();
-    }
-
-    public function test_creating_and_submitting_an_itinerary_sends_nothing()
-    {
-        $itinerary = Itinerary::factory()->draft()->create();
-
-        $this->actingAs($itinerary->user)
-            ->post(route('userzone.itineraries.submit', $itinerary))
-            ->assertSessionHasNoErrors();
-
-        $this->assertSame(Itinerary::PENDING, $itinerary->fresh()->status);
-        Notification::assertNothingSent();
-    }
-
-    public function test_an_unauthorized_approval_sends_nothing()
-    {
-        $itinerary = Itinerary::factory()->pending()->create();
-
-        foreach ([$itinerary->user, User::factory()->create()] as $user) {
-            $this->actingAs($user)
-                ->post(route('userzone.itineraries.approve', $itinerary))
-                ->assertForbidden();
+        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $draft))->assertSessionHasErrors('status');
+        foreach ([$pending->user, User::factory()->create()] as $user) {
+            $this->actingAs($user)->post(route('userzone.itineraries.approve', $pending))->assertForbidden();
         }
-
         Notification::assertNothingSent();
+
+        // Approving twice: the second, invalid transition sends no second email.
+        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $pending))->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post(route('userzone.itineraries.approve', $pending))->assertSessionHasErrors('status');
+        Notification::assertSentToTimes($pending->user, ItineraryPublished::class, 1);
     }
 
-    public function test_editing_a_published_itinerary_sends_nothing()
+    public function test_submitting_or_editing_an_itinerary_sends_nothing()
     {
-        $itinerary = Itinerary::factory()->create();
+        $draft = Itinerary::factory()->draft()->create();
+        $published = Itinerary::factory()->create();
 
-        $this->actingAs($itinerary->user)
-            ->put(route('userzone.itineraries.update', $itinerary), ['title' => 'A renamed route', 'city_id' => $itinerary->city_id])
+        $this->actingAs($draft->user)
+            ->post(route('userzone.itineraries.submit', $draft))
+            ->assertSessionHasNoErrors();
+        $this->actingAs($published->user)
+            ->put(route('userzone.itineraries.update', $published), ['title' => 'A renamed route', 'city_id' => $published->city_id])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame(Itinerary::PUBLISHED, $itinerary->fresh()->status);
+        $this->assertSame(Itinerary::PENDING, $draft->fresh()->status);
+        $this->assertSame(Itinerary::PUBLISHED, $published->fresh()->status);
         Notification::assertNothingSent();
     }
 }
