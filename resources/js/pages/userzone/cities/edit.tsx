@@ -41,14 +41,12 @@ export default function Edit({ city }: Props) {
                 <h1 className="text-xl font-semibold">Edit City</h1>
 
                 <CityForm data={data} setData={setData} errors={errors} onSubmit={submit}>
-                    <div className="flex gap-4">
-                        <Button type="submit" disabled={processing}>
-                            Save City
-                        </Button>
-                        <Button variant="outline" asChild>
-                            <Link href={route('userzone.cities.index')}>Cancel</Link>
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Saving…' : 'Save City'}
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={route('userzone.cities.index')}>Cancel</Link>
+                    </Button>
                 </CityForm>
             </div>
         </AppLayout>

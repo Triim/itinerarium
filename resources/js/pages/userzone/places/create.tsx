@@ -2,7 +2,7 @@ import PlaceForm, { type City, type ThemeOption } from '@/components/place-form'
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -47,7 +47,10 @@ export default function Create({ cities, theme_options }: Props) {
 
                 <PlaceForm data={data} setData={setData} errors={errors} cities={cities} themeOptions={theme_options} onSubmit={submit}>
                     <Button type="submit" disabled={processing}>
-                        Create Place
+                        {processing ? 'Creating…' : 'Create Place'}
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={route('userzone.places.index')}>Cancel</Link>
                     </Button>
                 </PlaceForm>
             </div>

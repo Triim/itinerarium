@@ -34,14 +34,12 @@ export default function Create() {
                 <h1 className="text-xl font-semibold">Create City</h1>
 
                 <CityForm data={data} setData={setData} errors={errors} onSubmit={submit}>
-                    <div className="flex gap-4">
-                        <Button type="submit" disabled={processing}>
-                            Create City
-                        </Button>
-                        <Button variant="outline" asChild>
-                            <Link href={route('userzone.cities.index')}>Cancel</Link>
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Creating…' : 'Create City'}
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={route('userzone.cities.index')}>Cancel</Link>
+                    </Button>
                 </CityForm>
             </div>
         </AppLayout>

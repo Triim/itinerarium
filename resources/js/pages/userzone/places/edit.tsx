@@ -77,14 +77,12 @@ export default function Edit({ place, cities, image_url, theme_options }: Props)
                     imageUrl={image_url}
                     onSubmit={submit}
                 >
-                    <div className="flex gap-4">
-                        <Button type="submit" disabled={processing}>
-                            Update Place
-                        </Button>
-                        <Button variant="outline" asChild>
-                            <Link href={route('userzone.places.index')}>Cancel</Link>
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Saving…' : 'Save Place'}
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={route('userzone.places.index')}>Cancel</Link>
+                    </Button>
                 </PlaceForm>
             </div>
         </AppLayout>

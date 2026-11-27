@@ -17,14 +17,24 @@ type Props = {
 
 export default function CityForm({ data, setData, errors, onSubmit, children }: Props) {
     return (
-        <form onSubmit={onSubmit} className="mt-4 max-w-xl space-y-6">
+        <form onSubmit={onSubmit} className="mt-6 max-w-xl space-y-8">
             <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} required />
-                <InputError message={errors.name} />
+                <Input
+                    id="name"
+                    value={data.name}
+                    onChange={(e) => setData('name', e.target.value)}
+                    required
+                    aria-invalid={errors.name ? true : undefined}
+                    aria-describedby={errors.name ? 'name-help name-error' : 'name-help'}
+                />
+                <p id="name-help" className="text-muted-foreground text-sm">
+                    At least 3 characters.
+                </p>
+                <InputError id="name-error" message={errors.name} />
             </div>
 
-            {children}
+            <div className="flex flex-wrap gap-4 border-t pt-6">{children}</div>
         </form>
     );
 }
