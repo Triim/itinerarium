@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Userzone;
 
 use App\Http\Controllers\Controller;
 use App\Models\Itinerary;
+use App\Notifications\ItineraryPublished;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 /**
  * The publication workflow: the owner submits a draft for review, an administrator approves it.
- * The approve route is behind the IsAdmin middleware.
+ * The approve route is behind the IsAdmin middleware. Approval emails the author.
  */
 class ItineraryPublicationController extends Controller
 {
@@ -30,6 +31,9 @@ class ItineraryPublicationController extends Controller
         if (! $itinerary->approve()) {
             throw ValidationException::withMessages(['status' => 'Only an itinerary awaiting approval can be approved.']);
         }
+
+        // Only a successful pending → published transition reaches this line.
+        $itinerary->user->notify(new ItineraryPublished($itinerary));
 
         return redirect()->route('userzone.itineraries.index');
     }
