@@ -7,8 +7,18 @@ type Place = {
     name: string;
     description: string | null;
     image_url: string | null;
+    image_credit: ImageCredit | null;
     themes: { id: string; label: string }[];
     films: string[];
+};
+
+type ImageCredit = {
+    title: string;
+    author: string;
+    source_url: string;
+    license: string;
+    license_url: string | null;
+    modifications: string;
 };
 
 type City = {
@@ -49,7 +59,12 @@ export default function Show({ place, city, itineraries }: Props) {
                     </Link>
                 </p>
                 <h1 className="mt-2 text-3xl font-semibold text-balance break-words sm:text-4xl">{place.name}</h1>
-                {place.image_url && <img src={place.image_url} alt={`Photo of ${place.name}`} className="mt-6 max-h-96 max-w-full rounded-lg" />}
+                {place.image_url && (
+                    <figure className="mt-6">
+                        <img src={place.image_url} alt={`Photo of ${place.name}`} className="max-h-96 max-w-full rounded-lg" />
+                        {place.image_credit && <PhotoCredit credit={place.image_credit} />}
+                    </figure>
+                )}
                 {place.description && <p className="mt-4 leading-relaxed break-words text-stone-600">{place.description}</p>}
                 {place.themes.length > 0 && (
                     <ul aria-label="Themes" className="mt-4 flex flex-wrap gap-2">
@@ -100,5 +115,27 @@ export default function Show({ place, city, itineraries }: Props) {
                 <p className="mt-4 text-stone-600">This place is not in an itinerary yet.</p>
             )}
         </SiteLayout>
+    );
+}
+
+const creditLink = 'underline underline-offset-2 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900';
+
+function PhotoCredit({ credit }: { credit: ImageCredit }) {
+    return (
+        <figcaption className="mt-2 text-xs break-words text-stone-500">
+            Photo:{' '}
+            <a href={credit.source_url} className={creditLink}>
+                {credit.title}
+            </a>{' '}
+            by {credit.author}, Wikimedia Commons,{' '}
+            {credit.license_url ? (
+                <a href={credit.license_url} rel="license" className={creditLink}>
+                    {credit.license}
+                </a>
+            ) : (
+                credit.license
+            )}
+            . {credit.modifications}
+        </figcaption>
     );
 }

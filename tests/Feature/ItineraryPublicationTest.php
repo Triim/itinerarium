@@ -153,7 +153,7 @@ class ItineraryPublicationTest extends TestCase
         $this->assertDatabaseCount('cities', 8);
         $this->assertDatabaseCount('places', 118);
         $this->assertDatabaseCount('itineraries', 10);
-        $this->assertDatabaseCount('media', 30);
+        $this->assertDatabaseCount('media', 97);
         $this->assertSame(10, Itinerary::published()->count());
     }
 }
