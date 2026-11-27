@@ -19,6 +19,7 @@ type City = {
 type Itinerary = {
     id: number;
     title: string;
+    slug: string;
     user: { name: string };
 };
 
@@ -85,7 +86,7 @@ export default function Show({ place, city, itineraries }: Props) {
                         <li key={itinerary.id} className="py-6">
                             <h3 className="text-lg font-semibold break-words">
                                 <Link
-                                    href={route('itineraries.show', itinerary.id)}
+                                    href={route('itineraries.show', itinerary.slug)}
                                     className="underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
                                 >
                                     {itinerary.title}

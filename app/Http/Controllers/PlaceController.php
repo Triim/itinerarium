@@ -53,7 +53,7 @@ class PlaceController extends Controller
                 ->published()
                 ->with('user:id,name')
                 ->orderBy('title')
-                ->get(['itineraries.id', 'title', 'user_id']),
+                ->get(['itineraries.id', 'title', 'slug', 'user_id']),
         ]);
     }
 }

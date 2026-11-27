@@ -4,6 +4,7 @@ import { Link } from '@inertiajs/react';
 type Itinerary = {
     id: number;
     title: string;
+    slug: string;
     places_count: number;
     city: { id: number; name: string };
     user: { id: number; name: string };
@@ -33,7 +34,7 @@ export default function Index({ itineraries }: Props) {
                         {itineraries.map((itinerary) => (
                             <li key={itinerary.id}>
                                 <Link
-                                    href={route('itineraries.show', itinerary.id)}
+                                    href={route('itineraries.show', itinerary.slug)}
                                     className="group flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:p-6"
                                 >
                                     <p className="text-xs font-medium tracking-widest break-words text-stone-500 uppercase">{itinerary.city.name}</p>

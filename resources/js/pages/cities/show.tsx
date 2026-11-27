@@ -11,6 +11,7 @@ type City = {
 type Itinerary = {
     id: number;
     title: string;
+    slug: string;
     places_count: number;
     user: { id: number; name: string };
 };
@@ -62,7 +63,7 @@ export default function Show({ city, itineraries }: Props) {
                         {itineraries.map((itinerary) => (
                             <li key={itinerary.id}>
                                 <Link
-                                    href={route('itineraries.show', itinerary.id)}
+                                    href={route('itineraries.show', itinerary.slug)}
                                     className="group flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:p-6"
                                 >
                                     <h3 className="text-lg font-semibold text-balance break-words">{itinerary.title}</h3>

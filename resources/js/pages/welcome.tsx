@@ -5,6 +5,7 @@ import { Link, usePage } from '@inertiajs/react';
 type WelcomeItinerary = {
     id: number;
     title: string;
+    slug: string;
     places_count: number;
     city: { name: string };
     user: { name: string };
@@ -44,7 +45,7 @@ export default function Welcome() {
                         {itineraries.map((itinerary) => (
                             <li key={itinerary.id}>
                                 <Link
-                                    href={route('itineraries.show', itinerary.id)}
+                                    href={route('itineraries.show', itinerary.slug)}
                                     className="flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
                                 >
                                     <p className="text-sm break-words text-stone-500">{itinerary.city.name}</p>
