@@ -1,29 +1,37 @@
-name: tests
+name: CI
 
 on:
   push:
     branches:
-      - develop
       - main
   pull_request:
     branches:
-      - develop
       - main
 
+permissions:
+  contents: read
+
 jobs:
-  ci:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # composer.lock requires PHP >= 8.4.1 (symfony/*, spatie/image).
+      # gd is MediaLibrary's default image driver, used for Place conversions.
+      # memory_limit restores PHP's stock default (setup-php otherwise sets -1),
+      # so CI runs under the same limit as local development and would expose,
+      # not hide, any memory regression.
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: '8.4'
+          extensions: ctype, dom, exif, fileinfo, gd, iconv, mbstring, pdo_sqlite, sqlite3, xml, zip
+          ini-values: memory_limit=128M
+          coverage: none
           tools: composer:v2
-          coverage: xdebug
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -31,23 +39,28 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Install Node Dependencies
+      - name: Install Node dependencies
         run: npm ci
 
-      - name: Build Assets
+      - name: Lint frontend
+        run: npx eslint .
+
+      - name: Check frontend formatting
+        run: npm run format:check
+
+      # Also produces the Vite manifest that Inertia page tests rely on.
+      - name: Build frontend
         run: npm run build
 
-      - name: Create SQLite Database
-        run: touch database/database.sqlite
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
 
-      - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      # Only APP_KEY is taken from here; phpunit.xml forces the testing
+      # environment (in-memory SQLite, array cache/session/mail, sync queue).
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
 
-      - name: Copy Environment File
-        run: cp .env.example .env
-
-      - name: Generate Application Key
-        run: php artisan key:generate
-
-      - name: Tests
-        run: ./vendor/bin/phpunit
+      - name: Run tests
+        run: vendor/bin/phpunit
