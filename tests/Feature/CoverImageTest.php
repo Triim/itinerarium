@@ -75,7 +75,7 @@ class CoverImageTest extends TestCase
         $city = City::factory()->create();
         $place = $this->photographed($city, 'Old Bridge');
         Itinerary::factory()->for($city)->hasAttached($place)->create(['status' => Itinerary::PUBLISHED]);
-        $before = Itinerary::recentForWelcome()[0]['cover']['url'];
+        $before = Itinerary::popularForWelcome()['itineraries'][0]['cover']['url'];
 
         $this->actingAs($admin)
             ->put(route('userzone.places.update', $place), [
@@ -89,7 +89,7 @@ class CoverImageTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('userzone.places.index'));
 
-        $after = Itinerary::recentForWelcome()[0]['cover']['url'];
+        $after = Itinerary::popularForWelcome()['itineraries'][0]['cover']['url'];
         $this->assertNotSame($before, $after);
         $this->assertSame($place->fresh()->coverImage()['url'], $after);
     }

@@ -19,7 +19,7 @@ class WelcomeCacheTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const KEY = 'welcome.recent_itineraries';
+    private const KEY = Itinerary::WELCOME_CACHE_KEY;
 
     protected function setUp(): void
     {
@@ -38,7 +38,7 @@ class WelcomeCacheTest extends TestCase
 
         $cards = $this->cards();
 
-        $this->assertSame($cards, Cache::get(self::KEY));
+        $this->assertSame(['popular' => false, 'itineraries' => $cards], Cache::get(self::KEY));
         $this->assertSame([$itinerary->id], array_column($cards, 'id'));
     }
 
@@ -76,7 +76,7 @@ class WelcomeCacheTest extends TestCase
         $this->actingAs($author)->post(route('userzone.itineraries.submit', $itinerary));
         // The empty list is now cached, and the pending itinerary is still not on it.
         $this->assertSame([], $this->cards());
-        $this->assertSame([], Cache::get(Itinerary::WELCOME_CACHE_KEY));
+        $this->assertSame(['popular' => false, 'itineraries' => []], Cache::get(self::KEY));
 
         $this->actingAs(User::factory()->admin()->create())
             ->post(route('userzone.itineraries.approve', $itinerary))
@@ -159,7 +159,7 @@ class WelcomeCacheTest extends TestCase
         // Simulates a concurrent visitor rebuilding the cache after the saved event but before sync().
         // Booting the model first registers its own listener ahead of this one.
         new Itinerary;
-        Itinerary::saved(fn () => Itinerary::recentForWelcome());
+        Itinerary::saved(fn () => Itinerary::popularForWelcome());
 
         $this->actingAs($author)
             ->post(route('userzone.itineraries.store'), [
@@ -254,7 +254,62 @@ class WelcomeCacheTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame('changed@example.com', $author->fresh()->email);
-        $this->assertSame($cards, Cache::get(self::KEY));
+        $this->assertSame($cards, Cache::get(self::KEY)['itineraries']);
+    }
+
+    public function test_saving_an_itinerary_refreshes_the_ranking()
+    {
+        $older = Itinerary::factory()->create(['created_at' => now()->subDay()]);
+        $newer = Itinerary::factory()->create();
+        $this->assertSame([$newer->id, $older->id], array_column($this->cards(), 'id'));
+
+        $this->actingAs(User::factory()->create())
+            ->post(route('userzone.saved-itineraries.store', $older))
+            ->assertRedirect();
+
+        // Well within the fresh window, so only invalidation can explain the new order.
+        $this->assertNull(Cache::get(self::KEY));
+        $this->assertSame([$older->id, $newer->id], array_column($this->cards(), 'id'));
+        $this->assertTrue(Cache::get(self::KEY)['popular']);
+    }
+
+    public function test_removing_a_save_refreshes_the_ranking()
+    {
+        $older = Itinerary::factory()->create(['created_at' => now()->subDay()]);
+        $newer = Itinerary::factory()->create();
+        $user = User::factory()->create();
+        $user->savedItineraries()->attach($older);
+        $this->assertSame([$older->id, $newer->id], array_column($this->cards(), 'id'));
+
+        $this->actingAs($user)
+            ->delete(route('userzone.saved-itineraries.destroy', $older))
+            ->assertRedirect();
+
+        $this->assertNull(Cache::get(self::KEY));
+        $this->assertSame([$newer->id, $older->id], array_column($this->cards(), 'id'));
+        $this->assertFalse(Cache::get(self::KEY)['popular']);
+    }
+
+    public function test_repeating_a_save_or_a_removal_keeps_the_cache()
+    {
+        $itinerary = Itinerary::factory()->create();
+        $user = User::factory()->create();
+        $user->savedItineraries()->attach($itinerary);
+        $this->cards();
+        $cached = Cache::get(self::KEY);
+
+        // Already saved: the pivot row exists, so nothing is added and the cache stays.
+        $this->actingAs($user)->post(route('userzone.saved-itineraries.store', $itinerary))->assertRedirect();
+        $this->assertSame($cached, Cache::get(self::KEY));
+
+        // The first removal deletes the row and clears the cache; the second has nothing to remove.
+        $this->actingAs($user)->delete(route('userzone.saved-itineraries.destroy', $itinerary))->assertRedirect();
+        $this->assertNull(Cache::get(self::KEY));
+        $this->cards();
+        $cached = Cache::get(self::KEY);
+        $this->actingAs($user)->delete(route('userzone.saved-itineraries.destroy', $itinerary))->assertRedirect();
+        $this->assertSame($cached, Cache::get(self::KEY));
+        $this->assertDatabaseCount('itinerary_user', 0);
     }
 
     public function test_guests_and_authenticated_users_receive_the_same_itinerary_data()
@@ -272,7 +327,7 @@ class WelcomeCacheTest extends TestCase
                 ->where('itineraries', $guestCards));
 
         // The cached payload is the public card list only, with nothing about the viewer.
-        $this->assertSame($guestCards, Cache::get(self::KEY));
+        $this->assertSame(['popular' => false, 'itineraries' => $guestCards], Cache::get(self::KEY));
     }
 
     public function test_fresh_window_serves_the_cached_value_without_refreshing()
@@ -285,7 +340,7 @@ class WelcomeCacheTest extends TestCase
         $this->travel(59)->seconds();
 
         $this->assertSame('Cached', $this->cards()[0]['title']);
-        $this->assertSame('Cached', Cache::get(self::KEY)[0]['title']);
+        $this->assertSame('Cached', Cache::get(self::KEY)['itineraries'][0]['title']);
     }
 
     public function test_stale_window_serves_the_old_value_and_refreshes_after_the_response()
@@ -299,7 +354,7 @@ class WelcomeCacheTest extends TestCase
 
         // The visitor gets the stale list at once; the deferred refresh runs after the response.
         $this->assertSame('Cached', $this->cards()[0]['title']);
-        $this->assertSame('Changed', Cache::get(self::KEY)[0]['title']);
+        $this->assertSame('Changed', Cache::get(self::KEY)['itineraries'][0]['title']);
 
         $this->assertSame('Changed', $this->cards()[0]['title']);
     }

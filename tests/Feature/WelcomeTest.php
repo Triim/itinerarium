@@ -11,7 +11,8 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 /**
- * The Welcome page cards: the three newest published itineraries. Caching is covered by WelcomeCacheTest.
+ * The Welcome page cards. Without saves they are the three newest published itineraries; ranking by
+ * saves is covered by WelcomePopularityTest, caching by WelcomeCacheTest.
  */
 class WelcomeTest extends TestCase
 {

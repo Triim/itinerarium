@@ -14,7 +14,8 @@ class Itinerary extends Model
 {
     use HasFactory;
 
-    public const WELCOME_CACHE_KEY = 'welcome.recent_itineraries';
+    /** Renamed from welcome.recent_itineraries when the value changed shape, so no old entry is read. */
+    public const WELCOME_CACHE_KEY = 'welcome.itineraries';
 
     /** Seconds the cached list is fresh, and the most it may be served stale while it refreshes. */
     public const WELCOME_CACHE_TTL = [60, 300];
@@ -77,28 +78,40 @@ class Itinerary extends Model
     }
 
     /**
-     * The three most recent published itineraries as plain public card data, cached.
+     * The three most saved published itineraries as plain public card data, cached. Ties, and
+     * itineraries nobody has saved, follow newest first, so with no saves at all this is the
+     * three most recent. 'popular' says whether any card has a save, for the section heading.
+     *
+     * @return array{popular: bool, itineraries: list<array<string, mixed>>}
      */
-    public static function recentForWelcome(): array
+    public static function popularForWelcome(): array
     {
-        return Cache::flexible(self::WELCOME_CACHE_KEY, self::WELCOME_CACHE_TTL, fn () => static::select(['id', 'title', 'slug', 'city_id', 'user_id'])
-            ->published()
-            ->with(['city:id,name', 'user:id,name', ...self::COVER_RELATIONS])
-            ->withCount('places')
-            ->latest()
-            ->orderByDesc('id')
-            ->take(3)
-            ->get()
-            ->map(fn (self $itinerary) => [
-                'id' => $itinerary->id,
-                'title' => $itinerary->title,
-                'slug' => $itinerary->slug,
-                'places_count' => $itinerary->places_count,
-                'city' => $itinerary->city->only(['id', 'name']),
-                'user' => $itinerary->user->only(['id', 'name']),
-                'cover' => $itinerary->coverImage(),
-            ])
-            ->all());
+        return Cache::flexible(self::WELCOME_CACHE_KEY, self::WELCOME_CACHE_TTL, function () {
+            $itineraries = static::select(['id', 'title', 'slug', 'city_id', 'user_id'])
+                ->published()
+                ->with(['city:id,name', 'user:id,name', ...self::COVER_RELATIONS])
+                // One subquery per count in the same select; the pivot is unique, so rows are distinct users.
+                ->withCount(['places', 'savedByUsers'])
+                ->orderByDesc('saved_by_users_count')
+                ->latest()
+                ->orderByDesc('id')
+                ->take(3)
+                ->get();
+
+            return [
+                // Sorted by saves, so the first card has one whenever any published itinerary does.
+                'popular' => $itineraries->first()?->saved_by_users_count > 0,
+                'itineraries' => $itineraries->map(fn (self $itinerary) => [
+                    'id' => $itinerary->id,
+                    'title' => $itinerary->title,
+                    'slug' => $itinerary->slug,
+                    'places_count' => $itinerary->places_count,
+                    'city' => $itinerary->city->only(['id', 'name']),
+                    'user' => $itinerary->user->only(['id', 'name']),
+                    'cover' => $itinerary->coverImage(),
+                ])->all(),
+            ];
+        });
     }
 
     /**

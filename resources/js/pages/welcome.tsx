@@ -15,11 +15,13 @@ type WelcomeItinerary = {
 };
 
 type WelcomeProps = SharedData & {
+    // True when the list is ranked by saves; with no saves yet it is the newest itineraries.
+    popular: boolean;
     itineraries: WelcomeItinerary[];
 };
 
 export default function Welcome() {
-    const { auth, itineraries } = usePage<WelcomeProps>().props;
+    const { auth, popular, itineraries } = usePage<WelcomeProps>().props;
 
     return (
         <SiteLayout title="Itinerarium">
@@ -38,9 +40,9 @@ export default function Welcome() {
                 </Link>
             </section>
 
-            <section className="mt-14" aria-labelledby="recent-itineraries">
-                <h2 id="recent-itineraries" className="text-sm font-medium tracking-widest text-stone-500 uppercase">
-                    Recently added
+            <section className="mt-14" aria-labelledby="welcome-itineraries">
+                <h2 id="welcome-itineraries" className="text-sm font-medium tracking-widest text-stone-500 uppercase">
+                    {popular ? 'Popular itineraries' : 'Recently added'}
                 </h2>
 
                 {itineraries.length > 0 ? (

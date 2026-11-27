@@ -39,25 +39,32 @@ class SavedItineraryController extends Controller
 
     /**
      * Saving twice keeps the single row. Unpublished itineraries have no public page, and
-     * authors cannot save their own, so saves count only other users' interest.
+     * authors cannot save their own, so saves count only other users' interest. Saves rank the
+     * Welcome list, so its cache is cleared, but only when a row was actually added.
      */
     public function store(Request $request, Itinerary $itinerary): RedirectResponse
     {
         abort_unless($itinerary->status === Itinerary::PUBLISHED, 404);
         abort_if($itinerary->user()->is($request->user()), 403);
 
-        $request->user()->savedItineraries()->syncWithoutDetaching([$itinerary->id]);
+        $changes = $request->user()->savedItineraries()->syncWithoutDetaching([$itinerary->id]);
+
+        if ($changes['attached'] !== []) {
+            Itinerary::forgetWelcomeCache();
+        }
 
         return back();
     }
 
     /**
      * Removes only the current user's save; the itinerary and other users' saves stay.
-     * Removing an itinerary that is not saved changes nothing.
+     * Removing an itinerary that is not saved changes nothing, the Welcome cache included.
      */
     public function destroy(Request $request, Itinerary $itinerary): RedirectResponse
     {
-        $request->user()->savedItineraries()->detach($itinerary->id);
+        if ($request->user()->savedItineraries()->detach($itinerary->id) > 0) {
+            Itinerary::forgetWelcomeCache();
+        }
 
         return back();
     }

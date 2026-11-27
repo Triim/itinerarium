@@ -10,8 +10,6 @@ class WelcomeController extends Controller
 {
     public function __invoke(): Response
     {
-        return Inertia::render('welcome', [
-            'itineraries' => Itinerary::recentForWelcome(),
-        ]);
+        return Inertia::render('welcome', Itinerary::popularForWelcome());
     }
 }

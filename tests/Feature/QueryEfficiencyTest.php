@@ -42,12 +42,15 @@ class QueryEfficiencyTest extends TestCase
 
         $before = array_combine($urls, array_map(fn ($url) => $this->countQueries($url, $admin), $urls));
 
-        // Spread the new records over several cities and authors, with an image and themes for every place.
+        // Spread the new records over several cities and authors, with an image and themes for every place
+        // and a save from a new user for both the measured itinerary and the new one.
         foreach (range(1, 20) as $i) {
             $otherCity = City::factory()->create();
             $newPlace = $this->placeWithImage($i % 2 ? $city : $otherCity);
             $newPlace->itineraries()->attach($itinerary, ['position' => $i + 1]);
-            Itinerary::factory()->for($i % 2 ? $city : $otherCity)->hasAttached($place)->create();
+            $newItinerary = Itinerary::factory()->for($i % 2 ? $city : $otherCity)->hasAttached($place)->create();
+            // Saves rank the Welcome cards, so they must be counted in the database, not per card.
+            User::factory()->create()->savedItineraries()->attach([$itinerary->id, $newItinerary->id]);
         }
 
         $after = array_combine($urls, array_map(fn ($url) => $this->countQueries($url, $admin), $urls));
